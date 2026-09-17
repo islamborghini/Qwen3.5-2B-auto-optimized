@@ -99,3 +99,317 @@ pyflakes OK
 [0m← [0mWrite qwen35_fast/gemv.py
 Wrote file successfully.
 [0m
+[0m$ [0m/Users/islam/fun_fable_proj/.venv/bin/python -m py_compile /Users/islam/fun_fable_proj/qwen35_fast/gemv.py && echo "compile OK"; /Users/islam/fun_fable_proj/.venv/bin/python -m pyflakes /Users/islam/fun_fable_proj/qwen35_fast/gemv.py && echo "pyflakes OK"; wc -l /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+compile OK
+pyflakes OK
+     217 /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -1,12 +1,10 @@
+ """gemv.py - batch-1 bf16 decode GEMV, y = x @ W.T, tuned for H100 HBM3 bandwidth.
+-
+     from qwen35_fast.gemv import gemv, test, bench
+     y = gemv(x, W)        # x:[M,K] bf16, W:[N,K] bf16 (nn.Linear layout), y:[M,N] bf16; M in 1..4
+     test()                # on a GPU: correctness vs torch.matmul, all shapes, M=1..4
+     bench()               # on a GPU: achieved GB/s vs torch.matmul per shape
+     bench(autotune=True)  # offline: sweep configs and print the best per shape
+-
+ W is streamed once per program over N blocks, coalesced along K (16-byte loads). When N*M cannot
+ fill the GPU (e.g. N=32), SPLIT_K writes fp32 partials to a preallocated (M,K,N,split,device)-cached
+ workspace and a tiny second kernel reduces them. Configs are a static (M,K,N) table: no runtime
+ autotune, no host syncs, no variable-size allocations -> safe under CUDA graph capture.
+@@ -14,9 +12,8 @@
+ import torch
+ import triton
+ import triton.language as tl
+ 
+-
+ @triton.jit
+ def _gemv_kernel(
+     x_ptr, w_ptr, y_ptr, part_ptr,
+     M, N, K, stride_xm, stride_wn, stride_ym,
+@@ -31,24 +28,21 @@
+     m_mask = offs_m[:, None] < M
+     n_mask = offs_n[:, None] < N
+     x_ptrs = x_ptr + offs_m[:, None] * stride_xm + (pid_k * k_per_split + offs_k)[None, :]
+     w_ptrs = w_ptr + offs_n[:, None] * stride_wn + (pid_k * k_per_split + offs_k)[None, :]
+-
+     acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)
+     for k0 in range(0, k_per_split, BLOCK_K):
+         kmask = (k0 + offs_k) < k_per_split
+         x = tl.load(x_ptrs + k0, mask=m_mask & kmask[None, :], other=0.0)
+         w = tl.load(w_ptrs + k0, mask=n_mask & kmask[None, :], other=0.0)
+         acc += tl.dot(x, tl.trans(w))
+-
+     if SPLIT_K == 1:
+         tl.store(y_ptr + offs_m[:, None] * stride_ym + offs_n[None, :],
+                  acc.to(tl.bfloat16), mask=m_mask & n_mask)
+     else:
+         tl.store(part_ptr + offs_m[:, None] * (SPLIT_K * N) + pid_k * N + offs_n[None, :],
+                  acc, mask=m_mask & n_mask)
+ 
+-
+ @triton.jit
+ def _reduce_kernel(part_ptr, y_ptr, M, N, stride_ym,
+                    BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, SPLIT_K: tl.constexpr):
+     offs_n = tl.program_id(0) * BLOCK_N + tl.arange(0, BLOCK_N)
+@@ -60,16 +54,14 @@
+             acc += tl.load(part_ptr + m * (SPLIT_K * N) + s * N + offs_n,
+                            mask=n_mask & mm, other=0.0)
+         tl.store(y_ptr + m * stride_ym + offs_n, acc.to(tl.bfloat16), mask=n_mask & mm)
+ 
+-
+ def _npow2(x):
+     p = 1
+     while p < x:
+         p *= 2
+     return p
+ 
+-
+ # (K, N) -> (BLOCK_N, BLOCK_K, SPLIT_K, num_warps, num_stages)
+ _BASE = {
+     (2048, 248320): (128, 256, 1, 8, 4),
+     (2048, 12288): (128, 256, 2, 8, 4),
+@@ -82,31 +74,26 @@
+ }
+ # Static table keyed by (M, K, N); M only affects row padding, so reuse the (K,N) entries.
+ _TABLE = {(m, k, n): c for m in (1, 2, 3, 4) for (k, n), c in _BASE.items()}
+ 
+-
+ def _heuristic(K, N):
+     bn = 64 if N > 64 else max(16, _npow2(N))
+     split = 1
+     while -(-N // bn) * split < 128 and split < 32 and K % (2 * split) == 0 and K // (2 * split) >= 64:
+         split *= 2
+     return (bn, 128, split, 4, 3)
+ 
+-
+ def _config(M, K, N):
+     return _TABLE.get((M, K, N)) or _BASE.get((K, N)) or _heuristic(K, N)
+ 
+-
+ _WS = {}
+ 
+-
+ def _workspace(M, K, N, split, device):
+     key = (M, K, N, split, str(device))
+     if key not in _WS:
+         _WS[key] = torch.empty((M, split, N), dtype=torch.float32, device=device)
+     return _WS[key]
+ 
+-
+ def _run(x, W, cfg):
+     M, K = x.shape
+     N = W.shape[0]
+     bn, bk, split, warps, stages = cfg
+@@ -122,25 +109,21 @@
+         _reduce_kernel[(-(-N // rbn),)](part, y, M, N, y.stride(0),
+                                         BLOCK_M=_npow2(M), BLOCK_N=rbn, SPLIT_K=split, num_warps=4)
+     return y
+ 
+-
+ def gemv(x, W):
+     """y = x @ W.T for x:[M,K] bf16, W:[N,K] bf16, M in 1..4. CUDA-graph-capture safe."""
+     assert x.dtype == torch.bfloat16 and W.dtype == torch.bfloat16
+     M, K = x.shape
+     assert W.shape[1] == K
+     return _run(x, W, _config(M, K, W.shape[0]))
+ 
+-
+ _SHAPES = [(2048, 8224), (2048, 12288), (6144, 2048), (2048, 5120),
+            (2048, 2048), (4096, 2048), (2048, 248320), (2048, 32)]
+ 
+-
+ def _ulp_bf16(v):
+     return torch.pow(2.0, torch.floor(torch.log2(v.abs().clamp_min(1e-30))) - 7)
+ 
+-
+ def test():
+     """On a GPU, check gemv against torch.matmul for every shape and M=1..4."""
+     if not torch.cuda.is_available():
+         print("test(): no CUDA GPU available")
+@@ -159,9 +142,8 @@
+                   f"worst={float((diff / tol).max()):.2f}x tol")
+     assert bad == 0, f"{bad} element(s) exceeded the bf16 tolerance"
+     print("test(): OK")
+ 
+-
+ def _time(fn, iters=50, warmup=10):
+     for _ in range(warmup):
+         fn()
+     torch.cuda.synchronize()
+@@ -173,9 +155,8 @@
+     e.record()
+     torch.cuda.synchronize()
+     return s.elapsed_time(e) / iters
+ 
+-
+ def _tune(x, W, nbytes, iters=30):
+     M, K = x.shape
+     N = W.shape[0]
+     ref = torch.matmul(x, W.t())
+@@ -195,9 +176,8 @@
+                 if best is None or gbps > best[1]:
+                     best = (cfg, gbps)
+     return best
+ 
+-
+ def bench(autotune=False):
+     """Report achieved GB/s vs torch.matmul per shape (M=1). autotune=True sweeps configs."""
+     if not torch.cuda.is_available():
+         print("bench(): no CUDA GPU available")
+
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [limit=45][0m
+The blanket edit stripped all blank lines. Let me rewrite cleanly with single-line separation and a tighter `_tune`.
+[0m
+[0m← [0mWrite qwen35_fast/gemv.py
+Wrote file successfully.
+[0m
+[0m$ [0m/Users/islam/fun_fable_proj/.venv/bin/python -m py_compile /Users/islam/fun_fable_proj/qwen35_fast/gemv.py && echo "compile OK"; /Users/islam/fun_fable_proj/.venv/bin/python -m pyflakes /Users/islam/fun_fable_proj/qwen35_fast/gemv.py && echo "pyflakes OK"; wc -l /Users/islam/fun_fable_proj/qwen35_fast/gemv.py; git -C /Users/islam/fun_fable_proj status --short -- qwen35_fast
+compile OK
+pyflakes OK
+     215 /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+ M qwen35_fast/engine.py
+ M qwen35_fast/gemv.py
+[0m
+[0m← [0mWrite qwen35_fast/gemv.py
+Wrote file successfully.
+[0m
+[0m$ [0m/Users/islam/fun_fable_proj/.venv/bin/python -m py_compile /Users/islam/fun_fable_proj/qwen35_fast/gemv.py && echo "compile OK"; /Users/islam/fun_fable_proj/.venv/bin/python -m pyflakes /Users/islam/fun_fable_proj/qwen35_fast/gemv.py && echo "pyflakes OK"; wc -l /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+compile OK
+pyflakes OK
+     214 /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+[0m
+[0m← [0mWrite qwen35_fast/gemv.py
+Wrote file successfully.
+[0m
+[0m$ [0m/Users/islam/fun_fable_proj/.venv/bin/python -m py_compile /Users/islam/fun_fable_proj/qwen35_fast/gemv.py && echo "compile OK"; /Users/islam/fun_fable_proj/.venv/bin/python -m pyflakes /Users/islam/fun_fable_proj/qwen35_fast/gemv.py && echo "pyflakes OK"; wc -l /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+compile OK
+pyflakes OK
+     190 /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -108,8 +108,10 @@
+         rbn = min(1024, _npow2(N))
+         _reduce_kernel[(-(-N // rbn),)](part, y, M, N, y.stride(0),
+                                         BLOCK_M=_npow2(M), BLOCK_N=rbn, SPLIT_K=split, num_warps=4)
+     return y
++
++
+ def gemv(x, W):
+     """y = x @ W.T for x:[M,K] bf16, W:[N,K] bf16, M in 1..4. CUDA-graph-capture safe."""
+     assert x.dtype == torch.bfloat16 and W.dtype == torch.bfloat16
+     M, K = x.shape
+
+[0m
+190 lines now. Let me restore a few clarifying blank lines around the public API while staying under 200.
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -122,8 +122,10 @@
+ _SHAPES = [(2048, 8224), (2048, 12288), (6144, 2048), (2048, 5120),
+            (2048, 2048), (4096, 2048), (2048, 248320), (2048, 32)]
+ def _ulp_bf16(v):
+     return torch.pow(2.0, torch.floor(torch.log2(v.abs().clamp_min(1e-30))) - 7)
++
++
+ def test():
+     """On a GPU, check gemv against torch.matmul for every shape and M=1..4."""
+     if not torch.cuda.is_available():
+         print("test(): no CUDA GPU available")
+
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -143,8 +143,10 @@
+             print(f"K={K:6d} N={N:7d} M={M}  max|d|={diff.max().item():.4g}  "
+                   f"worst={float((diff / tol).max()):.2f}x tol")
+     assert bad == 0, f"{bad} element(s) exceeded the bf16 tolerance"
+     print("test(): OK")
++
++
+ def _time(fn, iters=50, warmup=10):
+     for _ in range(warmup):
+         fn()
+     torch.cuda.synchronize()
+
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -156,8 +156,10 @@
+         fn()
+     e.record()
+     torch.cuda.synchronize()
+     return s.elapsed_time(e) / iters
++
++
+ _CANDS = [(bn, bk, sp) for bn in (16, 32, 64, 128, 256) for bk in (64, 128, 256)
+           for sp in (1, 2, 4, 8, 16, 32)]
+ def _tune(x, W, nbytes, iters=30):
+     M, K = x.shape
+
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -177,8 +177,10 @@
+         if ok:
+             gbps = nbytes / _time(lambda: _run(x, W, cfg), iters=iters, warmup=5) / 1e6
+             best = (cfg, gbps) if best is None or gbps > best[1] else best
+     return best
++
++
+ def bench(autotune=False):
+     """Report achieved GB/s vs torch.matmul per shape (M=1). autotune=True sweeps configs."""
+     if not torch.cuda.is_available():
+         print("bench(): no CUDA GPU available")
+
+[0m
+[0m$ [0m/Users/islam/fun_fable_proj/.venv/bin/python -m py_compile /Users/islam/fun_fable_proj/qwen35_fast/gemv.py && echo "compile OK"; /Users/islam/fun_fable_proj/.venv/bin/python -m pyflakes /Users/islam/fun_fable_proj/qwen35_fast/gemv.py && echo "pyflakes OK"; wc -l /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+compile OK
+pyflakes OK
+     200 /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [offset=85, limit=70][0m
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj status --short; echo "---"; git -C /Users/islam/fun_fable_proj diff --stat -- qwen35_fast/gemv.py
+M .gitignore
+ M LEDGER.md
+ M candidates/gemv/opencode.log
+ M qwen35_fast/engine.py
+ M qwen35_fast/gemv.py
+?? bench/run_opt.py
+?? results/eval_baselines.log
+---
+ qwen35_fast/gemv.py | 55 ++++++++++++++++++-----------------------------------
+ 1 file changed, 19 insertions(+), 36 deletions(-)
+[0m
+Done. Wrote `qwen35_fast/gemv.py` (200 lines, `py_compile` + `pyflakes` clean).
+
+Highlights:
+- `_gemv_kernel`: N-blocked, K-streamed kernel using `tl.dot` (bf16→fp32), W read exactly once, coalesced along K; constexpr `SPLIT_K` path writes fp32 partials.
+- `_reduce_kernel`: small fp32 split-K reduction (only launched when `SPLIT_K>1`).
+- Static `_BASE`/`_TABLE` config keyed by `(M,K,N)` for all listed shapes, with a heuristic fallback; no runtime autotune.
+- `gemv(x, W)`: no host syncs, no data-dependent Python, workspace preallocated and cached by `(M,K,N,split,device)` → CUDA-graph-safe.
+- `test()` checks all shapes × M=1..4 vs `torch.matmul` with a 2-bf16-ulp tolerance; `bench(autotune=True)` sweeps configs and prints best GB/s; `bench()` reports ours vs torch.
+
+No GPU here, so `test()`/`bench()` are unrun; only static checks were possible. No other files touched.

@@ -20,3 +20,8 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-16 | Modal H100 | profile #1-#2 crashed on my bugs (filename, torch shadowing) | ~$0.15 | pyflakes now run before every launch |
 | 2026-09-16 | Modal H100 | profile #3: k0 4.16ms/step 1391 kernels; k1 8.2ms (masked cuDNN SDPA 2.9ms); MTP acceptance ~68% prose / 83% code | ~$0.35 | results/profile_step.json |
 | 2026-09-16 | Modal H100 | custom screen #3: candidates C1 compile_blocks, C2 explicit decode attention; k=0..3 | est ~$0.7 | launched |
+| 2026-09-16 | Modal H100 | screen #3 result: compile+explicit-attn: k0 401 TPS; k2 486-692; k3 454-780 | ~/bin/zsh.7 | accepted as new incumbent |
+| 2026-09-17 | Modal H100 | baselines full stage (hf_eager, hf_compile, vllm_plain, vllm_mtp1-3), 12 workloads x 5 reps | est ~/bin/zsh.9 | launched |
+| 2026-09-17 | Modal H100 | baselines #1 segfault in hf_compile(reduce-overhead) before any measurement | ~/bin/zsh.3 | documented; relaunched with subprocess isolation, compile mode=default |
+| 2026-09-17 | DeepSeek | gemv.py Triton skinny-GEMV kernel (reviewed by Fable: tile configs reduced to fit SMEM) | /bin/zsh (subscription) | candidates/gemv |
+| 2026-09-17 | Modal H100 | run_opt: gemv test/bench + compiled-step profile + k0/2/3 gemv on/off | est ~/bin/zsh.5 | launched (parallel to baselines, separate GPU) |

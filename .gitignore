@@ -5,3 +5,4 @@ __pycache__/
 results/traces/
 *.safetensors
 .env
+results/trace_*.json

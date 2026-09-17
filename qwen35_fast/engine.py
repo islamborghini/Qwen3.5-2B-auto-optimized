@@ -66,9 +66,12 @@ def apply_rope(q, k, cos, sin):  # q,k: [B,H,T,D]; cos/sin: [T, rot]
 
 class Engine:
     def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True,
-                 compile_blocks=False):
+                 compile_blocks=False, use_gemv=False):
         self.dev = torch.device(device)
         self.compile_blocks = compile_blocks
+        self.use_gemv = use_gemv
+        self.mm = lambda x, W: x @ W.T
+        self._mm_choice = {}
         fns = dict(norm=rms_norm_zc, gnorm=rms_norm_gated, gdn_pre=gdn_pre, mlp_act=mlp_act, attn_post=attn_post, rope=apply_rope, dec_attn=dec_attn)
         if compile_blocks:
             torch._dynamo.config.cache_size_limit = 64
@@ -88,6 +91,31 @@ class Engine:
         fr = torch.cat([fr, fr], -1)
         self.cos = fr.cos().to(torch.bfloat16).to(self.dev); self.sin = fr.sin().to(torch.bfloat16).to(self.dev)
         self.graphs = {}
+        if use_gemv:
+            self._select_gemv()
+
+    def _select_gemv(self):
+        """Per weight shape, keep whichever is faster for M=1..spec_k+1: Triton gemv or cuBLAS (both exact-bf16 GEMV)."""
+        from qwen35_fast.gemv import gemv
+        Ws = {}
+        for d in self.layers + ([self.mtp] if self.mtp else []):
+            for v in d.values():
+                if isinstance(v, torch.Tensor) and v.dim() == 2 and v.shape[1] in (self.H, 2 * self.H, 6144):
+                    Ws.setdefault(tuple(v.shape), v)
+        Ws.setdefault(tuple(self.embed.shape), self.embed)
+        def timeit(fn, n=30):
+            for _ in range(5): fn()
+            s, t = torch.cuda.Event(True), torch.cuda.Event(True); s.record()
+            for _ in range(n): fn()
+            t.record(); torch.cuda.synchronize(); return s.elapsed_time(t) / n
+        for shape, W in Ws.items():
+            for M in range(1, self.spec_k + 2):
+                x = torch.randn(M, shape[1], device=self.dev, dtype=torch.bfloat16)
+                tt, tg = timeit(lambda: x @ W.T), timeit(lambda: gemv(x, W))
+                self._mm_choice[(M, shape)] = "gemv" if tg < tt else "torch"
+        def mm(x, W):
+            return gemv(x, W) if self._mm_choice.get((x.shape[0], tuple(W.shape))) == "gemv" else x @ W.T
+        self.mm = mm
 
     # ---------------------------------------------------------------- weights
     def _load(self, path):
@@ -168,11 +196,12 @@ class Engine:
     def _attn(self, w, x, cos, sin, kv_idx, pos, kv_len, prefill):
         """x: [T,H]. pos: [T] positions (device). kv_len: device scalar (valid cache length before this call)."""
         T = x.shape[0]
+        mm = (lambda a, W: a @ W.T) if prefill else self.mm
         if self.fuse_proj:
-            qkv = x @ w["qkv_w"].T
+            qkv = mm(x, w["qkv_w"])
             q, k, v = qkv.split([self.nq * self.hd * 2, self.nkv * self.hd, self.nkv * self.hd], -1)
         else:
-            q, k, v = x @ w["q"].T, x @ w["k"].T, x @ w["v"].T
+            q, k, v = mm(x, w["q"]), mm(x, w["k"]), mm(x, w["v"])
         q, gate = q.view(T, self.nq, 2 * self.hd).chunk(2, -1)
         gate = gate.reshape(T, -1)
         norm, rope = (rms_norm_zc, apply_rope) if prefill else (self.f["norm"], self.f["rope"])
@@ -189,15 +218,16 @@ class Engine:
             o = self.f["dec_attn"](q, kc, vc, pos, self.arangeL, self.nq // self.nkv, self.hd ** -0.5)
         o = o.transpose(1, 2).reshape(T, -1)
         o = attn_post(o, gate) if prefill else self.f["attn_post"](o, gate)
-        return o @ w["o"].T
+        return mm(o, w["o"])
 
     def _gdn(self, w, x, li, prefill, save):
         T = x.shape[0]
+        mm = (lambda a_, W: a_ @ W.T) if prefill else self.mm
         if self.fuse_proj:
-            allp = x @ w["in_all"].T
+            allp = mm(x, w["in_all"])
             qkv, z, b, a = allp.split([self.conv_dim, self.gh * self.gv, self.gh, self.gh], -1)
         else:
-            qkv, z, b, a = x @ w["qkv"].T, x @ w["z"].T, x @ w["b"].T, x @ w["a"].T
+            qkv, z, b, a = mm(x, w["qkv"]), mm(x, w["z"]), mm(x, w["b"]), mm(x, w["a"])
         xc = qkv.T[None]                                                       # [1,conv_dim,T]
         cw = w["conv_w"]                                                       # [conv_dim,1,k]
         if prefill:
@@ -220,15 +250,16 @@ class Engine:
                 save.append((li, q, k, v, g, beta, xc_all))
         gn = rms_norm_gated if prefill else self.f["gnorm"]
         o = gn(o.reshape(T * self.gh, self.gv), z.reshape(T * self.gh, self.gv), w["gnorm"], self.eps)
-        return o.reshape(T, -1) @ w["out"].T
+        return mm(o.reshape(T, -1), w["out"])
 
     def _mlp(self, w, x, prefill):
+        mm = (lambda a, W: a @ W.T) if prefill else self.mm
         if self.fuse_proj:
-            g, u = (x @ w["gate_up"].T).chunk(2, -1)
+            g, u = mm(x, w["gate_up"]).chunk(2, -1)
         else:
-            g, u = x @ w["gate"].T, x @ w["up"].T
+            g, u = mm(x, w["gate"]), mm(x, w["up"])
         act = mlp_act if prefill else self.f["mlp_act"]
-        return act(g, u) @ w["down"].T
+        return mm(act(g, u), w["down"])
 
     def _body(self, tokens, pos, prefill, save=None):
         """Run the main model over tokens [T] at positions pos [T]. Returns post-final-norm hidden [T,H] and pre-norm hidden."""
@@ -269,10 +300,10 @@ class Engine:
         norm = rms_norm_zc if prefill else self.f["norm"]
         e = norm(self.embed[tokens], m["pre_e"], self.eps)
         h = norm(hidden, m["pre_h"], self.eps)
-        return torch.cat([e, h], -1) @ m["fc"].T
+        return (torch.cat([e, h], -1) @ m["fc"].T) if prefill else self.mm(torch.cat([e, h], -1), m["fc"])
 
     def _argmax(self, h):
-        return (h @ self.embed.T).argmax(-1)
+        return self.mm(h, self.embed).argmax(-1)
 
     # ---------------------------------------------------------------- steps
     @torch.no_grad()

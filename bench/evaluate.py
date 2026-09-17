@@ -28,7 +28,9 @@ class HFEngine:
         t = time.perf_counter(); self.m = load_hf(); self.startup_s = time.perf_counter() - t; self.compile = compile
         if compile:
             self.m.generation_config.cache_implementation = "static"
-            self.m.forward = torch.compile(self.m.forward, mode="reduce-overhead", fullgraph=False)
+            # NOTE: mode="reduce-overhead" (CUDA-graph trees) segfaults with the hybrid linear-attention cache
+            # (in-place conv_state.copy_ inside the captured region; see results/eval_baselines_crash.log). Default mode works.
+            self.m.forward = torch.compile(self.m.forward, mode="default", fullgraph=False)
     def run(self, ids):
         torch.cuda.reset_peak_memory_stats()
         gen, ttft, tps, tot = hf_greedy(self.m, ids, N_OUT)
@@ -88,7 +90,8 @@ class CustomEngine:
 
 def make(name):
     if name == "hf_eager": return HFEngine()
-    if name == "hf_compile": return HFEngine(compile=True)
+    if name == "hf_compile":
+        e = HFEngine(compile=True); e.name = "hf_compile"; return e
     if name == "vllm_plain": return VLLMEngine(0)
     if name.startswith("vllm_mtp"): return VLLMEngine(int(name[8:]))
     if name.startswith("custom_k"): return CustomEngine(int(name[8:]))

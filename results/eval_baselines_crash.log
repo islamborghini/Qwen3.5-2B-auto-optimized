@@ -1,0 +1,119 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-aRg46STra6dqNGGFAF8eJ3
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 642.97it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<01:08,  9.02it/s]
+[1ALoading weights:   4%|▍         | 26/617 [00:00<00:04, 136.10it/s]
+[1ALoading weights:   8%|▊         | 47/617 [00:00<00:03, 161.21it/s]
+[1ALoading weights:  12%|█▏        | 76/617 [00:00<00:02, 203.92it/s]
+[1ALoading weights:  16%|█▌        | 99/617 [00:00<00:02, 212.72it/s]
+[1ALoading weights:  21%|██        | 130/617 [00:00<00:02, 233.98it/s]
+[1ALoading weights:  25%|██▌       | 156/617 [00:00<00:01, 238.51it/s]
+[1ALoading weights:  29%|██▉       | 182/617 [00:00<00:01, 243.91it/s]
+[1ALoading weights:  34%|███▎      | 207/617 [00:00<00:01, 237.36it/s]
+[1ALoading weights:  39%|███▊      | 238/617 [00:01<00:01, 258.32it/s]
+[1ALoading weights:  44%|████▎     | 269/617 [00:01<00:01, 261.77it/s]
+[1ALoading weights:  48%|████▊     | 297/617 [00:01<00:01, 264.00it/s]
+[1ALoading weights:  54%|█████▍    | 334/617 [00:01<00:00, 294.32it/s]
+[1ALoading weights:  64%|██████▍   | 395/617 [00:01<00:00, 384.37it/s]
+[1ALoading weights:  78%|███████▊  | 480/617 [00:01<00:00, 511.03it/s]
+[1ALoading weights:  97%|█████████▋| 600/617 [00:01<00:00, 709.84it/s]
+[1ALoading weights: 100%|██████████| 617/617 [00:01<00:00, 355.02it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 738.60it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<01:20,  7.62it/s]
+[1ALoading weights:   7%|▋         | 46/617 [00:00<00:02, 235.91it/s]
+[1ALoading weights:  15%|█▌        | 95/617 [00:00<00:01, 336.40it/s]
+[1ALoading weights:  24%|██▎       | 146/617 [00:00<00:01, 395.18it/s]
+[1ALoading weights:  31%|███▏      | 194/617 [00:00<00:01, 417.81it/s]
+[1ALoading weights:  39%|███▊      | 239/617 [00:00<00:00, 427.21it/s]
+[1ALoading weights:  47%|████▋     | 287/617 [00:00<00:00, 443.11it/s]
+[1ALoading weights:  58%|█████▊    | 360/617 [00:00<00:00, 531.23it/s]
+[1ALoading weights:  86%|████████▌ | 528/617 [00:00<00:00, 883.23it/s]
+[1ALoading weights: 100%|██████████| 617/617 [00:01<00:00, 606.53it/s]
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8] torch._dynamo hit config.recompile_limit (8)
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]    function: 'forward' (/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py:549)
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]    last reason: 10/7: cache_params.layers[9].device is None                    # if self.device is None:  # transformers/cache_utils.py:1026 in lazy_initialization
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8] User stack trace:
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]   File "/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 586, in forward
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]     mixed_qkv = cache_params.update_conv_state(
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]   File "/usr/local/lib/python3.12/site-packages/transformers/cache_utils.py", line 1423, in update_conv_state
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]     conv_states = self.layers[layer_idx].update_conv_state(conv_states, state_idx, **kwargs)
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]   File "/usr/local/lib/python3.12/site-packages/transformers/cache_utils.py", line 1065, in update_conv_state
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]     self.lazy_initialization(conv_states=conv_states, state_idx=state_idx, conv_kernel_size=conv_kernel_size)
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]   File "/usr/local/lib/python3.12/site-packages/transformers/cache_utils.py", line 1026, in lazy_initialization
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]     if self.device is None:
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W0917 06:29:41.470000 26 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8] To diagnose recompilation issues, see https://docs.pytorch.org/docs/main/user_guide/torch_compiler/compile/programming_model.recompilation.html
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs] skipping cudagraphs due to mutated inputs (34 instances). Found from : 
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]    File "/usr/local/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     output = func(self, *args, **kwargs)
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1855, in forward
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     outputs = self.model(
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]               ^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     output = func(self, *args, **kwargs)
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1648, in forward
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     outputs = self.language_model(
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]               ^^^^^^^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     output = func(self, *args, **kwargs)
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 286, in wrapper
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     outputs = func(self, *args, **kwargs)
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1292, in forward
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     hidden_states = decoder_layer(
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]                     ^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/modeling_layers.py", line 109, in __call__
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     return super().__call__(*args, **kwargs)
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 889, in forward
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     hidden_states = self.linear_attn(
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]                     ^^^^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/integrations/accelerate.py", line 1010, in wrapped
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     output = forward_func(self, *args, **kwargs)
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 577, in forward
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     mixed_qkv = causal_conv1d_update(
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]                 ^^^^^^^^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/integrations/hub_kernels.py", line 885, in wrapped
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     return implementation(*args, **kwargs)
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]   File "/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 261, in causal_conv1d_update
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs]     conv_state.copy_(hidden_states_new[:, :, -state_len:])
+W0917 06:30:22.267000 26 site-packages/torch/_inductor/cudagraph_utils.py:380] [__cudagraphs] 
+exit code -11
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-aRg46STra6dqNGGFAF8eJ3

@@ -2,14 +2,13 @@
 
     from qwen35_fast.gemv import gemv, test, bench
     y = gemv(x, W)        # x:[M,K] bf16, W:[N,K] bf16 (nn.Linear layout), y:[M,N] bf16; M in 1..4
-    test()                # on a GPU: correctness vs torch.matmul, all shapes, M=1..4
-    bench()               # on a GPU: achieved GB/s vs torch.matmul per shape
+    test()                # GPU: correctness vs torch.matmul, all shapes, M=1..4
+    bench()               # GPU: achieved GB/s vs torch.matmul per shape
     bench(autotune=True)  # offline: sweep configs and print the best per shape
 
-W is streamed once per program over N blocks, coalesced along K (16-byte loads). When N*M cannot
-fill the GPU (e.g. N=32), SPLIT_K writes fp32 partials to a preallocated (M,K,N,split,device)-cached
-workspace and a tiny second kernel reduces them. Configs are a static (M,K,N) table: no runtime
-autotune, no host syncs, no variable-size allocations -> safe under CUDA graph capture.
+W is streamed once over N blocks, coalesced along K (16-byte loads). When N*M cannot fill the GPU
+(e.g. N=32), SPLIT_K writes fp32 partials to a cached workspace and a tiny second kernel reduces
+them. Static (M,K,N) config table: no runtime autotune, no host syncs, no variable-size allocations.
 """
 import torch
 import triton
@@ -32,14 +31,12 @@ def _gemv_kernel(
     n_mask = offs_n[:, None] < N
     x_ptrs = x_ptr + offs_m[:, None] * stride_xm + (pid_k * k_per_split + offs_k)[None, :]
     w_ptrs = w_ptr + offs_n[:, None] * stride_wn + (pid_k * k_per_split + offs_k)[None, :]
-
     acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)
     for k0 in range(0, k_per_split, BLOCK_K):
         kmask = (k0 + offs_k) < k_per_split
         x = tl.load(x_ptrs + k0, mask=m_mask & kmask[None, :], other=0.0)
         w = tl.load(w_ptrs + k0, mask=n_mask & kmask[None, :], other=0.0)
         acc += tl.dot(x, tl.trans(w))
-
     if SPLIT_K == 1:
         tl.store(y_ptr + offs_m[:, None] * stride_ym + offs_n[None, :],
                  acc.to(tl.bfloat16), mask=m_mask & n_mask)
@@ -70,42 +67,33 @@ def _npow2(x):
 
 
 # (K, N) -> (BLOCK_N, BLOCK_K, SPLIT_K, num_warps, num_stages)
+# Conservative tiles: 64x128 bf16 per stage = 16 KB, 3 stages; keeps well under the 228 KB SMEM limit.
 _BASE = {
-    (2048, 248320): (128, 256, 1, 8, 4),
-    (2048, 12288): (128, 256, 2, 8, 4),
-    (2048, 8224): (128, 256, 4, 8, 4),
-    (2048, 5120): (128, 256, 4, 4, 4),
+    (2048, 248320): (64, 128, 1, 4, 3),
+    (2048, 12288): (64, 128, 2, 4, 3),
+    (2048, 8224): (64, 128, 2, 4, 3),
+    (2048, 5120): (64, 128, 4, 4, 3),
     (2048, 2048): (64, 128, 8, 4, 3),
     (4096, 2048): (64, 128, 8, 4, 3),
-    (6144, 2048): (64, 256, 8, 4, 4),
+    (6144, 2048): (64, 128, 8, 4, 3),
     (2048, 32): (32, 64, 32, 2, 2),
 }
 # Static table keyed by (M, K, N); M only affects row padding, so reuse the (K,N) entries.
 _TABLE = {(m, k, n): c for m in (1, 2, 3, 4) for (k, n), c in _BASE.items()}
-
-
 def _heuristic(K, N):
     bn = 64 if N > 64 else max(16, _npow2(N))
     split = 1
     while -(-N // bn) * split < 128 and split < 32 and K % (2 * split) == 0 and K // (2 * split) >= 64:
         split *= 2
     return (bn, 128, split, 4, 3)
-
-
 def _config(M, K, N):
     return _TABLE.get((M, K, N)) or _BASE.get((K, N)) or _heuristic(K, N)
-
-
 _WS = {}
-
-
 def _workspace(M, K, N, split, device):
     key = (M, K, N, split, str(device))
     if key not in _WS:
         _WS[key] = torch.empty((M, split, N), dtype=torch.float32, device=device)
     return _WS[key]
-
-
 def _run(x, W, cfg):
     M, K = x.shape
     N = W.shape[0]
@@ -134,8 +122,6 @@ def gemv(x, W):
 
 _SHAPES = [(2048, 8224), (2048, 12288), (6144, 2048), (2048, 5120),
            (2048, 2048), (4096, 2048), (2048, 248320), (2048, 32)]
-
-
 def _ulp_bf16(v):
     return torch.pow(2.0, torch.floor(torch.log2(v.abs().clamp_min(1e-30))) - 7)
 
@@ -165,8 +151,7 @@ def _time(fn, iters=50, warmup=10):
     for _ in range(warmup):
         fn()
     torch.cuda.synchronize()
-    s = torch.cuda.Event(enable_timing=True)
-    e = torch.cuda.Event(enable_timing=True)
+    s, e = torch.cuda.Event(True), torch.cuda.Event(True)
     s.record()
     for _ in range(iters):
         fn()
@@ -175,25 +160,23 @@ def _time(fn, iters=50, warmup=10):
     return s.elapsed_time(e) / iters
 
 
+_CANDS = [(bn, bk, sp) for bn in (32, 64, 128) for bk in (64, 128) for sp in (1, 2, 4, 8, 16)]
 def _tune(x, W, nbytes, iters=30):
     M, K = x.shape
     N = W.shape[0]
     ref = torch.matmul(x, W.t())
     best = None
-    for bn in (16, 32, 64, 128, 256):
-        for bk in (64, 128, 256):
-            for sp in (1, 2, 4, 8, 16, 32):
-                if bn > _npow2(N) or K % sp or K // sp < 16:
-                    continue
-                cfg = (bn, bk, sp, 4, 3)
-                try:
-                    if not torch.allclose(_run(x, W, cfg), ref, atol=1e-2, rtol=1e-2):
-                        continue
-                except Exception:
-                    continue
-                gbps = nbytes / _time(lambda: _run(x, W, cfg), iters=iters, warmup=5) / 1e6
-                if best is None or gbps > best[1]:
-                    best = (cfg, gbps)
+    for bn, bk, sp in _CANDS:
+        if bn > _npow2(N) or K % sp or K // sp < 16:
+            continue
+        cfg = (bn, bk, sp, 4, 3)
+        try:
+            ok = torch.allclose(_run(x, W, cfg), ref, atol=1e-2, rtol=1e-2)
+        except Exception:
+            continue
+        if ok:
+            gbps = nbytes / _time(lambda: _run(x, W, cfg), iters=iters, warmup=5) / 1e6
+            best = (cfg, gbps) if best is None or gbps > best[1] else best
     return best
 
 

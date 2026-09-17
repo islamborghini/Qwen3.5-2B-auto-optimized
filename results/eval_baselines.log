@@ -1,0 +1,42 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-9cbcpPm5Yhjwkc0qLxmxLO
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 745.36it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<03:48,  2.69it/s]
+[1ALoading weights:   4%|▍         | 27/617 [00:00<00:07, 74.14it/s]
+[1ALoading weights:   7%|▋         | 46/617 [00:00<00:05, 105.45it/s]
+[1ALoading weights:  13%|█▎        | 80/617 [00:00<00:03, 172.33it/s]
+[1ALoading weights:  17%|█▋        | 105/617 [00:00<00:02, 189.84it/s]
+[1ALoading weights:  23%|██▎       | 139/617 [00:00<00:02, 232.90it/s]
+[1ALoading weights:  27%|██▋       | 167/617 [00:00<00:01, 242.70it/s]
+[1ALoading weights:  32%|███▏      | 197/617 [00:01<00:01, 249.28it/s]
+[1ALoading weights:  36%|███▋      | 224/617 [00:01<00:01, 251.69it/s]
+[1ALoading weights:  41%|████      | 251/617 [00:01<00:01, 247.10it/s]
+[1ALoading weights:  46%|████▌     | 283/617 [00:01<00:01, 267.67it/s]
+[1ALoading weights:  50%|█████     | 311/617 [00:01<00:01, 249.47it/s]
+[1ALoading weights:  59%|█████▊    | 362/617 [00:01<00:00, 315.70it/s]
+[1ALoading weights:  75%|███████▍  | 460/617 [00:01<00:00, 499.42it/s]
+[1ALoading weights:  93%|█████████▎| 572/617 [00:01<00:00, 674.08it/s]Loading weights: 100%|██████████| 617/617 [00:01<00:00, 324.47it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
