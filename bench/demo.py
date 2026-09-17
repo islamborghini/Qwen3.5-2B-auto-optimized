@@ -4,7 +4,8 @@
     right: modal run bench/demo.py --mode engine --start-in 120 --prompt "write me an html page for a hotel reservation"
 
 Each loads its model (base ~20 s, engine ~70 s incl. compile), then both start generating at the same instant
-(120 s after launch) and stream tokens live. Single run: omit --start-in.
+(120 s after launch) and stream tokens live. Single run: omit --start-in. Long runs: --n-out 10000 --ignore-eos
+(keeps generating past the model's natural end-of-answer so both panes run the full length).
 """
 import os, sys
 import modal
@@ -21,17 +22,17 @@ image = (
 
 
 @app.function(gpu="H100", cpu=4.0, memory=32768, image=image, volumes={"/hf": vol}, timeout=1200)
-def demo(prompt: str, n_out: int, mode: str, start_at: float):
+def demo(prompt: str, n_out: int, mode: str, start_at: float, ignore_eos: bool):
     # Runs in a subprocess: the Modal function process's I/O threads contend for the GIL with HF's Python-bound loop.
     import subprocess
     env = dict(os.environ, PYTHONPATH="/work", OUT_DIR="/tmp/out")
-    subprocess.run([sys.executable, "-u", "/work/bench/demo_worker.py", prompt, str(n_out), mode, str(start_at)], env=env, check=False)
+    subprocess.run([sys.executable, "-u", "/work/bench/demo_worker.py", prompt, str(n_out), mode, str(start_at), "1" if ignore_eos else "0"], env=env, check=False)
 
 
 @app.local_entrypoint()
 def main(prompt: str = "Explain how a CPU cache hierarchy works and why it matters for performance.", n_out: int = 256,
-         mode: str = "engine", start_in: float = 0):
+         mode: str = "engine", start_in: float = 0, ignore_eos: bool = False):
     """mode: 'engine' (optimized) or 'base' (HF transformers). start_in: seconds from now at which generation starts,
     so two terminals launched together begin at the same instant (models take different times to load)."""
     import time
-    demo.remote(prompt, n_out, mode, time.time() + start_in if start_in else 0)
+    demo.remote(prompt, n_out, mode, time.time() + start_in if start_in else 0, ignore_eos)
