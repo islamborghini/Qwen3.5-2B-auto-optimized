@@ -1,5 +1,5 @@
 """Demo worker (runs as a subprocess inside the Modal container; no modal import here)."""
-import os, sys, time
+import sys, time
 
 
 def _run(prompt: str, n_out: int, skip_base: bool):
@@ -15,12 +15,13 @@ def _run(prompt: str, n_out: int, skip_base: bool):
     ids = tok(text, add_special_tokens=False)["input_ids"]
     eos = {tok.eos_token_id, tok.convert_tokens_to_ids("<|im_end|>")}
     P = lambda *a: print(*a, flush=True)
-    P(f"\nGPU: {torch.cuda.get_device_name(0)}   |   model: Qwen/Qwen3.5-2B (bf16, unchanged)   |   prompt: {len(ids)} tokens\n")
+    cpu = next((l.split(":", 1)[1].strip() for l in open("/proc/cpuinfo") if l.startswith("model name")), "?")
+    P(f"\nGPU: {torch.cuda.get_device_name(0)}   |   host CPU: {cpu}\nmodel: Qwen/Qwen3.5-2B (bf16, unchanged)   |   prompt: {len(ids)} tokens\n")
 
     # ---------------- optimized engine, streamed ----------------
     P("─" * 24, "OPTIMIZED ENGINE  (qwen35_fast: CUDA graph + fused kernels + exact MTP speculation)", "─" * 24)
     t = time.perf_counter(); eng = Engine(path, spec_k=2, compile_blocks=True, fused_gdn=True); eng.ensure_graph()
-    eng.generate(ids[:8], 4, ignore_eos=True)
+    eng.generate(ids, 4, ignore_eos=True)   # warm on the real prompt length (Triton autotune), excluded as in the benchmark
     P(f"[ready in {time.perf_counter()-t:.0f} s: load weights + compile + capture graph; one-time per process]\n")
     torch.cuda.synchronize(); t0 = time.perf_counter(); ft = {}
     def on_first(g): ft["tok"] = g.item(); ft["t"] = time.perf_counter()
@@ -50,7 +51,7 @@ def _run(prompt: str, n_out: int, skip_base: bool):
     # ---------------- base model, benchmark routine ----------------
     P("─" * 24, "BASE MODEL  (HF transformers eager, same weights, same GPU)", "─" * 24)
     m = load_hf()
-    hf_greedy(m, ids[:8], 4)   # warmup (Triton JIT), excluded from timing as in the benchmark
+    hf_greedy(m, ids, 4)   # warmup on the real prompt (Triton JIT/autotune), excluded from timing as in the benchmark
     P(f"[generating {n_eng} tokens; HF eager is CPU/launch-bound at roughly 50 tokens/s, so this takes a few seconds...]\n")
     gen, ttft, tps, tot = hf_greedy(m, ids, n_eng)
     P(tok.decode(gen, skip_special_tokens=True))
@@ -61,7 +62,9 @@ def _run(prompt: str, n_out: int, skip_base: bool):
     P(f"{'decode tokens/s':22}{tps:>14.0f}{tps_eng:>14.0f}{tps_eng/tps:>9.1f}x")
     P(f"{'time to first token':22}{1000*ttft:>11.0f} ms{1000*ttft_eng:>11.0f} ms{ttft/ttft_eng:>9.1f}x")
     P(f"{'total for the answer':22}{tot:>12.2f} s{tot_eng:>12.2f} s{tot/tot_eng:>9.1f}x")
-    P("(same bf16 weights, greedy decoding; outputs differ only where bf16 rounding flips a near-tie)\n")
+    P("same bf16 weights, greedy decoding; outputs differ only where bf16 rounding flips a near-tie.")
+    P(f"reference: under the controlled benchmark protocol the base model measured 50 tokens/s (HF eager is CPU-bound and")
+    P(f"varies with the host CPU); against that figure the optimized engine is {tps_eng/50:.0f}x faster. See results/RESULTS.md.\n")
 
 
 
