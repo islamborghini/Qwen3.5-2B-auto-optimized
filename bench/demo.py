@@ -41,7 +41,7 @@ def demo(prompt: str, n_out: int, skip_base: bool):
             def put(s, v):
                 if s.first: s.first = False; return           # prompt
                 s.t.append(time.perf_counter()); s.buf.append(int(v[0]))
-                stream_print(tok.decode(s.buf[-1:]))
+                if len(s.buf) % 16 == 0: stream_print(tok.decode(s.buf[-16:]))   # chunked: per-token flushes over the log stream slow the CPU-bound HF loop
             def end(s): pass
         x = torch.tensor([ids], device="cuda")
         with torch.no_grad():   # one-time warmup (Triton JIT of the fla kernels), excluded like in the benchmark
@@ -49,7 +49,7 @@ def demo(prompt: str, n_out: int, skip_base: bool):
         s = S(); torch.cuda.synchronize(); t0 = time.perf_counter()
         with torch.no_grad():
             m.generate(input_ids=x, attention_mask=torch.ones_like(x), max_new_tokens=n_out, do_sample=False, streamer=s, eos_token_id=list(eos))
-        n = len(s.t); tps = (n - 1) / (s.t[-1] - s.t[0]) if n > 1 else 0
+        stream_print(tok.decode(s.buf[len(s.buf) // 16 * 16:])); n = len(s.t); tps = (n - 1) / (s.t[-1] - s.t[0]) if n > 1 else 0
         print(f"\n\n[base] {n} tokens | time to first token {1000*(s.t[0]-t0):.0f} ms | decode {tps:.0f} tokens/s | total {s.t[-1]-t0:.2f} s\n", flush=True)
         del m; torch.cuda.empty_cache()
 
@@ -68,8 +68,9 @@ def demo(prompt: str, n_out: int, skip_base: bool):
         new = host[: int(host[T]) + 1].tolist()
         for tkn in new:
             if tkn in eos or len(out) >= n_out: done = True; break
-            out.append(tkn); stream_print(tok.decode([tkn]))
-    t_end = time.perf_counter(); n = len(out)
+            out.append(tkn)
+            if len(out) % 16 == 0: stream_print(tok.decode(out[-16:]))
+    t_end = time.perf_counter(); n = len(out); stream_print(tok.decode(out[n // 16 * 16:]))
     print(f"\n\n[engine] {n} tokens | time to first token {1000*(ft['t']-t0):.0f} ms | decode {(n-1)/(t_end-ft['t']):.0f} tokens/s | total {t_end-t0:.2f} s", flush=True)
 
 
