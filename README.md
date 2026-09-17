@@ -143,9 +143,10 @@ every top-1 disagreement sits at a genuine near-tie. Findings across seven sessi
   candidates rejected by the max-gate are reported with their numbers but never promoted.
 * Whole-layer `torch.compile` (with or without inductor's `emulate_precision_casts`) fails the max-gate on structured
   prompts (2.5-3.0 vs 2.4) and gains only 1-2%, so it was dropped. DeepSeek's two Triton GEMV kernels are correct but
-  slower than cuBLAS except on the tied lm_head (+7%), so they were dropped. The fused GDN decode-step Triton kernel
-  (Fable worker) removes 144 launches/step (-6.6% step time) but its in-place state write is corrupted in the
-  full-tile version; a K-chunked rewrite is in `candidates/`/branches if not merged.
+  slower than cuBLAS except on the tied lm_head (+7%), so they were dropped. The first fused GDN decode-step Triton kernel
+  (Fable worker T3) removed 144 launches/step but its in-place state write was corrupted (register-spill regime with a
+  full 128x128 fp32 tile per program); the rewrite (T3b: two kernels, state tile per (head, 16 columns) held in
+  registers across the T tokens, keep-mask for the exact commit) passes an exact test and is the `fused_gdn` option.
 
 ### Optimization ledger summary (dev screen: 512 + 2048 tokens, prose/code/structured, geomean decode TPS)
 | candidate | what | gate | geomean TPS | verdict |
@@ -158,7 +159,9 @@ every top-1 disagreement sits at a genuine near-tie. Findings across seven sessi
 | k*_layer(_at)(_ep) | whole-layer compile (+max-autotune, +cast emulation) | fail / marginal | 577-584 | rejected |
 | k*_gemv / gemv2 | Triton GEMV (DeepSeek v1/v2) per-shape selected | pass | = baseline | no gain |
 | lean decode path (T1) | -50 launches/step, residual+norm fusion | pass | +2-3% | merged (default) |
-| fused GDN step (T3) | 1 Triton launch per GDN layer | test fails | (+8% if fixed) | not enabled |
+| lean speculative glue (T1b) | static token buffer, fused acceptance, batched keep-mask/state writes, MTP-input norms fused | pass (p99 unchanged) | k2: 803->663 launches, -6% step | merged (default) |
+| fused GDN step v1 (T3) | full 128x128 tile per program | test fails (register-spill regime) | (-6.6% step) | not enabled |
+| fused GDN step v2 (T3b) | pre kernel (conv/silu/l2norm, 48 programs) + rule kernel (per (head, 16-col) tile, T<=4, keep mask) | test exact (0/184k beyond 2 ulp) | k2: -8.5% step, +9-10% TPS | `fused_gdn=True` candidate |
 
 ## Costs and effort (estimates; see LEDGER.md for every session)
 | Resource | Used | Notes |
