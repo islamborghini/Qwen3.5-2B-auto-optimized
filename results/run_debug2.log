@@ -1,0 +1,41 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-HETUjdmexVS50l5dDEOOcB
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+exp(g) kernel vs ref (head-wise max diff): 8.940696716308594e-08 kernel [1.62539990355981e-08, 0.6423501372337341, 0.1709316521883011] ref [1.62539990355981e-08, 0.6423501372337341, 0.17093166708946228]
+beta   kernel vs ref: 0.0 kernel [0.92578125, 0.328125, 0.37890625] ref [0.92578125, 0.328125, 0.37890625]
+kv     kernel vs ref: 8.940696716308594e-08 ref mag 0.5178049802780151
+vn kernel vs ref: 0.0 ref mag 4.108154296875
+S0 diff max: 1.1920928955078125e-07 S ref mag 1.7575252056121826 diff vs transposed-ref: 1.7511566877365112 diff vs decayed-only: 1.7575252056121826 diff vs undecayed+update: 1.3275028467178345
+diff top singular values: [1.8282608493791486e-07, 1.0978727260635424e-07, 7.2185137867109e-08, 7.041464300527878e-08]
+  fla vs torch-ref: state rel diff 1.33e-07, o max diff 0.000148
+  kernel q/k/v vs torch: 7.45e-09 5.96e-08 0
+  kernel vs torch-ref: state rel diff 6.39e-01
+gdn_step.test: max|o diff|=3.234, elements beyond 2ulp: 1843/10240 (17.998%), state max rel diff=6.39e-01
+gdn test: gdn_step tolerance exceeded
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 840.58it/s]
+k=0 reset/body/argmax+item/generate-ttft ms: [(0.07, 30.85, 0.41, 31.14), (0.07, 29.91, 0.42, 32.14)]
+k=2 reset/body/argmax+item/generate-ttft ms: [(0.08, 30.0, 0.42, 29.9), (0.08, 29.53, 0.42, 29.83)]
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-HETUjdmexVS50l5dDEOOcB

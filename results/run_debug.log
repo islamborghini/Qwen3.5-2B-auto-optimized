@@ -1,0 +1,38 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-O7vmqi25FtPmPgaWfhbdu6
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+exp(g) kernel vs ref (head-wise max diff): 8.940696716308594e-08 kernel [1.62539990355981e-08, 0.6423501372337341, 0.1709316521883011] ref [1.62539990355981e-08, 0.6423501372337341, 0.17093166708946228]
+beta   kernel vs ref: 0.0 kernel [0.92578125, 0.328125, 0.37890625] ref [0.92578125, 0.328125, 0.37890625]
+kv     kernel vs ref: 8.940696716308594e-08 ref mag 0.5178049802780151
+  fla vs torch-ref: state rel diff 1.33e-07, o max diff 0.000148
+  kernel q/k/v vs torch: 7.45e-09 5.96e-08 0
+  kernel vs torch-ref: state rel diff 6.74e-01
+gdn_step.test: max|o diff|=3.828, elements beyond 2ulp: 2080/10240 (20.312%), state max rel diff=8.02e-01
+gdn test: gdn_step tolerance exceeded
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 834.95it/s]
+k=0 reset/body/argmax+item/generate-ttft ms: [(0.07, 32.05, 0.41, 33.22), (0.07, 31.57, 0.41, 31.78)]
+k=2 reset/body/argmax+item/generate-ttft ms: [(0.08, 32.44, 0.42, 32.42), (0.08, 32.16, 0.41, 32.49)]
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-O7vmqi25FtPmPgaWfhbdu6

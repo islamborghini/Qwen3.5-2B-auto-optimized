@@ -40,3 +40,5 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | opt3: ep layer-compile candidates, k4, gemv v2 (DeepSeek) | est ~.0 | launched |
 | 2026-09-17 | Modal H100 | opt3 result: k3_compile 614 geomean best; layer-compile (ep) fails gate; gemv2 slower; mem gate was broken (process-wide peak), TTFT included MTP prefill+drafts -> fixed | ~.0 | results/opt_ledger_round3.json |
 | 2026-09-17 | Modal H100 | opt4: rerun loop with fixed mem/TTFT accounting (k0/k2/k3/k4 compile) | est ~/bin/zsh.5 | launched |
+| 2026-09-17 | Fable agents T1/T3 | T1: lean decode (-50 kernels, +2-3%, bit-identical) merged; T3: fused GDN Triton kernel (-144 kernels, -6.6% step) but state update wrong -> debugging | ~ Fable | branches merged |
+| 2026-09-17 | Modal H100 | opt4: spec configs rejected only by TTFT (+5.7%); mem accounting still broken -> fixed again; debug session (kernel dump + TTFT phases) | ~/bin/zsh.5 + ~/bin/zsh.2 | launched |

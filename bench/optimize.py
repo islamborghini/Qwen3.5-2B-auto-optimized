@@ -100,7 +100,7 @@ if __name__ == "__main__":
             import traceback; led["gemv_test"] = traceback.format_exc()[-1500:]; print(led["gemv_test"], flush=True)
             for k_ in list(CANDIDATES):
                 if CANDIDATES[k_].get("use_gemv"): CANDIDATES.pop(k_)
-    n = 0
+    n = 0; inc_eng = None; inc_name = None
     for name, kw in CANDIDATES.items():
         if name in led["candidates"] or n >= a.max_candidates or (time.time() - t0) / 60 > a.max_minutes:
             continue
@@ -115,18 +115,24 @@ if __name__ == "__main__":
             if ok:
                 rec["screen"] = screen(eng, wl, a.reps, static_mem); rec["geomean"] = geo(rec["screen"]); rec["spread"] = spread(rec["screen"])
                 inc = led["incumbent"]; checks = {}
-                if inc:
+                if inc and inc_eng is not None and inc_name == inc:   # paired re-measurement of the incumbent right now
+                    I = screen(inc_eng, wl, 1, led["candidates"][inc].get("static_mem", 0)); rec["incumbent_paired"] = {w_: statistics.median(v["tps"]) for w_, v in I.items()}
+                elif inc:
                     I = led["candidates"][inc]["screen"]
+                if inc:
                     checks["exceeds_noise"] = rec["spread"][0] > led["candidates"][inc]["spread"][1]
                     for wid in I:
                         C = rec["screen"][wid]
                         checks[f"{wid}:tps"] = statistics.median(C["tps"]) >= 0.95 * statistics.median(I[wid]["tps"])
                         checks[f"{wid}:ttft"] = statistics.median(C["ttft"]) <= 1.05 * statistics.median(I[wid]["ttft"])
                         checks[f"{wid}:mem"] = C["mem_gb"] <= 1.05 * I[wid]["mem_gb"]
-                rec["checks"] = checks; rec["accepted"] = all(checks.values()) if inc else True
+                rec["checks"] = checks; rec["accepted"] = all(checks.values()) if inc else True; rec["static_mem"] = static_mem
                 if rec["accepted"]:
                     led["incumbent"] = name
-            del eng; torch.cuda.empty_cache()
+                    if inc_eng is not None: del inc_eng
+                    inc_eng, inc_name = eng, name; eng = None
+            if eng is not None: del eng
+            torch.cuda.empty_cache()
         except Exception:
             import traceback; rec["error"] = traceback.format_exc()[-2000:]; rec["accepted"] = False
         led["candidates"][name] = rec

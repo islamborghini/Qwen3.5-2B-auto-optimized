@@ -52,6 +52,11 @@ def _gdn_step_kernel(qkv_ptr, z_ptr, b_ptr, a_ptr, st_ptr, w_ptr, nega_ptr, dtb_
     vn = beta * (v - kv)
     S += k[:, None] * vn[None, :]
     o = tl.sum(S * q[:, None], 0)
+    if DBG == 3:   # dump head 0's post-update state and vn (diagnosis only)
+        if h == 0:
+            tl.store(o_ptr + offs[:, None] * D + offs[None, :], S)
+            tl.store(o_ptr + D * D + offs, vn)
+        return
     tl.store(Sp, S)
     # gated RMSNorm (Qwen3_5RMSNormGated): input is the bf16 o, fp32 norm, bf16 * weight, * silu(z fp32), -> bf16
     ob = o.to(tl.bfloat16).to(tl.float32)

@@ -21,6 +21,22 @@ G.gdn_step(qkv, z, b, a, cs.clone(), cw, neg_expA, dt_bias, gn, S.clone(), dbg, 
 print("exp(g) kernel vs ref (head-wise max diff):", (dbg[:, 0, 0] - g.exp()).abs().max().item(), "kernel", dbg[:3, 0, 0].tolist(), "ref", g.exp()[:3].tolist())
 print("beta   kernel vs ref:", (dbg[:, 1, 0] - beta).abs().max().item(), "kernel", dbg[:3, 1, 0].tolist(), "ref", beta[:3].tolist())
 print("kv     kernel vs ref:", (dbg[:, 2] - kv_ref).abs().max().item(), "ref mag", kv_ref.abs().max().item(), flush=True)
+dbg3 = torch.zeros(D * D + D, device=dev, dtype=torch.float32)
+G.gdn_step(qkv, z, b, a, cs.clone(), cw, neg_expA, dt_bias, gn, S.clone(), dbg3, dbg=3)
+S0 = dbg3[:D * D].reshape(D, D); vn_k = dbg3[D * D:]
+vn_ref = beta[0] * (vf[0] - kv_ref[0]); S_ref0 = Sd[0] + kn[0][:, None] * vn_ref[None, :]
+diff = S0 - S_ref0
+print("vn kernel vs ref:", (vn_k - vn_ref).abs().max().item(), "ref mag", vn_ref.abs().max().item())
+print("S0 diff max:", diff.abs().max().item(), "S ref mag", S_ref0.abs().max().item(), "diff vs transposed-ref:", (S0 - S_ref0.T).abs().max().item(),
+      "diff vs decayed-only:", (S0 - Sd[0]).abs().max().item(), "diff vs undecayed+update:", (S0 - (S[0] + kn[0][:, None] * vn_ref[None, :])).abs().max().item())
+sv = torch.linalg.svdvals(diff); print("diff top singular values:", sv[:4].tolist(), flush=True)
+# per-head diff of the REAL path (no DBG): kernel in-place S vs torch reference (all heads)
+S_k, cs_k = S.clone(), cs.clone(); out = torch.empty(H * D, device=dev, dtype=torch.bfloat16)
+G.gdn_step(qkv, z, b, a, cs_k, cw, neg_expA, dt_bias, gn, S_k, out)
+vn_all = beta[:, None] * (vf - kv_ref); S_new = Sd + kn[:, :, None] * vn_all[:, None, :]
+per_head = ((S_k - S_new).abs().amax((1, 2)) / S_new.abs().amax((1, 2))).tolist()
+print("real-path per-head state rel diff:", [round(x, 3) for x in per_head])
+print("real-path head0 vs: ref", (S_k[0] - S_new[0]).abs().max().item(), "| undecayed", (S_k[0] - S[0]).abs().max().item(), "| decayed-only", (S_k[0] - Sd[0]).abs().max().item(), flush=True)
 try:
     G.test()
 except Exception as e:
