@@ -535,6 +535,10 @@ class Engine:
                     out[i + 1 + j] = lg[j]
         return out
 
+    def close(self):
+        """Drop the captured graph after all queued replays finished, before buffers it references are freed."""
+        torch.cuda.synchronize(); self.graphs.clear()
+
     @torch.no_grad()
     def ensure_graph(self):
         """Capture the decode-step graph once, on disposable dummy state (warmup runs mutate state)."""

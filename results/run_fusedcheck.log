@@ -1,0 +1,76 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-UEhzM0A5hros56kc6CIlJW
+✓ Created objects.
+├── 🔨 Created mount 
+│   /Users/islam/fun_fable_proj/.claude/worktrees/agent-a4d85703b930e5630/bench/
+│   session.py
+├── 🔨 Created mount 
+│   /Users/islam/fun_fable_proj/.claude/worktrees/agent-a4d85703b930e5630/qwen35
+│   _fast
+├── 🔨 Created mount 
+│   /Users/islam/fun_fable_proj/.claude/worktrees/agent-a4d85703b930e5630/bench
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 818.10it/s]
+PHASE gdn_step.test
+gdn_step.test: max|o diff|=1.526e-05, elements beyond 2ulp: 0/184320 (0.000%), state max rel diff=2.24e-07
+PHASE build k=3
+PHASE k=3 prefill
+PHASE k=3 eager steps
+PHASE k=3 ensure_graph
+PHASE k=3 graph steps
+PHASE k=3 generate
+  tps 528.3669919269076 {'steps': 170, 'accepted': 199}
+PHASE k=3 forced_decode_logits
+PHASE k=3 tps 2 reps
+  fused TPS {'prose-512': [528.6914648437665, 529.6243203554344], 'structured-2048': [889.9489821564596, 891.2724193023469]}
+PHASE k=3 teardown
+PHASE build k=2
+PHASE k=2 prefill
+PHASE k=2 eager steps
+PHASE k=2 ensure_graph
+PHASE k=2 graph steps
+PHASE k=2 generate
+  tps 598.2713659767394 {'steps': 168, 'accepted': 193}
+PHASE k=2 forced_decode_logits
+PHASE k=2 tps 2 reps
+  fused TPS {'prose-512': [597.7099075391122, 598.7286033327434], 'structured-2048': [776.8154050354341, 777.4823548092938]}
+PHASE k=2 teardown
+PHASE build k=0
+PHASE k=0 prefill
+PHASE k=0 eager steps
+PHASE k=0 ensure_graph
+PHASE k=0 graph steps
+PHASE k=0 generate
+  tps 433.66957521197446 {'steps': 0, 'accepted': 0}
+PHASE k=0 forced_decode_logits
+PHASE k=0 teardown
+PHASE build k=1
+PHASE k=1 prefill
+PHASE k=1 eager steps
+PHASE k=1 ensure_graph
+PHASE k=1 graph steps
+PHASE k=1 generate
+  tps 556.9158473859499 {'steps': 201, 'accepted': 138}
+PHASE k=1 forced_decode_logits
+PHASE k=1 teardown
+PHASE done
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-UEhzM0A5hros56kc6CIlJW
