@@ -1,0 +1,90 @@
+{
+ "lean1_emu0_k0": {
+  "step_ms": 2.4575690800000416,
+  "tps": {
+   "dev-prose-512": 359.35419451511905,
+   "dev-prose-2048": 358.96595523664536,
+   "dev-structured-512": 359.74488484108906,
+   "dev-structured-2048": 359.3920225194598
+  },
+  "logit_diff": {
+   "dev-prose-512": {
+    "max_abs": 0.3125,
+    "hf_floor": 0.28125,
+    "top1_disagree": 4
+   },
+   "dev-structured-2048": {
+    "max_abs": 1.576171875,
+    "hf_floor": 1.40625,
+    "top1_disagree": 1
+   }
+  },
+  "kernels_per_step": 457.0
+ },
+ "lean1_emu0_k3": {
+  "step_ms": 4.387165760000187,
+  "tps": {
+   "dev-prose-512": 455.736794393701,
+   "dev-prose-2048": 479.6366769100756,
+   "dev-structured-512": 728.0734949478131,
+   "dev-structured-2048": 765.7692473713395
+  },
+  "logit_diff": {
+   "dev-prose-512": {
+    "max_abs": 0.40625,
+    "hf_floor": 0.28125,
+    "top1_disagree": 4
+   },
+   "dev-structured-2048": {
+    "max_abs": 1.9375,
+    "hf_floor": 1.40625,
+    "top1_disagree": 2
+   }
+  },
+  "kernels_per_step": 824.0
+ },
+ "lean1_emu1_k0": {
+  "step_ms": 2.462109699999928,
+  "tps": {
+   "dev-prose-512": 359.9092461313419,
+   "dev-prose-2048": 360.7057075617012,
+   "dev-structured-512": 360.2326691105825,
+   "dev-structured-2048": 360.65179708264526
+  },
+  "logit_diff": {
+   "dev-prose-512": {
+    "max_abs": 0.3125,
+    "hf_floor": 0.28125,
+    "top1_disagree": 4
+   },
+   "dev-structured-2048": {
+    "max_abs": 1.576171875,
+    "hf_floor": 1.40625,
+    "top1_disagree": 1
+   }
+  },
+  "kernels_per_step": 457.0
+ },
+ "lean1_emu1_k3": {
+  "step_ms": 4.682157590000031,
+  "tps": {
+   "dev-prose-512": 428.9858173352315,
+   "dev-prose-2048": 453.08578659119036,
+   "dev-structured-512": 681.8595145376058,
+   "dev-structured-2048": 721.4623733351826
+  },
+  "logit_diff": {
+   "dev-prose-512": {
+    "max_abs": 0.40625,
+    "hf_floor": 0.28125,
+    "top1_disagree": 4
+   },
+   "dev-structured-2048": {
+    "max_abs": 1.9375,
+    "hf_floor": 1.40625,
+    "top1_disagree": 2
+   }
+  },
+  "kernels_per_step": 824.0
+ }
+}

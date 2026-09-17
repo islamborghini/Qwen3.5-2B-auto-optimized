@@ -34,6 +34,19 @@ def gdn_pre(xc_all, conv_w, b, a, neg_expA, dt_bias, conv_dim):
     return y, b.sigmoid()[None], (neg_expA * F.softplus(a.float() + dt_bias))[None]
 
 
+def add_norm(x, h, w, eps):
+    """x = x + h (bf16 rounding as eager), then zero-centered RMSNorm of the sum. Returns (sum, normed)."""
+    x = x + h
+    return x, rms_norm_zc(x, w, eps)
+
+
+def attn_qk(q, k, qn, kn, cos, sin, eps):
+    """q [T,nq,D], k [T,nkv,D] -> per-head RMSNorm + RoPE, layout [1,H,T,D]."""
+    q = rms_norm_zc(q, qn, eps).transpose(0, 1)[None]
+    k = rms_norm_zc(k, kn, eps).transpose(0, 1)[None]
+    return apply_rope(q, k, cos, sin)
+
+
 def mlp_act(g, u):
     return F.silu(g) * u
 
@@ -67,7 +80,7 @@ def apply_rope(q, k, cos, sin):  # q,k: [B,H,T,D]; cos/sin: [T, rot]
 
 class Engine:
     def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True,
-                 compile_blocks=False, use_gemv=False, compile_mode=None):
+                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False):
         """compile_mode: None | "blocks" (fused elementwise helpers) | "layer" (whole decode layer compiled, graph
         break at the fla kernel) | "layer_at" (same, inductor max-autotune for the GEMMs). compile_blocks=True == "blocks"."""
         self.dev = torch.device(device)
@@ -77,7 +90,12 @@ class Engine:
         self.use_gemv = use_gemv
         self.mm = lambda x, W: x @ W.T
         self._mm_choice = {}
-        fns = dict(norm=rms_norm_zc, gnorm=rms_norm_gated, gdn_pre=gdn_pre, mlp_act=mlp_act, attn_post=attn_post, rope=apply_rope, dec_attn=dec_attn)
+        self.lean = lean
+        fns = dict(norm=rms_norm_zc, gnorm=rms_norm_gated, gdn_pre=gdn_pre, mlp_act=mlp_act, attn_post=attn_post, rope=apply_rope,
+                   dec_attn=dec_attn, add_norm=add_norm, attn_qk=attn_qk)
+        if compile_blocks or self.compile_mode:
+            import torch._inductor.config as icfg
+            icfg.emulate_precision_casts = emulate_casts or self.compile_mode in ("layer", "layer_at")
         if compile_blocks:
             torch._dynamo.config.cache_size_limit = 64
             fns = {k: torch.compile(v, dynamic=False) for k, v in fns.items()}
@@ -101,8 +119,6 @@ class Engine:
         self._layer_c = self._layer_dec
         if self.compile_mode in ("layer", "layer_at"):
             torch._dynamo.config.cache_size_limit = 64
-            import torch._inductor.config as icfg
-            icfg.emulate_precision_casts = True   # round intermediates exactly like eager bf16 (numerics == eager)
             mode = "max-autotune-no-cudagraphs" if self.compile_mode == "layer_at" else "default"
             self._layer_c = torch.compile(self._layer_dec, dynamic=False, mode=mode)
 
@@ -216,11 +232,14 @@ class Engine:
             q, k, v = mm(x, w["q"]), mm(x, w["k"]), mm(x, w["v"])
         q, gate = q.view(T, self.nq, 2 * self.hd).chunk(2, -1)
         gate = gate.reshape(T, -1)
-        norm, rope = (rms_norm_zc, apply_rope) if prefill else (self.f["norm"], self.f["rope"])
-        q = norm(q, w["qn"], self.eps).transpose(0, 1)[None]          # [1,nq,T,D]
-        k = norm(k.view(T, self.nkv, self.hd), w["kn"], self.eps).transpose(0, 1)[None]
         v = v.view(T, self.nkv, self.hd).transpose(0, 1)[None]
-        q, k = rope(q, k, cos, sin)
+        if prefill or not self.lean:
+            norm, rope = (rms_norm_zc, apply_rope) if prefill else (self.f["norm"], self.f["rope"])
+            q = norm(q, w["qn"], self.eps).transpose(0, 1)[None]          # [1,nq,T,D]
+            k = norm(k.view(T, self.nkv, self.hd), w["kn"], self.eps).transpose(0, 1)[None]
+            q, k = rope(q, k, cos, sin)
+        else:
+            q, k = self.f["attn_qk"](q, k.view(T, self.nkv, self.hd), w["qn"], w["kn"], cos, sin, self.eps)
         if prefill:
             kc[:, :, :T] = k; vc[:, :, :T] = v
             o = F.scaled_dot_product_attention(q, k, v, is_causal=True, enable_gqa=True)
@@ -278,13 +297,14 @@ class Engine:
         cos, sin = self.cos[pos], self.sin[pos]
         li = ai = 0
         norm = rms_norm_zc if prefill else self.f["norm"]
+        h = None   # decode/lean: pending residual, added inside the next norm block (one kernel instead of two)
         for i, w in enumerate(self.layers):
             if self.layer_types[i] == "linear_attention":
                 if prefill:
                     x = x + self._gdn(w, norm(x, w["ln1"], self.eps), self.conv_state[li], self.rec_state[li], True, None)
                     x = x + self._mlp(w, norm(x, w["ln2"], self.eps), True)
                 else:
-                    x, sv = self._layer_c(w, x, cos, sin, pos, self.conv_state[li], self.rec_state[li], None, None, "gdn")
+                    x, h, sv = self._layer_c(w, x, h, cos, sin, pos, self.conv_state[li], self.rec_state[li], None, None, "gdn")
                     if sv is not None:
                         save.append(sv)
                 li += 1
@@ -293,24 +313,35 @@ class Engine:
                     x = x + self._attn(w, norm(x, w["ln1"], self.eps), cos, sin, self.kc[ai], self.vc[ai], pos, True)
                     x = x + self._mlp(w, norm(x, w["ln2"], self.eps), True)
                 else:
-                    x, _ = self._layer_c(w, x, cos, sin, pos, None, None, self.kc[ai], self.vc[ai], "attn")
+                    x, h, _ = self._layer_c(w, x, h, cos, sin, pos, None, None, self.kc[ai], self.vc[ai], "attn")
                 ai += 1
+        if h is not None:
+            x, hn = self._pre_norm(x, h, self.final_norm)
+            return hn, x
         return norm(x, self.final_norm, self.eps), x
 
-    def _layer_dec(self, w, x, cos, sin, pos, conv_state, rec_state, kc, vc, ltype):
-        """One decoder layer, decode path (T small). Compiled as a whole in compile_mode='layer*'."""
-        norm = self.f["norm"]
-        h = norm(x, w["ln1"], self.eps)
+    def _pre_norm(self, x, h, w):
+        """(x + h) then norm; h=None means no pending residual. Non-lean: separate add and norm (reference path)."""
+        if h is None:
+            return x, self.f["norm"](x, w, self.eps)
+        if self.lean:
+            return self.f["add_norm"](x, h, w, self.eps)
+        x = x + h
+        return x, self.f["norm"](x, w, self.eps)
+
+    def _layer_dec(self, w, x, h_in, cos, sin, pos, conv_state, rec_state, kc, vc, ltype):
+        """One decoder layer, decode path (T small). Takes the pending residual h_in; returns (x, pending residual, save).
+        Compiled as a whole in compile_mode='layer*'."""
+        x, hn = self._pre_norm(x, h_in, w["ln1"])
         sv = None
         if ltype == "gdn":
             save = []
-            h = self._gdn(w, h, conv_state, rec_state, False, save)
+            h = self._gdn(w, hn, conv_state, rec_state, False, save)
             sv = save[0] if save else None
         else:
-            h = self._attn(w, h, cos, sin, kc, vc, pos, False)
-        x = x + h
-        x = x + self._mlp(w, norm(x, w["ln2"], self.eps), False)
-        return x, sv
+            h = self._attn(w, hn, cos, sin, kc, vc, pos, False)
+        x, hn = self._pre_norm(x, h, w["ln2"])
+        return x, self._mlp(w, hn, False), sv
 
     def _commit(self, save, n_acc):
         """Commit GDN/conv states for the first n_acc tokens of the last multi-token step (device-side, exact)."""
@@ -328,7 +359,8 @@ class Engine:
             x = x + self._attn(m, norm(x, m["ln1"], self.eps), cos, sin, self.kc[-1], self.vc[-1], pos, True)
             x = x + self._mlp(m, norm(x, m["ln2"], self.eps), True)
         else:
-            x, _ = self._layer_c(m, x, cos, sin, pos, None, None, self.kc[-1], self.vc[-1], "attn")
+            x, h, _ = self._layer_c(m, x, None, cos, sin, pos, None, None, self.kc[-1], self.vc[-1], "attn")
+            return self._pre_norm(x, h, m["norm"])[1]
         return norm(x, m["norm"], self.eps)
 
     def _mtp_in(self, hidden, tokens, prefill=False):
