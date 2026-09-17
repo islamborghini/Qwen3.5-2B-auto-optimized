@@ -43,3 +43,9 @@ A copy of this license is made available in this container at /NGC-DL-CONTAINER-
 [transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
 hf_eager dev-prose-128 tps=51.4 ttft=37.0ms
 hf_eager dev-prose-512 tps=50.1 ttft=39.7ms
+hf_eager dev-prose-2048 tps=50.2 ttft=38.6ms
+hf_eager dev-prose-8192 tps=50.1 ttft=107.6ms
+hf_eager dev-code-128 tps=50.9 ttft=38.0ms
+hf_eager dev-code-512 tps=50.3 ttft=38.5ms
+hf_eager dev-code-2048 tps=49.7 ttft=38.9ms
+hf_eager dev-code-8192 tps=50.8 ttft=107.7ms

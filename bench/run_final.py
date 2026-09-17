@@ -12,7 +12,7 @@ json.dump({"incumbent": inc, "kwargs": kw}, open(os.path.join(OUT, "frozen_confi
 print("FROZEN:", inc, kw, flush=True)
 os.environ["QWEN35_FROZEN"] = json.dumps(kw)
 eng = f"custom_k{kw.get('spec_k', 0)}"
-run([os.path.join(here, "evaluate.py"), "--engines", f"{eng},vllm_mtp3,vllm_plain", "--stage", "full", "--tag", "final_full"])
-run([os.path.join(here, "evaluate.py"), "--engines", f"{eng},vllm_mtp3,vllm_plain", "--stage", "heldout", "--split", "heldout", "--tag", "final_heldout"])
+run([os.path.join(here, "evaluate.py"), "--engines", f"{eng},vllm_mtp3", "--stage", "full", "--tag", "final_full"])
+run([os.path.join(here, "evaluate.py"), "--engines", f"{eng},vllm_mtp3", "--stage", "heldout", "--split", "heldout", "--tag", "final_heldout"])
 run([os.path.join(here, "ifeval.py"), "--engine", eng, "--limit", "100"])
 run([os.path.join(here, "ifeval.py"), "--engine", "hf", "--limit", "100"])
