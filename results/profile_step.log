@@ -1,0 +1,117 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-AlRPnK7ggg6kPNe2QyEBTw
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 422.96it/s]
+{
+ "w:mtp.norm.weight": {
+  "mean": 2.8050971031188965,
+  "std": 0.5044692754745483
+ },
+ "w:mtp.pre_fc_norm_hidden.weight": {
+  "mean": -0.28146982192993164,
+  "std": 0.10372691601514816
+ },
+ "w:mtp.pre_fc_norm_embedding.weight": {
+  "mean": -0.43043196201324463,
+  "std": 0.09062495082616806
+ },
+ "w:mtp.layers.0.input_layernorm.weight": {
+  "mean": 0.3319206237792969,
+  "std": 0.11447914689779282
+ },
+ "w:model.language_model.norm.weight": {
+  "mean": 2.5362985134124756,
+  "std": 0.4536300301551819
+ },
+ "w:model.language_model.layers.0.linear_attn.norm.weight": {
+  "mean": 0.9159862995147705,
+  "std": 0.10288959741592407
+ }
+}
+USDT:2026-09-17 06:17:59 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 06:18:00 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+k=0 step_ms=4.162 kernels/step=1391 [{"id": "dev-prose-512", "tps": 219.2196206532915, "steps": 0, "accepted": 0}, {"id": "dev-prose-2048", "tps": 219.07767445082723, "steps": 0, "accepted": 0}, {"id": "dev-code-512", "tps": 219.81053857318778, "steps": 0, "accepted": 0}, {"id": "dev-code-2048", "tps": 219.79319103569787, "steps": 0, "accepted": 0}, {"id": "dev-structured-512", "tps": 219.8133337756267, "steps": 0, "accepted": 0}, {"id": "dev-structured-2048", "tps": 219.89888899035424, "steps": 0, "accepted": 0}]
+    {'name': 'aten::mm', 'self_us_per_step': 1596.5835999999597, 'count_per_step': 97.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_4x1_v_bz_TNT', 'self_us_per_step': 707.3703999999373, 'count_per_step': 54.0}
+    {'name': 'aten::copy_', 'self_us_per_step': 654.4277999999106, 'count_per_step': 318.0}
+    {'name': 'void at::native::unrolled_elementwise_kernel<at::native::direct_copy_k', 'self_us_per_step': 438.99879999994454, 'count_per_step': 171.0}
+    {'name': 'aten::mul', 'self_us_per_step': 381.5393999999239, 'count_per_step': 248.0}
+    {'name': 'nvjet_sm90_tst_512x8_64x3_2x1_v_bz_TNT', 'self_us_per_step': 331.4176000000036, 'count_per_step': 1.0}
+    {'name': 'aten::add', 'self_us_per_step': 281.7946000000353, 'count_per_step': 219.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_2x1_v_bz_splitK_TNT', 'self_us_per_step': 266.6452000000165, 'count_per_step': 24.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_2x1_v_bz_TNT', 'self_us_per_step': 249.07039999999614, 'count_per_step': 18.0}
+    {'name': 'aten::mean', 'self_us_per_step': 179.50900000001394, 'count_per_step': 79.0}
+    {'name': 'void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at:', 'self_us_per_step': 179.50900000001394, 'count_per_step': 79.0}
+    {'name': 'void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunc', 'self_us_per_step': 163.30040000003874, 'count_per_step': 140.0}
+USDT:2026-09-17 06:18:18 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 06:18:18 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+k=1 step_ms=8.218 kernels/step=1759 [{"id": "dev-prose-512", "tps": 200.23540978267167, "steps": 261, "accepted": 176}, {"id": "dev-prose-2048", "tps": 202.21845252134108, "steps": 152, "accepted": 103}, {"id": "dev-code-512", "tps": 221.19425493289356, "steps": 139, "accepted": 116}, {"id": "dev-code-2048", "tps": 202.38054649552114, "steps": 152, "accepted": 104}, {"id": "dev-structured-512", "tps": 231.21384285292754, "steps": 133, "accepted": 122}, {"id": "dev-structured-2048", "tps": 229.62889037468528, "steps": 134, "accepted": 122}]
+    {'name': 'aten::_cudnn_attention_forward', 'self_us_per_step': 2881.6911999999984, 'count_per_step': 7.0}
+    {'name': 'cudnn_generated_fort_native_sdpa_sm90_flash_fprop_wgmma_f16_knob_7_64x', 'self_us_per_step': 2876.0973999999874, 'count_per_step': 7.0}
+    {'name': 'aten::mm', 'self_us_per_step': 1967.0521999999576, 'count_per_step': 103.0}
+    {'name': 'aten::copy_', 'self_us_per_step': 1041.875999999997, 'count_per_step': 496.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_4x1_v_bz_TNT', 'self_us_per_step': 719.831999999964, 'count_per_step': 57.0}
+    {'name': 'nvjet_sm90_tst_512x8_64x3_2x1_v_bz_TNT', 'self_us_per_step': 664.124999999997, 'count_per_step': 2.0}
+    {'name': 'aten::mul', 'self_us_per_step': 530.4007999999698, 'count_per_step': 304.0}
+    {'name': 'void at::native::unrolled_elementwise_kernel<at::native::direct_copy_k', 'self_us_per_step': 443.9414000000328, 'count_per_step': 161.0}
+    {'name': 'aten::add', 'self_us_per_step': 336.8613999999823, 'count_per_step': 256.0}
+    {'name': 'void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_imp', 'self_us_per_step': 331.6820000000527, 'count_per_step': 140.0}
+    {'name': 'void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_imp', 'self_us_per_step': 297.2315999999819, 'count_per_step': 190.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_2x1_v_bz_splitK_TNT', 'self_us_per_step': 276.0482000000111, 'count_per_step': 25.0}
+USDT:2026-09-17 06:18:35 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 06:18:35 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+k=2 step_ms=8.957 kernels/step=1874 [{"id": "dev-prose-512", "tps": 232.15309579344105, "steps": 229, "accepted": 260}, {"id": "dev-prose-2048", "tps": 230.97709740612567, "steps": 122, "accepted": 134}, {"id": "dev-code-512", "tps": 270.7884068818442, "steps": 104, "accepted": 151}, {"id": "dev-code-2048", "tps": 232.94911184903762, "steps": 121, "accepted": 134}, {"id": "dev-structured-512", "tps": 306.40438110394325, "steps": 92, "accepted": 163}, {"id": "dev-structured-2048", "tps": 302.96265793127566, "steps": 93, "accepted": 164}]
+    {'name': 'aten::_cudnn_attention_forward', 'self_us_per_step': 2935.5023999999976, 'count_per_step': 8.0}
+    {'name': 'cudnn_generated_fort_native_sdpa_sm90_flash_fprop_wgmma_f16_knob_7_64x', 'self_us_per_step': 2908.538199999998, 'count_per_step': 7.0}
+    {'name': 'aten::mm', 'self_us_per_step': 2356.7753999999995, 'count_per_step': 109.0}
+    {'name': 'aten::copy_', 'self_us_per_step': 1121.6732000000418, 'count_per_step': 520.0}
+    {'name': 'nvjet_sm90_tst_512x8_64x3_2x1_v_bz_TNT', 'self_us_per_step': 995.492799999997, 'count_per_step': 3.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_4x1_v_bz_TNT', 'self_us_per_step': 753.5804000000102, 'count_per_step': 60.0}
+    {'name': 'aten::mul', 'self_us_per_step': 574.9399999999711, 'count_per_step': 324.0}
+    {'name': 'void at::native::unrolled_elementwise_kernel<at::native::direct_copy_k', 'self_us_per_step': 496.7697999999962, 'count_per_step': 175.0}
+    {'name': 'aten::add', 'self_us_per_step': 363.2333999999923, 'count_per_step': 275.0}
+    {'name': 'void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_imp', 'self_us_per_step': 344.7424000000603, 'count_per_step': 141.0}
+    {'name': 'void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_imp', 'self_us_per_step': 314.142199999993, 'count_per_step': 199.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_2x1_v_bz_splitK_TNT', 'self_us_per_step': 286.99319999997505, 'count_per_step': 26.0}
+USDT:2026-09-17 06:18:50 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 06:18:51 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+k=3 step_ms=9.687 kernels/step=1989 [{"id": "dev-prose-512", "tps": 232.21517307818877, "steps": 220, "accepted": 285}, {"id": "dev-prose-2048", "tps": 230.90928571420665, "steps": 113, "accepted": 143}, {"id": "dev-code-512", "tps": 245.83285829749087, "steps": 106, "accepted": 152}, {"id": "dev-code-2048", "tps": 274.45448170645136, "steps": 95, "accepted": 162}, {"id": "dev-structured-512", "tps": 357.06902737033505, "steps": 73, "accepted": 184}, {"id": "dev-structured-2048", "tps": 367.4820834218351, "steps": 71, "accepted": 184}]
+    {'name': 'aten::_cudnn_attention_forward', 'self_us_per_step': 2980.6756000000078, 'count_per_step': 9.0}
+    {'name': 'cudnn_generated_fort_native_sdpa_sm90_flash_fprop_wgmma_f16_knob_7_64x', 'self_us_per_step': 2932.86339999999, 'count_per_step': 7.0}
+    {'name': 'aten::mm', 'self_us_per_step': 2770.5467999998264, 'count_per_step': 115.0}
+    {'name': 'nvjet_sm90_tst_512x8_64x3_2x1_v_bz_TNT', 'self_us_per_step': 1325.7872000000032, 'count_per_step': 4.0}
+    {'name': 'aten::copy_', 'self_us_per_step': 1175.6526000000115, 'count_per_step': 544.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_4x1_v_bz_TNT', 'self_us_per_step': 811.2181999999397, 'count_per_step': 63.0}
+    {'name': 'aten::mul', 'self_us_per_step': 612.459599999994, 'count_per_step': 344.0}
+    {'name': 'void at::native::unrolled_elementwise_kernel<at::native::direct_copy_k', 'self_us_per_step': 539.2161999999881, 'count_per_step': 189.0}
+    {'name': 'aten::add', 'self_us_per_step': 389.41260000004183, 'count_per_step': 294.0}
+    {'name': 'void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_imp', 'self_us_per_step': 345.57660000000686, 'count_per_step': 142.0}
+    {'name': 'void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_imp', 'self_us_per_step': 332.08040000001085, 'count_per_step': 208.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_2x1_v_bz_splitK_TNT', 'self_us_per_step': 300.0589999999861, 'count_per_step': 27.0}
+saved profile_step.json
+saved results/trace_k0.json
+saved results/profile_step.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-AlRPnK7ggg6kPNe2QyEBTw

@@ -341,3 +341,503 @@ shell tool terminated command after exceeding timeout 120000 ms. If this command
 323:        first_tok = first.item()  # sync: first token complete
 337:            acc = int(host[T]); new = host[: acc + 1].tolist()
 [0m
+[0m$ [0mcat /Users/islam/fun_fable_proj/.venv/pyvenv.cfg 2>/dev/null; echo ---; ls /Users/islam/fun_fable_proj/.venv/lib/*/site-packages 2>/dev/null | grep -i "fla\|flash" ; echo ---; find /Users/islam/fun_fable_proj -maxdepth 2 -name "*.txt" -o -maxdepth 2 -name "*.toml" -o -maxdepth 2 -name "*.cfg" 2>/dev/null
+home = /opt/homebrew/opt/python@3.12/bin
+implementation = CPython
+uv = 0.11.13
+version_info = 3.12.12
+include-system-site-packages = false
+---
+---
+/Users/islam/fun_fable_proj/.venv/pyvenv.cfg
+[0m
+[0m$ [0mgrep -rn "fla\|engine\|import" /Users/islam/fun_fable_proj/bench/*.py | head -40; echo ===; git -C /Users/islam/fun_fable_proj show --stat HEAD | head -30
+/Users/islam/fun_fable_proj/bench/common.py:1:import json, os, time
+/Users/islam/fun_fable_proj/bench/common.py:2:import torch
+/Users/islam/fun_fable_proj/bench/common.py:11:    from huggingface_hub import snapshot_download
+/Users/islam/fun_fable_proj/bench/common.py:27:    from transformers import Qwen3_5ForConditionalGeneration
+/Users/islam/fun_fable_proj/bench/common.py:35:    from transformers.generation.streamers import BaseStreamer
+/Users/islam/fun_fable_proj/bench/evaluate.py:3:Measurement boundaries (all engines):
+/Users/islam/fun_fable_proj/bench/evaluate.py:12:Usage (inside the Modal session):  python bench/evaluate.py --engines hf_eager,vllm_mtp3,custom --stage screen|full
+/Users/islam/fun_fable_proj/bench/evaluate.py:14:import argparse, asyncio, json, os, statistics, sys, time
+/Users/islam/fun_fable_proj/bench/evaluate.py:15:import torch
+/Users/islam/fun_fable_proj/bench/evaluate.py:17:from bench.common import *
+/Users/islam/fun_fable_proj/bench/evaluate.py:24:# ---------------------------------------------------------------- engines
+/Users/islam/fun_fable_proj/bench/evaluate.py:42:        from vllm import AsyncLLMEngine, AsyncEngineArgs
+/Users/islam/fun_fable_proj/bench/evaluate.py:46:        self.llm = AsyncLLMEngine.from_engine_args(AsyncEngineArgs(
+/Users/islam/fun_fable_proj/bench/evaluate.py:53:        from vllm import SamplingParams
+/Users/islam/fun_fable_proj/bench/evaluate.py:75:        from qwen35_fast.engine import Engine
+/Users/islam/fun_fable_proj/bench/evaluate.py:100:def evaluate(engine_names, stage, split="dev", tag=None):
+/Users/islam/fun_fable_proj/bench/evaluate.py:102:    engines = {}
+/Users/islam/fun_fable_proj/bench/evaluate.py:103:    res = {"stage": stage, "split": split, "gpu": torch.cuda.get_device_name(0), "engines": {}}
+/Users/islam/fun_fable_proj/bench/evaluate.py:104:    for n in engine_names:
+/Users/islam/fun_fable_proj/bench/evaluate.py:105:        e = make(n); engines[n] = e
+/Users/islam/fun_fable_proj/bench/evaluate.py:106:        res["engines"][n] = {"startup_s": e.startup_s, "runs": {w["id"]: [] for w in wl}}
+/Users/islam/fun_fable_proj/bench/evaluate.py:109:    # alternate engine order per repetition to reduce drift effects; engines are all resident (serial execution)
+/Users/islam/fun_fable_proj/bench/evaluate.py:111:        order = engine_names if rep % 2 == 0 else engine_names[::-1]
+/Users/islam/fun_fable_proj/bench/evaluate.py:114:                r = engines[n].run(w["ids"])
+/Users/islam/fun_fable_proj/bench/evaluate.py:115:                res["engines"][n]["runs"][w["id"]].append({k: v for k, v in r.items() if k != "tokens"} | {"tokens": r["tokens"]})
+/Users/islam/fun_fable_proj/bench/evaluate.py:117:    for e in engines.values():
+/Users/islam/fun_fable_proj/bench/evaluate.py:126:    for n, d in res["engines"].items():
+/Users/islam/fun_fable_proj/bench/evaluate.py:139:    ap.add_argument("--engines", required=True); ap.add_argument("--stage", default="screen")
+/Users/islam/fun_fable_proj/bench/evaluate.py:142:    evaluate(a.engines.split(","), a.stage, a.split, a.tag)
+/Users/islam/fun_fable_proj/bench/feasibility.py:4:import json, os, time
+/Users/islam/fun_fable_proj/bench/feasibility.py:5:import modal
+/Users/islam/fun_fable_proj/bench/feasibility.py:15:    .uv_pip_install("vllm==0.29.0", "flash-linear-attention==0.5.2", "hf_transfer==0.1.9", "accelerate==1.15.0")
+/Users/islam/fun_fable_proj/bench/feasibility.py:37:    import torch
+/Users/islam/fun_fable_proj/bench/feasibility.py:38:    from huggingface_hub import snapshot_download
+/Users/islam/fun_fable_proj/bench/feasibility.py:39:    from transformers import AutoTokenizer
+/Users/islam/fun_fable_proj/bench/feasibility.py:53:        import transformers
+/Users/islam/fun_fable_proj/bench/feasibility.py:54:        from transformers import Qwen3_5ForConditionalGeneration
+/Users/islam/fun_fable_proj/bench/feasibility.py:55:        from transformers.generation.streamers import BaseStreamer
+/Users/islam/fun_fable_proj/bench/feasibility.py:57:            import fla; res["fla"] = fla.__version__
+/Users/islam/fun_fable_proj/bench/feasibility.py:59:            res["fla"] = f"missing: {e}"
+zsh:1: == not found
+[0m
+[0m% [0mWebFetch https://raw.githubusercontent.com/fla-org/flash-linear-attention/v0.5.2/fla/ops/gated_delta_rule/fused_recurrent.py
+[0m% [0mWebFetch https://raw.githubusercontent.com/fla-org/flash-linear-attention/v0.5.2/fla/ops/gated_delta_rule/chunk.py
+[0m→ [0mRead bench/evaluate.py[90m [limit=100, offset=24][0m
+[0m% [0mWebFetch https://raw.githubusercontent.com/fla-org/flash-linear-attention/v0.5.2/fla/ops/gated_delta_rule/__init__.py
+[0m→ [0mRead bench/common.py
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj/candidates/; echo ---; cat /Users/islam/fun_fable_proj/bench/run_custom.py; echo ---; ls /Users/islam/fun_fable_proj/results; echo ---; find /Users/islam/fun_fable_proj -maxdepth 2 -iname "readme*" -o -maxdepth 2 -iname "*.md" | head
+total 0
+drwxr-xr-x@  3 islam  staff   96 Sep 16 22:56 .
+drwxr-xr-x@ 11 islam  staff  352 Sep 16 22:55 ..
+drwxr-xr-x@  5 islam  staff  160 Sep 16 22:56 review1
+---
+"""Custom engine: correctness vs HF (logits on identical prefixes + multi-step greedy decode) and speed screen.
+Args: --spec 0,1,2,3  --hidden post_norm,pre_norm  --lengths 512,2048
+"""
+import argparse, json, os, sys, time, statistics
+import torch
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bench.common import *
+from qwen35_fast.engine import Engine
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--spec", default="0,1,2,3"); ap.add_argument("--hidden", default="post_norm,pre_norm")
+ap.add_argument("--lengths", default="512,2048"); ap.add_argument("--reps", type=int, default=3)
+ap.add_argument("--n_out", type=int, default=256); ap.add_argument("--skip_hf", action="store_true")
+a = ap.parse_args()
+lengths = [int(x) for x in a.lengths.split(",")]
+res = {"gpu": torch.cuda.get_device_name(0)}
+path = model_path()
+wl = workloads("dev", lengths)
+
+# ---- HF reference (logits + greedy) ----
+ref = {}
+if not a.skip_hf:
+    hf = load_hf()
+    for w in wl:
+        gen, ttft, tps, tot = hf_greedy(hf, w["ids"], a.n_out)
+        lg = hf_logits(hf, w["ids"] + gen[:64])
+        ref[w["id"]] = {"gen": gen, "ttft": ttft, "tps": tps, "logits_tail": lg[-65:].cpu()}
+        print("HF", w["id"], f"tps={tps:.1f} ttft={ttft*1000:.1f}ms", flush=True)
+    res["hf"] = {k: {"tps": v["tps"], "ttft": v["ttft"]} for k, v in ref.items()}
+    del hf; torch.cuda.empty_cache()
+
+# ---- custom engine ----
+for hidden in a.hidden.split(","):
+    for k in [int(x) for x in a.spec.split(",")]:
+        if k == 0 and hidden != a.hidden.split(",")[0]:
+            continue
+        tag = f"custom_k{k}_{hidden}"
+        torch.cuda.reset_peak_memory_stats()
+        t = time.perf_counter(); eng = Engine(path, spec_k=k, mtp_hidden=hidden); load_s = time.perf_counter() - t
+        r = {"load_s": load_s, "runs": {}}
+        try:
+            for w in wl:
+                # warmup (also captures graph)
+                eng.generate(w["ids"], 8, ignore_eos=True)
+                outs = []
+                for _ in range(a.reps):
+                    o = eng.generate(w["ids"], a.n_out, ignore_eos=True)
+                    o["decode_tps"] = (len(o["tokens"]) - 1) / o["decode_s"]
+                    outs.append(o)
+                gen = outs[-1]["tokens"]
+                item = {"decode_tps": [o["decode_tps"] for o in outs], "ttft_s": [o["ttft_s"] for o in outs],
+                        "total_s": [o["total_s"] for o in outs], "n_gen": len(gen), "text": None}
+                if w["id"] in ref:
+                    hgen = ref[w["id"]]["gen"]
+                    mm = next((i for i in range(min(len(hgen), len(gen))) if hgen[i] != gen[i]), None)
+                    item["first_mismatch_vs_hf"] = mm
+                    item["match_frac_vs_hf"] = sum(x == y for x, y in zip(hgen, gen)) / len(gen)
+                    # logits on identical prefix: prompt + first 64 HF tokens, compare last 65 positions
+                    ids = w["ids"] + hgen[:64]
+                    eng.reset(); tokens = torch.tensor(ids, device="cuda"); pos = torch.arange(len(ids), device="cuda")
+                    with torch.no_grad():
+                        hn, _ = eng._body(tokens, pos, prefill=True)
+                        lg = (hn[-65:] @ eng.embed.T).float().cpu()
+                    rl = ref[w["id"]]["logits_tail"]
+                    item["logit_max_abs_diff"] = (lg - rl).abs().max().item()
+                    item["logit_ref_max_abs"] = rl.abs().max().item()
+                    item["top1_agree_frac"] = (lg.argmax(-1) == rl.argmax(-1)).float().mean().item()
+                r["runs"][w["id"]] = item
+                print(tag, w["id"], json.dumps({kk: (round(statistics.median(v), 2) if isinstance(v, list) else v) for kk, v in item.items() if kk != "text"}), flush=True)
+            r["peak_mem_gb"] = torch.cuda.max_memory_allocated() / 1e9
+        except Exception:
+            import traceback; r["error"] = traceback.format_exc(); print(r["error"], flush=True)
+        res[tag] = r
+        del eng; torch.cuda.empty_cache()
+save("custom_screen.json", res)
+---
+custom_screen.log
+feasibility.json
+feasibility.log
+---
+/Users/islam/fun_fable_proj/LEDGER.md
+[0m
+[0m$ [0mwc -l /Users/islam/fun_fable_proj/results/custom_screen.log; echo ---; cat /Users/islam/fun_fable_proj/results/custom_screen.log
+86 /Users/islam/fun_fable_proj/results/custom_screen.log
+---
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-NRJCRn7iD6EGc66LS7ACT2
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 814.59it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1200.46it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<03:45,  2.73it/s]
+[1ALoading weights:   4%|▍         | 26/617 [00:00<00:08, 70.33it/s]
+[1ALoading weights:  10%|▉         | 61/617 [00:00<00:03, 146.89it/s]
+[1ALoading weights:  15%|█▌        | 95/617 [00:00<00:02, 193.17it/s]
+[1ALoading weights:  21%|██        | 130/617 [00:00<00:02, 234.18it/s]
+[1ALoading weights:  26%|██▌       | 159/617 [00:00<00:01, 249.02it/s]
+[1ALoading weights:  31%|███▏      | 194/617 [00:01<00:01, 276.67it/s]
+[1ALoading weights:  36%|███▋      | 225/617 [00:01<00:01, 284.92it/s]
+[1ALoading weights:  41%|████▏     | 256/617 [00:01<00:01, 285.99it/s]
+[1ALoading weights:  47%|████▋     | 293/617 [00:01<00:01, 305.75it/s]
+[1ALoading weights:  56%|█████▌    | 345/617 [00:01<00:00, 360.76it/s]
+[1ALoading weights:  70%|███████   | 433/617 [00:01<00:00, 510.54it/s]
+[1ALoading weights:  92%|█████████▏| 566/617 [00:01<00:00, 749.51it/s]
+[1ALoading weights: 100%|██████████| 617/617 [00:01<00:00, 371.90it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+HF dev-prose-512 tps=15.2 ttft=37034.9ms
+HF dev-prose-2048 tps=16.0 ttft=88.1ms
+HF dev-code-512 tps=42.4 ttft=45.0ms
+HF dev-code-2048 tps=42.6 ttft=45.4ms
+HF dev-structured-512 tps=42.7 ttft=44.9ms
+HF dev-structured-2048 tps=42.5 ttft=45.4ms
+custom_k0_post_norm dev-prose-512 {"decode_tps": 237.28, "ttft_s": 0.03, "total_s": 1.11, "n_gen": 256, "first_mismatch_vs_hf": 73, "match_frac_vs_hf": 0.30859375, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k0_post_norm dev-prose-2048 {"decode_tps": 237.96, "ttft_s": 0.03, "total_s": 1.11, "n_gen": 256, "first_mismatch_vs_hf": 175, "match_frac_vs_hf": 0.6953125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k0_post_norm dev-code-512 {"decode_tps": 237.34, "ttft_s": 0.03, "total_s": 1.11, "n_gen": 256, "first_mismatch_vs_hf": 10, "match_frac_vs_hf": 0.0546875, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k0_post_norm dev-code-2048 {"decode_tps": 237.36, "ttft_s": 0.04, "total_s": 1.11, "n_gen": 256, "first_mismatch_vs_hf": 95, "match_frac_vs_hf": 0.3828125, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k0_post_norm dev-structured-512 {"decode_tps": 237.43, "ttft_s": 0.03, "total_s": 1.11, "n_gen": 256, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.61328125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k0_post_norm dev-structured-2048 {"decode_tps": 237.98, "ttft_s": 0.03, "total_s": 1.11, "n_gen": 256, "first_mismatch_vs_hf": 124, "match_frac_vs_hf": 0.59375, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k1_post_norm dev-prose-512 {"decode_tps": 201.15, "ttft_s": 0.04, "total_s": 1.3, "n_gen": 256, "first_mismatch_vs_hf": 88, "match_frac_vs_hf": 0.36328125, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k1_post_norm dev-prose-2048 {"decode_tps": 202.52, "ttft_s": 0.04, "total_s": 1.3, "n_gen": 256, "first_mismatch_vs_hf": 175, "match_frac_vs_hf": 0.6953125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k1_post_norm dev-code-512 {"decode_tps": 221.51, "ttft_s": 0.03, "total_s": 1.19, "n_gen": 256, "first_mismatch_vs_hf": 10, "match_frac_vs_hf": 0.0546875, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k1_post_norm dev-code-2048 {"decode_tps": 202.47, "ttft_s": 0.04, "total_s": 1.3, "n_gen": 256, "first_mismatch_vs_hf": 11, "match_frac_vs_hf": 0.046875, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k1_post_norm dev-structured-512 {"decode_tps": 231.47, "ttft_s": 0.03, "total_s": 1.14, "n_gen": 256, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.61328125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k1_post_norm dev-structured-2048 {"decode_tps": 229.68, "ttft_s": 0.04, "total_s": 1.15, "n_gen": 256, "first_mismatch_vs_hf": 24, "match_frac_vs_hf": 0.60546875, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k2_post_norm dev-prose-512 {"decode_tps": 229.14, "ttft_s": 0.04, "total_s": 1.15, "n_gen": 256, "first_mismatch_vs_hf": 88, "match_frac_vs_hf": 0.36328125, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k2_post_norm dev-prose-2048 {"decode_tps": 230.13, "ttft_s": 0.04, "total_s": 1.14, "n_gen": 256, "first_mismatch_vs_hf": 175, "match_frac_vs_hf": 0.6953125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k2_post_norm dev-code-512 {"decode_tps": 271.02, "ttft_s": 0.03, "total_s": 0.98, "n_gen": 256, "first_mismatch_vs_hf": 10, "match_frac_vs_hf": 0.0546875, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k2_post_norm dev-code-2048 {"decode_tps": 231.06, "ttft_s": 0.04, "total_s": 1.14, "n_gen": 256, "first_mismatch_vs_hf": 11, "match_frac_vs_hf": 0.046875, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k2_post_norm dev-structured-512 {"decode_tps": 306.41, "ttft_s": 0.03, "total_s": 0.87, "n_gen": 256, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.61328125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k2_post_norm dev-structured-2048 {"decode_tps": 301.57, "ttft_s": 0.04, "total_s": 0.88, "n_gen": 256, "first_mismatch_vs_hf": 24, "match_frac_vs_hf": 0.60546875, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k3_post_norm dev-prose-512 {"decode_tps": 228.54, "ttft_s": 0.04, "total_s": 1.15, "n_gen": 256, "first_mismatch_vs_hf": 88, "match_frac_vs_hf": 0.37109375, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k3_post_norm dev-prose-2048 {"decode_tps": 228.62, "ttft_s": 0.04, "total_s": 1.15, "n_gen": 256, "first_mismatch_vs_hf": 91, "match_frac_vs_hf": 0.3671875, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k3_post_norm dev-code-512 {"decode_tps": 243.48, "ttft_s": 0.04, "total_s": 1.09, "n_gen": 256, "first_mismatch_vs_hf": 49, "match_frac_vs_hf": 0.1953125, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k3_post_norm dev-code-2048 {"decode_tps": 270.36, "ttft_s": 0.04, "total_s": 0.98, "n_gen": 256, "first_mismatch_vs_hf": 11, "match_frac_vs_hf": 0.046875, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k3_post_norm dev-structured-512 {"decode_tps": 361.82, "ttft_s": 0.04, "total_s": 0.74, "n_gen": 256, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.61328125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k3_post_norm dev-structured-2048 {"decode_tps": 367.27, "ttft_s": 0.04, "total_s": 0.73, "n_gen": 256, "first_mismatch_vs_hf": 144, "match_frac_vs_hf": 0.62109375, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k1_pre_norm dev-prose-512 {"decode_tps": 202.43, "ttft_s": 0.03, "total_s": 1.29, "n_gen": 256, "first_mismatch_vs_hf": 88, "match_frac_vs_hf": 0.36328125, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k1_pre_norm dev-prose-2048 {"decode_tps": 198.6, "ttft_s": 0.04, "total_s": 1.32, "n_gen": 256, "first_mismatch_vs_hf": 175, "match_frac_vs_hf": 0.6953125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k1_pre_norm dev-code-512 {"decode_tps": 207.97, "ttft_s": 0.03, "total_s": 1.26, "n_gen": 256, "first_mismatch_vs_hf": 10, "match_frac_vs_hf": 0.0546875, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k1_pre_norm dev-code-2048 {"decode_tps": 201.1, "ttft_s": 0.03, "total_s": 1.3, "n_gen": 256, "first_mismatch_vs_hf": 11, "match_frac_vs_hf": 0.046875, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k1_pre_norm dev-structured-512 {"decode_tps": 208.03, "ttft_s": 0.03, "total_s": 1.26, "n_gen": 256, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.61328125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k1_pre_norm dev-structured-2048 {"decode_tps": 215.07, "ttft_s": 0.03, "total_s": 1.22, "n_gen": 256, "first_mismatch_vs_hf": 24, "match_frac_vs_hf": 0.60546875, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k2_pre_norm dev-prose-512 {"decode_tps": 223.81, "ttft_s": 0.04, "total_s": 1.18, "n_gen": 256, "first_mismatch_vs_hf": 88, "match_frac_vs_hf": 0.36328125, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k2_pre_norm dev-prose-2048 {"decode_tps": 219.5, "ttft_s": 0.04, "total_s": 1.2, "n_gen": 256, "first_mismatch_vs_hf": 175, "match_frac_vs_hf": 0.6953125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k2_pre_norm dev-code-512 {"decode_tps": 247.26, "ttft_s": 0.03, "total_s": 1.07, "n_gen": 256, "first_mismatch_vs_hf": 10, "match_frac_vs_hf": 0.0546875, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k2_pre_norm dev-code-2048 {"decode_tps": 231.05, "ttft_s": 0.04, "total_s": 1.14, "n_gen": 256, "first_mismatch_vs_hf": 11, "match_frac_vs_hf": 0.046875, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj status --short; echo ---; git -C /Users/islam/fun_fable_proj log --oneline --all; echo ---; git -C /Users/islam/fun_fable_proj ls-files | head -50
+M candidates/review1/opencode.log
+ M results/custom_screen.log
+---
+958daaa Evaluator, IFEval harness, report/acceptance logic; fix fla kwarg bug in engine
+a48da86 Custom engine (CUDA graph + exact MTP spec decode), session runner, feasibility results
+facec27 Feasibility bench + frozen workloads (exact token-id prompts, dev/heldout)
+a71cb2e Init: ledger, gitignore
+---
+.gitignore
+LEDGER.md
+bench/common.py
+bench/evaluate.py
+bench/feasibility.py
+bench/ifeval.py
+bench/report.py
+bench/run_custom.py
+bench/session.py
+bench/workloads.json
+bench/workloads.py
+candidates/review1/TASK.md
+candidates/review1/hf_reference_modeling_qwen3_5.py
+candidates/review1/opencode.log
+qwen35_fast/engine.py
+qwen35_fast/hf_wrapper.py
+results/custom_screen.log
+results/feasibility.json
+results/feasibility.log
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj show 958daaa --stat | head -30; echo ===DIFF-ENGINE===; git -C /Users/islam/fun_fable_proj show 958daaa -- qwen35_fast/engine.py
+commit 958daaaf3e9cb27f1feb72178c3cdd74c92a4444
+Author: Islam Assanov <islamassanov66@gmail.com>
+Date:   Wed Sep 16 23:08:10 2026 -0700
+
+    Evaluator, IFEval harness, report/acceptance logic; fix fla kwarg bug in engine
+
+ LEDGER.md                       |   2 +
+ bench/evaluate.py               | 142 ++++++++++++++++++++++++++++++++++++++++
+ bench/ifeval.py                 |  68 +++++++++++++++++++
+ bench/report.py                 |  56 ++++++++++++++++
+ candidates/review1/opencode.log |  50 ++++++++++++++
+ qwen35_fast/engine.py           |   6 +-
+ qwen35_fast/hf_wrapper.py       |  14 ++++
+ results/custom_screen.log       |  22 ++++++-
+ 8 files changed, 356 insertions(+), 4 deletions(-)
+zsh:1: ==DIFF-ENGINE=== not found
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj show 958daaa -- qwen35_fast/engine.py
+commit 958daaaf3e9cb27f1feb72178c3cdd74c92a4444
+Author: Islam Assanov <islamassanov66@gmail.com>
+Date:   Wed Sep 16 23:08:10 2026 -0700
+
+    Evaluator, IFEval harness, report/acceptance logic; fix fla kwarg bug in engine
+
+diff --git a/qwen35_fast/engine.py b/qwen35_fast/engine.py
+index e5f1c51..5ef0199 100644
+--- a/qwen35_fast/engine.py
++++ b/qwen35_fast/engine.py
+@@ -175,10 +175,10 @@ class Engine:
+         beta = b.sigmoid()[None]                                               # [1,T,gh]
+         g = (w["neg_expA"] * F.softplus(a.float() + w["dt_bias"]))[None]       # [1,T,gh] fp32
+         if prefill:
+-            o, st = chunk_gated_delta_rule(q, k, v, g, beta, initial_state=None, output_final_state=True, use_qk_l2norm_in_kernel=True)
++            o, st = chunk_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=None, output_final_state=True, use_qk_l2norm_in_kernel=True)
+             self.rec_state[li].copy_(st); self.conv_state[li].copy_(xc_all[:, :, -(self.conv_k - 1):])
+         else:
+-            o, st = fused_recurrent_gated_delta_rule(q, k, v, g, beta, initial_state=self.rec_state[li],
++            o, st = fused_recurrent_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=self.rec_state[li],
+                                                      output_final_state=True, use_qk_l2norm_in_kernel=True)
+             if T == 1:
+                 self.rec_state[li].copy_(st); self.conv_state[li].copy_(xc_all[:, :, 1:])
+@@ -213,7 +213,7 @@ class Engine:
+         """Commit GDN/conv states for the first n_acc tokens of the last multi-token step (device-side, exact)."""
+         keep = (self.arangeT < n_acc).to(torch.float32)[None, :, None]        # [1,T,1]
+         for li, q, k, v, g, beta, xc_all in save:
+-            _, st = fused_recurrent_gated_delta_rule(q, k, v, g * keep, beta * keep.to(beta.dtype),
++            _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g * keep, beta=beta * keep.to(beta.dtype),
+                                                      initial_state=self.rec_state[li], output_final_state=True, use_qk_l2norm_in_kernel=True)
+             self.rec_state[li].copy_(st)
+             self.conv_state[li].copy_(xc_all.index_select(2, n_acc + self.arangeC))
+[0m
+[0m$ [0mgrep -n "chunk_gated_delta_rule\|fused_recurrent_gated_delta_rule" /Users/islam/fun_fable_proj/qwen35_fast/engine.py; echo ---; git -C /Users/islam/fun_fable_proj diff --stat; echo ---; git -C /Users/islam/fun_fable_proj diff qwen35_fast/engine.py | head
+11:from fla.ops.gated_delta_rule import chunk_gated_delta_rule, fused_recurrent_gated_delta_rule
+178:            o, st = chunk_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=None, output_final_state=True, use_qk_l2norm_in_kernel=True)
+181:            o, st = fused_recurrent_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=self.rec_state[li],
+216:            _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g * keep, beta=beta * keep.to(beta.dtype),
+---
+ candidates/review1/opencode.log | 318 ++++++++++++++++++++++++++++++++++++++++
+ results/custom_screen.log       |  78 ++++++++++
+ 2 files changed, 396 insertions(+)
+---
+[0m
+[0m→ [0mRead qwen35_fast/engine.py[90m [offset=158, limit=70][0m
+[0m→ [0mRead qwen35_fast/engine.py[90m [offset=228, limit=120][0m
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj show 958daaa:candidates/review1/opencode.log | sed -n '1,80p'
+[0m
+> build · deepseek-v4.1-flash
+[0m
+[0m→ [0mRead candidates/review1/TASK.md
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj/candidates/review1/ && wc -l /Users/islam/fun_fable_proj/qwen35_fast/engine.py /Users/islam/fun_fable_proj/candidates/review1/hf_reference_modeling_qwen3_5.py
+total 208
+drwxr-xr-x@ 5 islam  staff    160 Sep 16 22:56 .
+drwxr-xr-x@ 3 islam  staff     96 Sep 16 22:56 ..
+-rw-r--r--@ 1 islam  staff  95685 Sep 16 22:56 hf_reference_modeling_qwen3_5.py
+-rw-r--r--@ 1 islam  staff     85 Sep 16 22:57 opencode.log
+-rw-r--r--@ 1 islam  staff   1648 Sep 16 22:56 TASK.md
+     345 /Users/islam/fun_fable_proj/qwen35_fast/engine.py
+    2121 /Users/islam/fun_fable_proj/candidates/review1/hf_reference_modeling_qwen3_5.py
+    2466 total
+[0m
+[0m→ [0mRead qwen35_fast/engine.py
+[0m
+[0m$ [0mgrep -n "class Qwen3_5\|def forward\|def apply_rotary_pos_emb\|def __init__" /Users/islam/fun_fable_proj/candidates/review1/hf_reference_modeling_qwen3_5.py
+77:class Qwen3_5VisionRotaryEmbedding(nn.Module):
+85:    def __init__(self, config: Qwen3_5VisionConfig, device=None):
+121:    def forward(self, x, position_ids):
+143:class Qwen3_5TextRotaryEmbedding(nn.Module):
+145:    def __init__(self, config: Qwen3_5TextConfig, device=None):
+188:    def forward(self, x, position_ids):
+218:class Qwen3_5RMSNormGated(nn.Module):
+219:    def __init__(self, hidden_size: int, eps: float = 1e-6, **kwargs) -> None:
+225:    def forward(self, hidden_states: torch.Tensor, gate: torch.Tensor) -> torch.Tensor:
+504:class Qwen3_5GatedDeltaNet(nn.Module):
+505:    def __init__(self, config: Qwen3_5Config, layer_idx: int):
+550:    def forward(
+674:def apply_rotary_pos_emb(q, k, cos, sin, unsqueeze_dim=1):
+749:class Qwen3_5Attention(nn.Module):
+752:    def __init__(self, config: Qwen3_5Config, layer_idx: int):
+776:    def forward(
+824:class Qwen3_5MLP(nn.Module):
+825:    def __init__(self, config: Qwen3_5Config, intermediate_size: int):
+835:    def forward(self, x):
+841:class Qwen3_5RMSNorm(nn.Module):
+842:    def __init__(self, dim: int, eps: float = 1e-6):
+850:    def forward(self, x):
+861:class Qwen3_5DecoderLayer(GradientCheckpointingLayer):
+862:    def __init__(self, config: Qwen3_5TextConfig, layer_idx: int):
+874:    def forward(
+917:class Qwen3_5PreTrainedModel(PreTrainedModel):
+948:class Qwen3_5VisionMLP(nn.Module):
+949:    def __init__(self, config):
+957:    def forward(self, hidden_state):
+961:class Qwen3_5VisionPatchEmbed(nn.Module):
+962:    def __init__(self, config) -> None:
+972:    def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
+981:class Qwen3_5VisionPatchMerger(nn.Module):
+982:    def __init__(self, config: Qwen3_5VisionConfig, use_postshuffle_norm=False) -> None:
+991:    def forward(self, x: torch.Tensor) -> torch.Tensor:
+997:def apply_rotary_pos_emb_vision(
+1011:class Qwen3_5VisionAttention(nn.Module):
+1012:    def __init__(self, config: Qwen3_5VisionConfig) -> None:
+1025:    def forward(
+1094:class Qwen3_5VisionBlock(GradientCheckpointingLayer):
+1095:    def __init__(self, config, attn_implementation: str = "sdpa") -> None:
+1103:    def forward(
+1124:class Qwen3_5VisionModel(Qwen3_5PreTrainedModel):
+1133:    def __init__(self, config, *inputs, **kwargs) -> None:
+1163:    def forward(self, hidden_states: torch.Tensor, grid_thw: torch.Tensor, **kwargs) -> torch.Tensor:
+1212:class Qwen3_5ModelOutputWithPast(BaseModelOutputWithPast):
+1222:class Qwen3_5TextModel(Qwen3_5PreTrainedModel):
+1225:    def __init__(self, config: Qwen3_5TextConfig):
+1240:    def forward(
+1311:class Qwen3_5Model(Qwen3_5PreTrainedModel):
+1317:    def __init__(self, config):
+1595:    def forward(
+1664:class Qwen3_5ForCausalLM(Qwen3_5PreTrainedModel, GenerationMixin):
+1672:    def __init__(self, config):
+1683:    def forward(
+1745:class Qwen3_5ForTokenClassification(GenericForTokenClassification, Qwen3_5PreTrainedModel):
+1751:class Qwen3_5CausalLMOutputWithPast(CausalLMOutputWithPast):
+1761:class Qwen3_5ForConditionalGeneration(Qwen3_5PreTrainedModel, GenerationMixin):
+1766:    def __init__(self, config):
+1801:    def forward(
+2076:class Qwen3_5TextForSequenceClassification(GenericForSequenceClassification, Qwen3_5PreTrainedModel):
+[0m
+[0m→ [0mRead qwen35_fast/hf_wrapper.py
+I have enough context. Let me verify one thing about the file changing mid-session, then write the review.
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && stat -f "%Sm engine.py" -t "%H:%M:%S" qwen35_fast/engine.py && git log -1 --format="%H %ad %s" --date=format:"%H:%M:%S" && date +"%H:%M:%S"
+23:14:54 engine.py
+958daaaf3e9cb27f1feb72178c3cdd74c92a4444 23:08:10 Evaluator, IFEval harness, report/acceptance logic; fix fla kwarg bug in engine
+23:15:52
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && md5 qwen35_fast/engine.py && grep -n "beta=beta\|g, beta\|\.float()\.argmax\|pos0 + j\|for _ in range(2)" qwen35_fast/engine.py
+MD5 (qwen35_fast/engine.py) = 4af928c88cc2df34fd1869d33166759c
+202:            o, st = chunk_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=None, output_final_state=True, use_qk_l2norm_in_kernel=True)
+205:            o, st = fused_recurrent_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=self.rec_state[li],
+210:                save.append((li, q, k, v, g, beta, xc_all))
+242:        for li, q, k, v, g, beta, xc_all in save:
+243:            _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g * keep, beta=beta * keep.to(beta.dtype),
+265:        return (h @ self.embed.T).float().argmax(-1)
+294:            p = (pos0 + (j - 1)).reshape(1) if isinstance(pos0, torch.Tensor) else torch.tensor([pos0 + j - 1], device=self.dev)
+337:                for _ in range(2):
+[0m
+The engine is being edited concurrently — line numbers and content have shifted. Let me re-read the current state.
+[0m→ [0mRead qwen35_fast/engine.py
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && md5 qwen35_fast/engine.py && wc -l qwen35_fast/engine.py && git status --short qwen35_fast/engine.py && stat -f "%Sm" -t "%H:%M:%S" qwen35_fast/engine.py
+MD5 (qwen35_fast/engine.py) = 13ceca4001fb87d13ddca6c23ba323ec
+     376 qwen35_fast/engine.py
+ M qwen35_fast/engine.py
+23:16:13
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && grep -n "argmax(-1)\|fused_recurrent_gated_delta_rule(\|chunk_gated_delta_rule(\|pos0 + j - 1\|for _ in range(2)\|linear_num_key_heads\|linear_num_value_heads" qwen35_fast/engine.py
+70:        self.gh = c["linear_num_value_heads"]; self.gk = c["linear_key_head_dim"]; self.gv = c["linear_value_head_dim"]
+202:            o, st = chunk_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=None, output_final_state=True, use_qk_l2norm_in_kernel=True)
+205:            o, st = fused_recurrent_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=self.rec_state[li],
+243:            _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g * keep, beta=beta * keep.to(beta.dtype),
+265:        return (h @ self.embed.T).float().argmax(-1)
+294:            p = (pos0 + (j - 1)).reshape(1) if isinstance(pos0, torch.Tensor) else torch.tensor([pos0 + j - 1], device=self.dev)
+337:                for _ in range(2):
+[0m
+The engine is being iteratively edited by a concurrent process (it has already changed twice during my review). I'll review the current revision and write up findings, noting which issues were addressed mid-review.
+[0m← [0mWrite candidates/review1/REVIEW.md
+Wrote file successfully.
+[0m
+[0m← [0mEdit candidates/review1/REVIEW.md
+Index: /Users/islam/fun_fable_proj/candidates/review1/REVIEW.md
+===================================================================
+--- /Users/islam/fun_fable_proj/candidates/review1/REVIEW.md
++++ /Users/islam/fun_fable_proj/candidates/review1/REVIEW.md
+@@ -44,10 +44,11 @@
+ appends to the full-attention KV cache, and updates `self.conv_state` / `self.rec_state`.
+ The two warmup calls execute (only the capture context suppresses execution), so after
+ capture the model has already silently consumed two decode steps; `g.replay()` then performs
+ a third. The tokens returned by the first `generate()` after construction therefore skip two
+-steps (the bench hides this by throwing away a dedicated warmup `generate`, `bench/run_construct`);
+-a plain one-shot `generate()` on a fresh `Engine` is incorrect.
++steps (the bench hides this by throwing away a dedicated warmup `generate`,
++`bench/evaluate.py:77` / `bench/run_custom.py`); a plain one-shot `generate()` on a fresh
++`Engine` is incorrect.
+ 
+ Fix: warm up against disposable state and restore before recording/replaying. E.g. snapshot
+ the mutable state (`n`, `pending`, `drafts`, `conv_state`, `rec_state`, `kc`, `vc`, and the
+ spec counters) before the warmup loop and `copy_` it back after capture; or build the graph
+
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && md5 qwen35_fast/engine.py && wc -l qwen35_fast/engine.py && ls -la candidates/review1/
+MD5 (qwen35_fast/engine.py) = 13ceca4001fb87d13ddca6c23ba323ec
+     376 qwen35_fast/engine.py
+total 336
+drwxr-xr-x@ 6 islam  staff    192 Sep 16 23:17 .
+drwxr-xr-x@ 3 islam  staff     96 Sep 16 22:56 ..
+-rw-r--r--@ 1 islam  staff  95685 Sep 16 22:56 hf_reference_modeling_qwen3_5.py
+-rw-r--r--@ 1 islam  staff  54675 Sep 16 23:17 opencode.log
+-rw-r--r--@ 1 islam  staff   9623 Sep 16 23:17 REVIEW.md
+-rw-r--r--@ 1 islam  staff   1648 Sep 16 22:56 TASK.md
+[0m
+Wrote `candidates/review1/REVIEW.md`.
+
+Note: `qwen35_fast/engine.py` was edited twice by a concurrent process during the review (adding `compile_blocks`, `gdn_pre`, spec counters, and fixing the FLA kwargs and draft-chain position). I reviewed the current 376-line revision (`md5 13ceca4…`) and flagged which findings were already addressed.
+
+Remaining findings:
+1. `_argmax` (line 265) upcasts bf16 logits to fp32 before argmax; HF greedy argmaxes bf16 logits, so near-ties can diverge. Fix: drop `.float()`.
+2. CUDA-graph capture (lines 334-344): the two warmup `_step_impl()` calls execute and advance `n`/pending/drafts/KV/GDN state before `replay()`, so the first `generate()` on a fresh engine skips two steps. Fix: snapshot/restore state around warmup or re-prefill after capture. (Also, `stat_steps`/`stat_acc` are incremented inside the captured region.)
+3. FLA `fused_recurrent_gated_delta_rule` positional-arg bug (documented; now keyword-fixed).
+4. `_draft_chain` MTP position off-by-one (documented; now fixed).
+5. `linear_num_key_heads` ignored — latent GVA assumption, safe for this checkpoint.
+6. Minor: unused `tok`, `pre_norm` option inconsistent with the reference, `reset()` not clearing KV caches.
+
+I also included a checklist of the areas I verified as matching the reference (norm order/dtype, RoPE layout/dims, q/k norm placement, attention gate, GQA, conv state/activation, gated delta rule args, gated RMSNorm, residual structure, KV indexing, acceptance/rollback) and confirmed there are no host syncs/data-dependent shapes/Python ints from device tensors in `_step_impl`.

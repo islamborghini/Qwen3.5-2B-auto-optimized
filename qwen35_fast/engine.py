@@ -4,8 +4,9 @@ Exact BF16 weights (loaded straight from the HF safetensors). Static caches, one
 optional exact speculative decoding with the checkpoint's own MTP head (greedy outputs are preserved:
 a draft token is accepted only if it equals the target model's argmax at that position).
 """
-import json, math, os, time
+import json, os, time
 import torch
+import torch._dynamo
 import torch.nn.functional as F
 from safetensors import safe_open
 from fla.ops.gated_delta_rule import chunk_gated_delta_rule, fused_recurrent_gated_delta_rule
@@ -26,6 +27,30 @@ def rms_norm_gated(x, gate, w, eps):  # Qwen3_5RMSNormGated (same op order as HF
     return (h * F.silu(gate.float())).to(x.dtype)
 
 
+def gdn_pre(xc_all, conv_w, b, a, neg_expA, dt_bias, conv_dim):
+    """conv(+silu) over [1,conv_dim,3+T] -> y [T,conv_dim]; beta=sigmoid(b); g=-exp(A)*softplus(a+dt_bias) (fp32)."""
+    y = F.silu(F.conv1d(xc_all, conv_w, groups=conv_dim))[0].T
+    return y, b.sigmoid()[None], (neg_expA * F.softplus(a.float() + dt_bias))[None]
+
+
+def mlp_act(g, u):
+    return F.silu(g) * u
+
+
+def attn_post(o, gate):
+    return o * torch.sigmoid(gate)
+
+
+def dec_attn(q, kc, vc, pos, arangeL, rep, scale):
+    """q [1,nq,T,D]; kc/vc [1,nkv,L,D]; keys at positions <= pos[t] attend. Explicit matmul path for tiny T."""
+    _, nq, T, D = q.shape; nkv = kc.shape[1]
+    qg = q.view(1, nkv, rep * T, D)                                            # group query heads per kv head
+    s = torch.matmul(qg, kc.transpose(-1, -2)).float() * scale                # [1,nkv,rep*T,L]
+    mask = (arangeL[None, :] <= pos[:, None]).repeat(rep, 1)[None, None]      # [1,1,rep*T,L] rows ordered (head, t)
+    s = s.masked_fill(~mask, float("-inf")).softmax(-1).to(q.dtype)
+    return torch.matmul(s, vc).view(1, nq, T, D)
+
+
 def rotate_half(x):
     x1, x2 = x[..., : x.shape[-1] // 2], x[..., x.shape[-1] // 2:]
     return torch.cat((-x2, x1), dim=-1)
@@ -40,8 +65,15 @@ def apply_rope(q, k, cos, sin):  # q,k: [B,H,T,D]; cos/sin: [T, rot]
 
 
 class Engine:
-    def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True):
+    def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True,
+                 compile_blocks=False):
         self.dev = torch.device(device)
+        self.compile_blocks = compile_blocks
+        fns = dict(norm=rms_norm_zc, gnorm=rms_norm_gated, gdn_pre=gdn_pre, mlp_act=mlp_act, attn_post=attn_post, rope=apply_rope, dec_attn=dec_attn)
+        if compile_blocks:
+            torch._dynamo.config.cache_size_limit = 64
+            fns = {k: torch.compile(v, dynamic=False) for k, v in fns.items()}
+        self.f = fns
         self.cfg = c = json.load(open(os.path.join(model_path, "config.json")))["text_config"]
         self.eps = c["rms_norm_eps"]; self.H = c["hidden_size"]; self.nl = c["num_hidden_layers"]
         self.layer_types = c["layer_types"]; self.hd = c["head_dim"]; self.nq = c["num_attention_heads"]; self.nkv = c["num_key_value_heads"]
@@ -123,11 +155,14 @@ class Engine:
         self.step_tokens = torch.zeros(T, dtype=torch.long, device=dev)  # greedy tokens produced by last step
         self.step_acc = torch.zeros((), dtype=torch.long, device=dev)    # number of accepted drafts in last step
         self.arangeT = torch.arange(T, device=dev)
+        self.stat_steps = torch.zeros((), dtype=torch.long, device=dev)
+        self.stat_acc = torch.zeros((), dtype=torch.long, device=dev)
         self.arangeL = torch.arange(L, device=dev)
         self.arangeC = torch.arange(self.conv_k - 1, device=dev)
 
     def reset(self):
         self.conv_state.zero_(); self.rec_state.zero_(); self.n.zero_(); self.pending.zero_(); self.drafts.zero_()
+        self.kc.zero_(); self.vc.zero_()
 
     # ---------------------------------------------------------------- blocks
     def _attn(self, w, x, cos, sin, kv_idx, pos, kv_len, prefill):
@@ -140,19 +175,20 @@ class Engine:
             q, k, v = x @ w["q"].T, x @ w["k"].T, x @ w["v"].T
         q, gate = q.view(T, self.nq, 2 * self.hd).chunk(2, -1)
         gate = gate.reshape(T, -1)
-        q = rms_norm_zc(q, w["qn"], self.eps).transpose(0, 1)[None]          # [1,nq,T,D]
-        k = rms_norm_zc(k.view(T, self.nkv, self.hd), w["kn"], self.eps).transpose(0, 1)[None]
+        norm, rope = (rms_norm_zc, apply_rope) if prefill else (self.f["norm"], self.f["rope"])
+        q = norm(q, w["qn"], self.eps).transpose(0, 1)[None]          # [1,nq,T,D]
+        k = norm(k.view(T, self.nkv, self.hd), w["kn"], self.eps).transpose(0, 1)[None]
         v = v.view(T, self.nkv, self.hd).transpose(0, 1)[None]
-        q, k = apply_rope(q, k, cos, sin)
+        q, k = rope(q, k, cos, sin)
         kc, vc = self.kc[kv_idx], self.vc[kv_idx]
         if prefill:
             kc[:, :, :T] = k; vc[:, :, :T] = v
             o = F.scaled_dot_product_attention(q, k, v, is_causal=True, enable_gqa=True)
         else:
             kc.index_copy_(2, pos, k); vc.index_copy_(2, pos, v)
-            mask = self.arangeL[None, :] <= pos[:, None]                       # [T,L] causal incl. new tokens
-            o = F.scaled_dot_product_attention(q, kc, vc, attn_mask=mask[None, None], enable_gqa=True)
-        o = o.transpose(1, 2).reshape(T, -1) * torch.sigmoid(gate)
+            o = self.f["dec_attn"](q, kc, vc, pos, self.arangeL, self.nq // self.nkv, self.hd ** -0.5)
+        o = o.transpose(1, 2).reshape(T, -1)
+        o = attn_post(o, gate) if prefill else self.f["attn_post"](o, gate)
         return o @ w["o"].T
 
     def _gdn(self, w, x, li, prefill, save):
@@ -168,12 +204,10 @@ class Engine:
             xc_all = torch.cat([torch.zeros_like(self.conv_state[li]), xc], -1)
         else:
             xc_all = torch.cat([self.conv_state[li], xc], -1)
-        y = F.silu(F.conv1d(xc_all, cw, groups=self.conv_dim))                 # [1,conv_dim,T]
-        y = y[0].T                                                             # [T,conv_dim]
+        pre = gdn_pre if prefill else self.f["gdn_pre"]
+        y, beta, g = pre(xc_all, cw, b, a, w["neg_expA"], w["dt_bias"], self.conv_dim)   # y [T,conv_dim]; beta/g [1,T,gh]
         q, k, v = y.split([self.gh * self.gk, self.gh * self.gk, self.gh * self.gv], -1)
         q = q.reshape(1, T, self.gh, self.gk); k = k.reshape(1, T, self.gh, self.gk); v = v.reshape(1, T, self.gh, self.gv)
-        beta = b.sigmoid()[None]                                               # [1,T,gh]
-        g = (w["neg_expA"] * F.softplus(a.float() + w["dt_bias"]))[None]       # [1,T,gh] fp32
         if prefill:
             o, st = chunk_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=None, output_final_state=True, use_qk_l2norm_in_kernel=True)
             self.rec_state[li].copy_(st); self.conv_state[li].copy_(xc_all[:, :, -(self.conv_k - 1):])
@@ -184,30 +218,33 @@ class Engine:
                 self.rec_state[li].copy_(st); self.conv_state[li].copy_(xc_all[:, :, 1:])
             else:
                 save.append((li, q, k, v, g, beta, xc_all))
-        o = rms_norm_gated(o.reshape(T * self.gh, self.gv), z.reshape(T * self.gh, self.gv), w["gnorm"], self.eps)
+        gn = rms_norm_gated if prefill else self.f["gnorm"]
+        o = gn(o.reshape(T * self.gh, self.gv), z.reshape(T * self.gh, self.gv), w["gnorm"], self.eps)
         return o.reshape(T, -1) @ w["out"].T
 
-    def _mlp(self, w, x):
+    def _mlp(self, w, x, prefill):
         if self.fuse_proj:
             g, u = (x @ w["gate_up"].T).chunk(2, -1)
         else:
             g, u = x @ w["gate"].T, x @ w["up"].T
-        return (F.silu(g) * u) @ w["down"].T
+        act = mlp_act if prefill else self.f["mlp_act"]
+        return act(g, u) @ w["down"].T
 
     def _body(self, tokens, pos, prefill, save=None):
         """Run the main model over tokens [T] at positions pos [T]. Returns post-final-norm hidden [T,H] and pre-norm hidden."""
         x = self.embed[tokens]
         cos, sin = self.cos[pos], self.sin[pos]
         li = ai = 0
+        norm = rms_norm_zc if prefill else self.f["norm"]
         for i, w in enumerate(self.layers):
-            h = rms_norm_zc(x, w["ln1"], self.eps)
+            h = norm(x, w["ln1"], self.eps)
             if self.layer_types[i] == "linear_attention":
                 h = self._gdn(w, h, li, prefill, save); li += 1
             else:
                 h = self._attn(w, h, cos, sin, ai, pos, self.n, prefill); ai += 1
             x = x + h
-            x = x + self._mlp(w, rms_norm_zc(x, w["ln2"], self.eps))
-        return rms_norm_zc(x, self.final_norm, self.eps), x
+            x = x + self._mlp(w, norm(x, w["ln2"], self.eps), prefill)
+        return norm(x, self.final_norm, self.eps), x
 
     def _commit(self, save, n_acc):
         """Commit GDN/conv states for the first n_acc tokens of the last multi-token step (device-side, exact)."""
@@ -220,20 +257,22 @@ class Engine:
 
     def _mtp_layer(self, x, cos, sin, pos, prefill=False):
         m = self.mtp
-        h = rms_norm_zc(x, m["ln1"], self.eps)
+        norm = rms_norm_zc if prefill else self.f["norm"]
+        h = norm(x, m["ln1"], self.eps)
         h = self._attn(m, h, cos, sin, self.kc.shape[0] - 1, pos, self.n, prefill)
         x = x + h
-        x = x + self._mlp(m, rms_norm_zc(x, m["ln2"], self.eps))
-        return rms_norm_zc(x, m["norm"], self.eps)
+        x = x + self._mlp(m, norm(x, m["ln2"], self.eps), prefill)
+        return norm(x, m["norm"], self.eps)
 
-    def _mtp_in(self, hidden, tokens):
+    def _mtp_in(self, hidden, tokens, prefill=False):
         m = self.mtp
-        e = rms_norm_zc(self.embed[tokens], m["pre_e"], self.eps)
-        h = rms_norm_zc(hidden, m["pre_h"], self.eps)
+        norm = rms_norm_zc if prefill else self.f["norm"]
+        e = norm(self.embed[tokens], m["pre_e"], self.eps)
+        h = norm(hidden, m["pre_h"], self.eps)
         return torch.cat([e, h], -1) @ m["fc"].T
 
     def _argmax(self, h):
-        return (h @ self.embed.T).float().argmax(-1)
+        return (h @ self.embed.T).argmax(-1)
 
     # ---------------------------------------------------------------- steps
     @torch.no_grad()
@@ -250,7 +289,7 @@ class Engine:
             hid = hn if self.mtp_hidden == "post_norm" else hp
             # MTP over the whole prompt: inputs (h_i, t_{i+1}) for i < T-1, and (h_{T-1}, g) for the last row
             nxt = torch.cat([tokens[1:], g])
-            x = self._mtp_in(hid, nxt)
+            x = self._mtp_in(hid, nxt, prefill=True)
             self.n.fill_(0)  # not used in prefill attention path (is_causal)
             mo = self._mtp_layer(x, self.cos[pos], self.sin[pos], pos, prefill=True)
             self.n.fill_(T)
@@ -262,7 +301,7 @@ class Engine:
         d = self._argmax(m_last)
         self.drafts[0].copy_(d[0])
         for j in range(1, self.spec_k):
-            p = (pos0 + j).reshape(1) if isinstance(pos0, torch.Tensor) else torch.tensor([pos0 + j], device=self.dev)
+            p = (pos0 + (j - 1)).reshape(1) if isinstance(pos0, torch.Tensor) else torch.tensor([pos0 + j - 1], device=self.dev)
             x = self._mtp_in(m_last, d)
             m_last = self._mtp_layer(x, self.cos[p], self.sin[p], p)
             d = self._argmax(m_last)
@@ -270,7 +309,6 @@ class Engine:
 
     def _step_impl(self):
         """One decode step (T = spec_k + 1 tokens). Updates state; writes self.step_tokens / self.step_acc."""
-        T = self.spec_k + 1
         tokens = torch.cat([self.pending.reshape(1), self.drafts]) if self.spec_k else self.pending.reshape(1)
         pos = self.n + self.arangeT
         save = []
@@ -286,6 +324,7 @@ class Engine:
         n_acc = acc + 1                                                        # tokens committed by main model
         self._commit(save, n_acc)
         self.step_tokens.copy_(g); self.step_acc.copy_(acc)
+        self.stat_steps.add_(1); self.stat_acc.add_(acc)
         # MTP pass over the T rows (rows beyond acceptance are harmless; their cache slots get overwritten later)
         hid = hn if self.mtp_hidden == "post_norm" else hp
         x = self._mtp_in(hid, g)
@@ -297,25 +336,35 @@ class Engine:
         self.pending.copy_(new_pending[0])
 
     @torch.no_grad()
+    def ensure_graph(self):
+        """Capture the decode-step graph once, on disposable dummy state (warmup runs mutate state)."""
+        if "step" in self.graphs:
+            return
+        self.prefill([1, 2, 3, 4])
+        s = torch.cuda.Stream(); s.wait_stream(torch.cuda.current_stream())
+        with torch.cuda.stream(s):
+            for _ in range(2):
+                self._step_impl()
+        torch.cuda.current_stream().wait_stream(s)
+        g = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(g):
+            self._step_impl()
+        self.graphs["step"] = g
+        self.stat_steps.zero_(); self.stat_acc.zero_()
+        torch.cuda.synchronize()
+
+    @torch.no_grad()
     def step(self, use_graph=True):
         if not use_graph:
             return self._step_impl()
-        g = self.graphs.get("step")
-        if g is None:
-            s = torch.cuda.Stream(); s.wait_stream(torch.cuda.current_stream())
-            with torch.cuda.stream(s):
-                for _ in range(2):
-                    self._step_impl()
-            torch.cuda.current_stream().wait_stream(s)
-            g = torch.cuda.CUDAGraph()
-            with torch.cuda.graph(g):
-                self._step_impl()
-            self.graphs["step"] = g
-        g.replay()
+        self.ensure_graph()
+        self.graphs["step"].replay()
 
     @torch.no_grad()
     def generate(self, ids, n_out, eos_ids=(), ignore_eos=False, use_graph=True):
         """Returns dict(tokens, ttft_s, decode_s, prefill_s, total_s). Timing per README measurement notes."""
+        if use_graph:
+            self.ensure_graph()   # one-time startup cost, excluded from timing
         torch.cuda.synchronize()
         t0 = time.perf_counter()
         first = self.prefill(ids)
@@ -342,4 +391,5 @@ class Engine:
             if not ignore_eos and any(t in eos for t in new):
                 break
         t_end = time.perf_counter()
-        return {"tokens": out[:n_out], "ttft_s": t_first - t0, "decode_s": t_end - t_first, "total_s": t_end - t0}
+        st = {"steps": int(self.stat_steps), "accepted": int(self.stat_acc)}; self.stat_steps.zero_(); self.stat_acc.zero_()
+        return {"tokens": out[:n_out], "ttft_s": t_first - t0, "decode_s": t_end - t_first, "total_s": t_end - t0, "spec": st}

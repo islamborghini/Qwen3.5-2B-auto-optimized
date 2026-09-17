@@ -11,6 +11,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--spec", default="0,1,2,3"); ap.add_argument("--hidden", default="post_norm,pre_norm")
 ap.add_argument("--lengths", default="512,2048"); ap.add_argument("--reps", type=int, default=3)
 ap.add_argument("--n_out", type=int, default=256); ap.add_argument("--skip_hf", action="store_true")
+ap.add_argument("--compile", default="0,1")
 a = ap.parse_args()
 lengths = [int(x) for x in a.lengths.split(",")]
 res = {"gpu": torch.cuda.get_device_name(0)}
@@ -31,12 +32,13 @@ if not a.skip_hf:
 
 # ---- custom engine ----
 for hidden in a.hidden.split(","):
+  for comp in [int(x) for x in a.compile.split(",")]:
     for k in [int(x) for x in a.spec.split(",")]:
         if k == 0 and hidden != a.hidden.split(",")[0]:
             continue
-        tag = f"custom_k{k}_{hidden}"
+        tag = f"custom_k{k}_{hidden}_c{comp}"
         torch.cuda.reset_peak_memory_stats()
-        t = time.perf_counter(); eng = Engine(path, spec_k=k, mtp_hidden=hidden); load_s = time.perf_counter() - t
+        t = time.perf_counter(); eng = Engine(path, spec_k=k, mtp_hidden=hidden, compile_blocks=bool(comp)); load_s = time.perf_counter() - t
         r = {"load_s": load_s, "runs": {}}
         try:
             for w in wl:
@@ -49,7 +51,8 @@ for hidden in a.hidden.split(","):
                     outs.append(o)
                 gen = outs[-1]["tokens"]
                 item = {"decode_tps": [o["decode_tps"] for o in outs], "ttft_s": [o["ttft_s"] for o in outs],
-                        "total_s": [o["total_s"] for o in outs], "n_gen": len(gen), "text": None}
+                        "total_s": [o["total_s"] for o in outs], "n_gen": len(gen), "text": None,
+                        "acc_rate": (outs[-1]["spec"]["accepted"] / max(1, outs[-1]["spec"]["steps"] * max(k, 1)))}
                 if w["id"] in ref:
                     hgen = ref[w["id"]]["gen"]
                     mm = next((i for i in range(min(len(hgen), len(gen))) if hgen[i] != gen[i]), None)

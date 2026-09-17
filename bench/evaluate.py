@@ -44,7 +44,7 @@ class VLLMEngine:
         kw = {"speculative_config": {"method": "mtp", "num_speculative_tokens": spec_k}} if spec_k else {}
         t = time.perf_counter()
         self.llm = AsyncLLMEngine.from_engine_args(AsyncEngineArgs(
-            model=MODEL, revision=REV, dtype="bfloat16", max_model_len=9216, gpu_memory_utilization=0.6, seed=0,
+            model=MODEL, revision=REV, dtype="bfloat16", max_model_len=9216, gpu_memory_utilization=0.16, seed=0,
             limit_mm_per_prompt={"image": 0, "video": 0}, enable_prefix_caching=False, **kw))
         self.startup_s = time.perf_counter() - t
         self.loop = asyncio.new_event_loop(); self.i = 0
@@ -101,11 +101,18 @@ def evaluate(engine_names, stage, split="dev", tag=None):
     st = STAGES[stage]; wl = workloads(split, st["lengths"])
     engines = {}
     res = {"stage": stage, "split": split, "gpu": torch.cuda.get_device_name(0), "engines": {}}
-    for n in engine_names:
-        e = make(n); engines[n] = e
-        res["engines"][n] = {"startup_s": e.startup_s, "runs": {w["id"]: [] for w in wl}}
-        for w in wl:  # warmup each configuration
-            e.run(w["ids"])
+    for n in list(engine_names):
+        try:
+            e = make(n); engines[n] = e
+            res["engines"][n] = {"startup_s": e.startup_s, "runs": {w["id"]: [] for w in wl}}
+            for w in wl:  # warmup each configuration
+                e.run(w["ids"])
+        except Exception:
+            import traceback
+            res.setdefault("failed", {})[n] = traceback.format_exc()[-3000:]
+            print("ENGINE FAILED", n, res["failed"][n][-800:], flush=True)
+            engine_names = [x for x in engine_names if x != n]
+            res["engines"].pop(n, None); engines.pop(n, None); torch.cuda.empty_cache()
     # alternate engine order per repetition to reduce drift effects; engines are all resident (serial execution)
     for rep in range(st["reps"]):
         order = engine_names if rep % 2 == 0 else engine_names[::-1]

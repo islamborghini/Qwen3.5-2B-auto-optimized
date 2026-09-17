@@ -1,0 +1,105 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-uJSvr3U9NIddCl4RT0pNzS
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 752.61it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1367.83it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<03:10,  3.23it/s]
+[1ALoading weights:   5%|▌         | 32/617 [00:00<00:05, 98.99it/s]
+[1ALoading weights:  10%|▉         | 60/617 [00:00<00:03, 151.47it/s]
+[1ALoading weights:  15%|█▌        | 93/617 [00:00<00:02, 195.86it/s]
+[1ALoading weights:  22%|██▏       | 134/617 [00:00<00:01, 256.27it/s]
+[1ALoading weights:  28%|██▊       | 170/617 [00:00<00:01, 282.18it/s]
+[1ALoading weights:  33%|███▎      | 203/617 [00:00<00:01, 295.88it/s]
+[1ALoading weights:  39%|███▉      | 240/617 [00:01<00:01, 313.33it/s]
+[1ALoading weights:  46%|████▌     | 284/617 [00:01<00:00, 339.88it/s]
+[1ALoading weights:  53%|█████▎    | 324/617 [00:01<00:00, 354.23it/s]
+[1ALoading weights:  66%|██████▋   | 410/617 [00:01<00:00, 495.05it/s]
+[1ALoading weights:  86%|████████▋ | 533/617 [00:01<00:00, 707.46it/s]
+[1ALoading weights: 100%|██████████| 617/617 [00:01<00:00, 404.50it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+HF dev-prose-512 tps=17.5 ttft=33930.4ms
+HF dev-prose-2048 tps=18.4 ttft=76.6ms
+HF dev-code-512 tps=50.3 ttft=39.4ms
+HF dev-code-2048 tps=50.8 ttft=37.8ms
+HF dev-structured-512 tps=49.4 ttft=37.6ms
+HF dev-structured-2048 tps=49.5 ttft=39.7ms
+custom_k0_post_norm_c0 dev-prose-512 {"decode_tps": 234.64, "ttft_s": 0.03, "total_s": 1.11, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 73, "match_frac_vs_hf": 0.28515625, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c0 dev-prose-2048 {"decode_tps": 234.8, "ttft_s": 0.03, "total_s": 1.12, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 91, "match_frac_vs_hf": 0.35546875, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c0 dev-code-512 {"decode_tps": 234.71, "ttft_s": 0.03, "total_s": 1.11, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 10, "match_frac_vs_hf": 0.0546875, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c0 dev-code-2048 {"decode_tps": 234.79, "ttft_s": 0.03, "total_s": 1.12, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 95, "match_frac_vs_hf": 0.38671875, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c0 dev-structured-512 {"decode_tps": 234.77, "ttft_s": 0.03, "total_s": 1.11, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.61328125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c0 dev-structured-2048 {"decode_tps": 234.79, "ttft_s": 0.03, "total_s": 1.12, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 159, "match_frac_vs_hf": 0.625, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c0 dev-prose-512 {"decode_tps": 298.96, "ttft_s": 0.03, "total_s": 0.88, "n_gen": 256, "acc_rate": 0.6887417218543046, "first_mismatch_vs_hf": 73, "match_frac_vs_hf": 0.3359375, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c0 dev-prose-2048 {"decode_tps": 299.62, "ttft_s": 0.03, "total_s": 0.88, "n_gen": 256, "acc_rate": 0.6887417218543046, "first_mismatch_vs_hf": 91, "match_frac_vs_hf": 0.36328125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c0 dev-code-512 {"decode_tps": 322.6, "ttft_s": 0.03, "total_s": 0.82, "n_gen": 256, "acc_rate": 0.8285714285714286, "first_mismatch_vs_hf": 10, "match_frac_vs_hf": 0.0546875, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c0 dev-code-2048 {"decode_tps": 314.25, "ttft_s": 0.03, "total_s": 0.84, "n_gen": 256, "acc_rate": 0.7708333333333334, "first_mismatch_vs_hf": 52, "match_frac_vs_hf": 0.22265625, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c0 dev-structured-512 {"decode_tps": 342.07, "ttft_s": 0.03, "total_s": 0.77, "n_gen": 256, "acc_rate": 0.9393939393939394, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.3125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c0 dev-structured-2048 {"decode_tps": 342.7, "ttft_s": 0.03, "total_s": 0.78, "n_gen": 256, "acc_rate": 0.9393939393939394, "first_mismatch_vs_hf": 159, "match_frac_vs_hf": 0.625, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c0 dev-prose-512 {"decode_tps": 327.5, "ttft_s": 0.03, "total_s": 0.81, "n_gen": 256, "acc_rate": 0.5491803278688525, "first_mismatch_vs_hf": 73, "match_frac_vs_hf": 0.3359375, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c0 dev-prose-2048 {"decode_tps": 322.31, "ttft_s": 0.03, "total_s": 0.82, "n_gen": 256, "acc_rate": 0.5282258064516129, "first_mismatch_vs_hf": 91, "match_frac_vs_hf": 0.36328125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c0 dev-code-512 {"decode_tps": 391.79, "ttft_s": 0.03, "total_s": 0.68, "n_gen": 256, "acc_rate": 0.7549019607843137, "first_mismatch_vs_hf": 10, "match_frac_vs_hf": 0.0546875, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c0 dev-code-2048 {"decode_tps": 380.95, "ttft_s": 0.03, "total_s": 0.7, "n_gen": 256, "acc_rate": 0.7142857142857143, "first_mismatch_vs_hf": 52, "match_frac_vs_hf": 0.22265625, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c0 dev-structured-512 {"decode_tps": 444.19, "ttft_s": 0.03, "total_s": 0.6, "n_gen": 256, "acc_rate": 0.9277777777777778, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.3125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c0 dev-structured-2048 {"decode_tps": 444.24, "ttft_s": 0.03, "total_s": 0.61, "n_gen": 256, "acc_rate": 0.9277777777777778, "first_mismatch_vs_hf": 159, "match_frac_vs_hf": 0.625, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c0 dev-prose-512 {"decode_tps": 314.89, "ttft_s": 0.03, "total_s": 0.84, "n_gen": 256, "acc_rate": 0.4152046783625731, "first_mismatch_vs_hf": 179, "match_frac_vs_hf": 0.7421875, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c0 dev-prose-2048 {"decode_tps": 317.22, "ttft_s": 0.03, "total_s": 0.84, "n_gen": 256, "acc_rate": 0.4218289085545723, "first_mismatch_vs_hf": 168, "match_frac_vs_hf": 0.66796875, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c0 dev-code-512 {"decode_tps": 382.05, "ttft_s": 0.03, "total_s": 0.7, "n_gen": 256, "acc_rate": 0.5815602836879432, "first_mismatch_vs_hf": 10, "match_frac_vs_hf": 0.0546875, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c0 dev-code-2048 {"decode_tps": 402.76, "ttft_s": 0.03, "total_s": 0.67, "n_gen": 256, "acc_rate": 0.6329588014981273, "first_mismatch_vs_hf": 95, "match_frac_vs_hf": 0.38671875, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c0 dev-structured-512 {"decode_tps": 492.11, "ttft_s": 0.03, "total_s": 0.55, "n_gen": 256, "acc_rate": 0.8401826484018264, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.61328125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c0 dev-structured-2048 {"decode_tps": 504.53, "ttft_s": 0.03, "total_s": 0.54, "n_gen": 256, "acc_rate": 0.863849765258216, "first_mismatch_vs_hf": 144, "match_frac_vs_hf": 0.62109375, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c1 dev-prose-512 {"decode_tps": 401.87, "ttft_s": 0.03, "total_s": 0.66, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 73, "match_frac_vs_hf": 0.28515625, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c1 dev-prose-2048 {"decode_tps": 400.81, "ttft_s": 0.03, "total_s": 0.66, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 91, "match_frac_vs_hf": 0.36328125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c1 dev-code-512 {"decode_tps": 401.8, "ttft_s": 0.03, "total_s": 0.66, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 10, "match_frac_vs_hf": 0.05859375, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c1 dev-code-2048 {"decode_tps": 400.83, "ttft_s": 0.03, "total_s": 0.66, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 95, "match_frac_vs_hf": 0.37890625, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c1 dev-structured-512 {"decode_tps": 401.88, "ttft_s": 0.03, "total_s": 0.66, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.3125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k0_post_norm_c1 dev-structured-2048 {"decode_tps": 400.26, "ttft_s": 0.03, "total_s": 0.67, "n_gen": 256, "acc_rate": 0.0, "first_mismatch_vs_hf": 124, "match_frac_vs_hf": 0.59375, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c1 dev-prose-512 {"decode_tps": 451.59, "ttft_s": 0.03, "total_s": 0.59, "n_gen": 256, "acc_rate": 0.6139240506329114, "first_mismatch_vs_hf": 179, "match_frac_vs_hf": 0.7109375, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c1 dev-prose-2048 {"decode_tps": 476.58, "ttft_s": 0.03, "total_s": 0.57, "n_gen": 256, "acc_rate": 0.7, "first_mismatch_vs_hf": 175, "match_frac_vs_hf": 0.6953125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c1 dev-code-512 {"decode_tps": 499.19, "ttft_s": 0.03, "total_s": 0.54, "n_gen": 256, "acc_rate": 0.7832167832167832, "first_mismatch_vs_hf": 30, "match_frac_vs_hf": 0.14453125, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c1 dev-code-2048 {"decode_tps": 506.97, "ttft_s": 0.03, "total_s": 0.53, "n_gen": 256, "acc_rate": 0.8156028368794326, "first_mismatch_vs_hf": 95, "match_frac_vs_hf": 0.40234375, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c1 dev-structured-512 {"decode_tps": 540.82, "ttft_s": 0.03, "total_s": 0.5, "n_gen": 256, "acc_rate": 0.9318181818181818, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.61328125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k1_post_norm_c1 dev-structured-2048 {"decode_tps": 541.63, "ttft_s": 0.03, "total_s": 0.5, "n_gen": 256, "acc_rate": 0.9393939393939394, "first_mismatch_vs_hf": 159, "match_frac_vs_hf": 0.625, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c1 dev-prose-512 {"decode_tps": 486.5, "ttft_s": 0.03, "total_s": 0.55, "n_gen": 256, "acc_rate": 0.49609375, "first_mismatch_vs_hf": 179, "match_frac_vs_hf": 0.7109375, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c1 dev-prose-2048 {"decode_tps": 514.94, "ttft_s": 0.03, "total_s": 0.53, "n_gen": 256, "acc_rate": 0.5578512396694215, "first_mismatch_vs_hf": 175, "match_frac_vs_hf": 0.6953125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c1 dev-code-512 {"decode_tps": 561.17, "ttft_s": 0.03, "total_s": 0.48, "n_gen": 256, "acc_rate": 0.6531531531531531, "first_mismatch_vs_hf": 30, "match_frac_vs_hf": 0.14453125, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c1 dev-code-2048 {"decode_tps": 604.79, "ttft_s": 0.03, "total_s": 0.45, "n_gen": 256, "acc_rate": 0.7427184466019418, "first_mismatch_vs_hf": 95, "match_frac_vs_hf": 0.40234375, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c1 dev-structured-512 {"decode_tps": 676.87, "ttft_s": 0.03, "total_s": 0.41, "n_gen": 256, "acc_rate": 0.8858695652173914, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.61328125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k2_post_norm_c1 dev-structured-2048 {"decode_tps": 692.13, "ttft_s": 0.03, "total_s": 0.4, "n_gen": 256, "acc_rate": 0.9277777777777778, "first_mismatch_vs_hf": 159, "match_frac_vs_hf": 0.625, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c1 dev-prose-512 {"decode_tps": 454.0, "ttft_s": 0.03, "total_s": 0.59, "n_gen": 256, "acc_rate": 0.3691460055096419, "first_mismatch_vs_hf": 179, "match_frac_vs_hf": 0.7109375, "logit_max_abs_diff": 0.296875, "logit_ref_max_abs": 35.0, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c1 dev-prose-2048 {"decode_tps": 484.37, "ttft_s": 0.03, "total_s": 0.56, "n_gen": 256, "acc_rate": 0.4247787610619469, "first_mismatch_vs_hf": 175, "match_frac_vs_hf": 0.6953125, "logit_max_abs_diff": 0.265625, "logit_ref_max_abs": 34.75, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c1 dev-code-512 {"decode_tps": 566.53, "ttft_s": 0.03, "total_s": 0.48, "n_gen": 256, "acc_rate": 0.5498281786941581, "first_mismatch_vs_hf": 30, "match_frac_vs_hf": 0.14453125, "logit_max_abs_diff": 0.28125, "logit_ref_max_abs": 30.5, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c1 dev-code-2048 {"decode_tps": 621.31, "ttft_s": 0.03, "total_s": 0.44, "n_gen": 256, "acc_rate": 0.6363636363636364, "first_mismatch_vs_hf": 95, "match_frac_vs_hf": 0.40234375, "logit_max_abs_diff": 0.3125, "logit_ref_max_abs": 32.25, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c1 dev-structured-512 {"decode_tps": 762.84, "ttft_s": 0.03, "total_s": 0.37, "n_gen": 256, "acc_rate": 0.8564814814814815, "first_mismatch_vs_hf": 12, "match_frac_vs_hf": 0.61328125, "logit_max_abs_diff": 0.4375, "logit_ref_max_abs": 35.75, "top1_agree_frac": 1.0}
+custom_k3_post_norm_c1 dev-structured-2048 {"decode_tps": 779.73, "ttft_s": 0.03, "total_s": 0.36, "n_gen": 256, "acc_rate": 0.8809523809523809, "first_mismatch_vs_hf": 159, "match_frac_vs_hf": 0.625, "logit_max_abs_diff": 0.375, "logit_ref_max_abs": 35.5, "top1_agree_frac": 1.0}
+saved custom_screen.json
+saved results/custom_screen.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-uJSvr3U9NIddCl4RT0pNzS
