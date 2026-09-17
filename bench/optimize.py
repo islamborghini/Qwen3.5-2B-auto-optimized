@@ -14,29 +14,26 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bench.common import *
 from qwen35_fast.engine import Engine
 
-CANDIDATES = {  # name -> Engine kwargs (order = priority). gemv variants dropped: kernel correct but slower than cuBLAS
-    "k0_compile": dict(spec_k=0, compile_blocks=True),   # except on lm_head (+7%), see LEDGER.md
+CANDIDATES = {  # name -> Engine kwargs (order = priority). Earlier rounds (results/opt_ledger_*.json): layer-level
+    # torch.compile fails the numerical gate; gemv kernels (DeepSeek v1/v2) are slower than cuBLAS except on lm_head.
+    "k0_compile": dict(spec_k=0, compile_blocks=True),
     "k2_compile": dict(spec_k=2, compile_blocks=True),
     "k3_compile": dict(spec_k=3, compile_blocks=True),
-    "k0_layer_ep": dict(spec_k=0, compile_mode="layer"),        # ep = emulate_precision_casts (eager rounding)
-    "k0_layer_at_ep": dict(spec_k=0, compile_mode="layer_at"),
-    "k2_layer_at_ep": dict(spec_k=2, compile_mode="layer_at"),
-    "k3_layer_at_ep": dict(spec_k=3, compile_mode="layer_at"),
     "k4_compile": dict(spec_k=4, compile_blocks=True),
-    "k2_compile_gemv2": dict(spec_k=2, compile_blocks=True, use_gemv=True),   # DeepSeek GEMV v2, per-shape selection
-    "k3_compile_gemv2": dict(spec_k=3, compile_blocks=True, use_gemv=True),
 }
 LEDGER = os.path.join(OUT, "opt_ledger.json")
 
 
-def screen(eng, wl, reps):
+def screen(eng, wl, reps, base_mem=0):
+    """base_mem: bytes allocated before this engine was built; peak is reported relative to it (compile caches may keep
+    earlier candidates alive in the same process, so absolute peaks are not comparable)."""
     out = {}
     for w in wl:
         eng.generate(w["ids"], 8, ignore_eos=True)
         runs = [eng.generate(w["ids"], 256, ignore_eos=True) for _ in range(reps)]
         torch.cuda.reset_peak_memory_stats(); eng.generate(w["ids"], 256, ignore_eos=True)
         out[w["id"]] = {"tps": [255 / r["decode_s"] for r in runs], "ttft": [r["ttft_s"] for r in runs],
-                        "mem_gb": torch.cuda.max_memory_allocated() / 1e9, "tokens": runs[-1]["tokens"]}
+                        "mem_gb": (torch.cuda.max_memory_allocated() - base_mem) / 1e9, "tokens": runs[-1]["tokens"]}
     return out
 
 
@@ -110,12 +107,13 @@ if __name__ == "__main__":
             continue
         n += 1; rec = {"kwargs": kw, "t": time.time()}
         try:
+            torch._dynamo.reset(); torch.cuda.empty_cache(); base_mem = torch.cuda.memory_allocated()
             eng = Engine(path, **kw)
             ok, why = correctness(eng, wl, ref); rec["correct"] = ok; rec["why"] = why
             if not ok:   # for the record only (never promoted): 1-rep speed screen of the rejected candidate
-                rec["screen_rejected"] = {k_: statistics.median(v["tps"]) for k_, v in screen(eng, wl, 1).items()}
+                rec["screen_rejected"] = {k_: statistics.median(v["tps"]) for k_, v in screen(eng, wl, 1, base_mem).items()}
             if ok:
-                rec["screen"] = screen(eng, wl, a.reps); rec["geomean"] = geo(rec["screen"]); rec["spread"] = spread(rec["screen"])
+                rec["screen"] = screen(eng, wl, a.reps, base_mem); rec["geomean"] = geo(rec["screen"]); rec["spread"] = spread(rec["screen"])
                 inc = led["incumbent"]; checks = {}
                 if inc:
                     I = led["candidates"][inc]["screen"]

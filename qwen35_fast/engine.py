@@ -343,8 +343,9 @@ class Engine:
 
     # ---------------------------------------------------------------- steps
     @torch.no_grad()
-    def prefill(self, ids):
-        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending)."""
+    def prefill(self, ids, on_first_token=None):
+        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending).
+        on_first_token(g) is called right after the main-model argmax (before MTP drafting) for TTFT accounting."""
         self.reset()
         T = len(ids)
         tokens = torch.tensor(ids, device=self.dev)
@@ -353,6 +354,8 @@ class Engine:
         self.last_hn = hn[-1:]
         g = self._argmax(hn[-1:])
         self.n.fill_(T); self.pending.copy_(g[0])
+        if on_first_token is not None:
+            on_first_token(g)          # host sync here: first token available -> TTFT boundary
         if self.spec_k > 0:
             hid = hn if self.mtp_hidden == "post_norm" else hp
             # MTP over the whole prompt: inputs (h_i, t_{i+1}) for i < T-1, and (h_{T-1}, g) for the last row
@@ -460,10 +463,11 @@ class Engine:
             self.ensure_graph()   # one-time startup cost, excluded from timing
         torch.cuda.synchronize()
         t0 = time.perf_counter()
-        first = self.prefill(ids)
-        ev_first = torch.cuda.Event(enable_timing=True); ev_first.record()
-        first_tok = first.item()  # sync: first token complete
-        t_first = time.perf_counter()
+        ft = {}
+        def on_first(g):
+            ft["tok"] = g.item(); ft["t"] = time.perf_counter()   # sync: first token complete on host
+        self.prefill(ids, on_first_token=on_first)
+        first_tok, t_first = ft["tok"], ft["t"]
         out = [first_tok]
         T = self.spec_k + 1
         host = torch.empty(T + 1, dtype=torch.long, pin_memory=True)

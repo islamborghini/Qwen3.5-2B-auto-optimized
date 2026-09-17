@@ -6,3 +6,4 @@ results/traces/
 *.safetensors
 .env
 results/trace_*.json
+.claude/

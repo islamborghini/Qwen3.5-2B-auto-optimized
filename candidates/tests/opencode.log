@@ -1,0 +1,409 @@
+[0m
+> build · deepseek-v4.1-flash
+[0m
+[0m→ [0mRead candidates/tests/TASK.md
+[0m→ [0mRead qwen35_fast/engine.py
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj && ls -la /Users/islam/fun_fable_proj/tests 2>/dev/null; ls -la /Users/islam/fun_fable_proj/candidates/tests
+total 64
+drwxr-xr-x@  14 islam  staff    448 Sep 17 00:45 .
+drwxr-x---+ 264 islam  staff   8448 Sep 17 00:46 ..
+drwxr-xr-x@   7 islam  staff    224 Sep 16 23:45 .cache
+drwxr-xr-x@   3 islam  staff     96 Sep 17 00:45 .claude
+drwxr-xr-x@  15 islam  staff    480 Sep 17 00:45 .git
+-rw-r--r--@   1 islam  staff     90 Sep 16 23:26 .gitignore
+drwxr-xr-x@   8 islam  staff    256 Sep 16 22:33 .venv
+drwxr-xr-x@  20 islam  staff    640 Sep 17 00:33 bench
+drwxr-xr-x@   7 islam  staff    224 Sep 17 00:47 candidates
+-rw-r--r--@   1 islam  staff   5462 Sep 17 00:42 LEDGER.md
+drwxr-xr-x@   6 islam  staff    192 Sep 16 23:24 qwen35_fast
+-rw-r--r--@   1 islam  staff  12496 Sep 17 00:42 README.md
+-rw-r--r--@   1 islam  staff    468 Sep 16 23:45 requirements.txt
+drwxr-xr-x@  28 islam  staff    896 Sep 17 00:45 results
+total 16
+drwxr-xr-x@ 4 islam  staff   128 Sep 17 00:47 .
+drwxr-xr-x@ 7 islam  staff   224 Sep 17 00:47 ..
+-rw-r--r--@ 1 islam  staff   122 Sep 17 00:47 opencode.log
+-rw-r--r--@ 1 islam  staff  1378 Sep 17 00:47 TASK.md
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj/bench /Users/islam/fun_fable_proj/qwen35_fast /Users/islam/fun_fable_proj/results
+/Users/islam/fun_fable_proj/bench:
+total 1328
+drwxr-xr-x@  4 islam  staff     128 Sep 16 23:44 __pycache__
+drwxr-xr-x@ 20 islam  staff     640 Sep 17 00:33 .
+drwxr-xr-x@ 14 islam  staff     448 Sep 17 00:45 ..
+-rw-r--r--@  1 islam  staff    2076 Sep 16 22:56 common.py
+-rw-r--r--@  1 islam  staff    8414 Sep 16 23:43 evaluate.py
+-rw-r--r--@  1 islam  staff    6611 Sep 16 22:49 feasibility.py
+-rw-r--r--@  1 islam  staff    6564 Sep 17 00:41 fill_results.py
+-rw-r--r--@  1 islam  staff    3872 Sep 16 23:45 ifeval.py
+-rw-r--r--@  1 islam  staff    8603 Sep 17 00:42 optimize.py
+-rw-r--r--@  1 islam  staff    2905 Sep 16 23:15 profile_step.py
+-rw-r--r--@  1 islam  staff    3302 Sep 16 23:08 report.py
+-rw-r--r--@  1 islam  staff     544 Sep 16 23:43 run_baselines.py
+-rw-r--r--@  1 islam  staff    4319 Sep 16 23:19 run_custom.py
+-rw-r--r--@  1 islam  staff    1328 Sep 16 23:54 run_final.py
+-rw-r--r--@  1 islam  staff    1129 Sep 17 00:02 run_final2.py
+-rw-r--r--@  1 islam  staff    2998 Sep 16 23:32 run_opt.py
+-rw-r--r--@  1 islam  staff     214 Sep 17 00:33 run_opt2.py
+-rw-r--r--@  1 islam  staff    1878 Sep 16 23:43 session.py
+-rw-r--r--@  1 islam  staff  579738 Sep 16 22:44 workloads.json
+-rw-r--r--@  1 islam  staff    4523 Sep 16 22:44 workloads.py
+
+/Users/islam/fun_fable_proj/qwen35_fast:
+total 88
+drwxr-xr-x@  3 islam  staff     96 Sep 16 23:27 __pycache__
+drwxr-xr-x@  6 islam  staff    192 Sep 16 23:24 .
+drwxr-xr-x@ 14 islam  staff    448 Sep 17 00:45 ..
+-rw-r--r--@  1 islam  staff  26808 Sep 17 00:47 engine.py
+-rw-r--r--@  1 islam  staff   8519 Sep 17 00:39 gemv.py
+-rw-r--r--@  1 islam  staff    700 Sep 16 23:01 hf_wrapper.py
+
+/Users/islam/fun_fable_proj/results:
+total 43824
+drwxr-xr-x@ 28 islam  staff       896 Sep 17 00:45 .
+drwxr-xr-x@ 14 islam  staff       448 Sep 17 00:45 ..
+-rw-r--r--@  1 islam  staff     28099 Sep 16 23:24 custom_screen.json
+-rw-r--r--@  1 islam  staff     13635 Sep 16 23:12 custom_screen.log
+-rw-r--r--@  1 islam  staff     16511 Sep 16 23:24 custom_screen3.log
+-rw-r--r--@  1 islam  staff     12832 Sep 16 23:31 eval_baselines_crash.log
+-rw-r--r--@  1 islam  staff   1021847 Sep 17 00:06 eval_baselines_full_dev.json
+-rw-r--r--@  1 islam  staff    137365 Sep 17 00:06 eval_baselines.log
+-rw-r--r--@  1 islam  staff    613793 Sep 17 00:39 eval_final_full_dev.json
+-rw-r--r--@  1 islam  staff    614727 Sep 17 00:39 eval_final_heldout_heldout.json
+-rw-r--r--@  1 islam  staff     84452 Sep 17 00:06 eval_hfcompile_full_dev.json
+-rw-r--r--@  1 islam  staff     16026 Sep 16 22:59 feasibility.json
+-rw-r--r--@  1 islam  staff    156952 Sep 16 22:59 feasibility.log
+-rw-r--r--@  1 islam  staff      9448 Sep 17 00:02 final3_optimize_gate.log
+-rw-r--r--@  1 islam  staff    194579 Sep 17 00:39 ifeval_custom_k0.json
+-rw-r--r--@  1 islam  staff    191254 Sep 17 00:39 ifeval_custom_k3.json
+-rw-r--r--@  1 islam  staff    203407 Sep 17 00:39 ifeval_hf.json
+-rw-r--r--@  1 islam  staff     99658 Sep 17 00:45 opt_ledger.json
+-rw-r--r--@  1 islam  staff     15789 Sep 16 23:19 profile_step.json
+-rw-r--r--@  1 islam  staff     10400 Sep 16 23:19 profile_step.log
+-rw-r--r--@  1 islam  staff      7193 Sep 17 00:41 RESULTS.md
+-rw-r--r--@  1 islam  staff      9448 Sep 17 00:02 run_final.log
+-rw-r--r--@  1 islam  staff    115816 Sep 17 00:39 run_final2.log
+-rw-r--r--@  1 islam  staff     13764 Sep 16 23:34 run_opt.json
+-rw-r--r--@  1 islam  staff      5909 Sep 16 23:34 run_opt.log
+-rw-r--r--@  1 islam  staff     72283 Sep 17 00:45 run_opt2.log
+-rw-r--r--@  1 islam  staff      8539 Sep 17 00:47 run_opt3.log
+-rw-r--r--@  1 islam  staff  18567399 Sep 16 23:19 trace_k0.json
+[0m
+[0m$ [0mfind /Users/islam/fun_fable_proj -name "test_*.py" -o -name "*_test.py" | grep -v .venv
+(no output)
+[0m
+[0m→ [0mRead bench/common.py
+[0m→ [0mRead bench/workloads.py
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj/candidates; cat /Users/islam/fun_fable_proj/candidates/tests/opencode.log; ls -la /Users/islam/fun_fable_proj/candidates/tests
+total 48
+drwxr-xr-x@  7 islam  staff    224 Sep 17 00:47 .
+drwxr-xr-x@ 14 islam  staff    448 Sep 17 00:45 ..
+-rw-r--r--@  1 islam  staff  24357 Sep 17 00:33 engine_v1_backup.py
+drwxr-xr-x@  4 islam  staff    128 Sep 16 23:20 gemv
+drwxr-xr-x@  4 islam  staff    128 Sep 17 00:33 gemv2
+drwxr-xr-x@  6 islam  staff    192 Sep 16 23:17 review1
+drwxr-xr-x@  4 islam  staff    128 Sep 17 00:47 tests
+[0m
+> build · deepseek-v4.1-flash
+[0m
+[0m→ [0mRead candidates/tests/TASK.md
+[0m→ [0mRead qwen35_fast/engine.py
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj && ls -la /Users/islam/fun_fable_proj/tests 2>/dev/null; ls -la /Users/islam/fun_fable_proj/candidates/tests
+total 64
+drwxr-xr-x@  14 islam  staff    448 Sep 17 00:45 .
+drwxr-x---+ 264 islam  staff   8448 Sep 17 00:46 ..
+drwxr-xr-x@   7 islam  staff    224 Sep 16 23:45 .cache
+drwxr-xr-x@   3 islam  staff     96 Sep 17 00:45 .claude
+drwxr-xr-x@  15 islam  staff    480 Sep 17 00:45 .git
+-rw-r--r--@   1 islam  staff     90 Sep 16 23:26 .gitignore
+drwxr-xr-x@   8 islam  staff    256 Sep 16 22:33 .venv
+drwxr-xr-x@  20 islam  staff    640 Sep 17 00:33 bench
+drwxr-xr-x@   7 islam  staff    224 Sep 17 00:47 candidates
+-rw-r--r--@   1 islam  staff   5462 Sep 17 00:42 LEDGER.md
+drwxr-xr-x@   6 islam  staff    192 Sep 16 23:24 qwen35_fast
+-rw-r--r--@   1 islam  staff  12496 Sep 17 00:42 README.md
+-rw-r--r--@   1 islam  staff    468 Sep 16 23:45 requirements.txt
+drwxr-xr-x@  28 islam  staff    896 Sep 17 00:45 results
+total 16
+drwxr-xr-x@ 4 islam  staff   128 Sep 17 00:47 .
+drwxr-xr-x@ 7 islam  staff   224 Sep 17 00:47 ..
+-rw-r--r--@ 1 islam  staff   122 Sep 17 00:47 opencode.log
+-rw-r--r--@ 1 islam  staff  1378 Sep 17 00:47 TASK.md
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj/bench /Users/islam/fun_fable_proj/qwen35_fast /Users/islam/fun_fable_proj/results
+/Users/islam/fun_fable_proj/bench:
+total 1328
+drwxr-xr-x@  4 islam  staff     128 Sep 16 23:44 __pycache__
+drwxr-xr-x@ 20 islam  staff     640 Sep 17 00:33 .
+drwxr-xr-x@ 14 islam  staff     448 Sep 17 00:45 ..
+-rw-r--r--@  1 islam  staff    2076 Sep 16 22:56 common.py
+-rw-r--r--@  1 islam  staff    8414 Sep 16 23:43 evaluate.py
+-rw-r--r--@  1 islam  staff    6611 Sep 16 22:49 feasibility.py
+-rw-r--r--@  1 islam  staff    6564 Sep 17 00:41 fill_results.py
+-rw-r--r--@  1 islam  staff    3872 Sep 16 23:45 ifeval.py
+-rw-r--r--@  1 islam  staff    8603 Sep 17 00:42 optimize.py
+-rw-r--r--@  1 islam  staff    2905 Sep 16 23:15 profile_step.py
+-rw-r--r--@  1 islam  staff    3302 Sep 16 23:08 report.py
+-rw-r--r--@  1 islam  staff     544 Sep 16 23:43 run_baselines.py
+-rw-r--r--@  1 islam  staff    4319 Sep 16 23:19 run_custom.py
+-rw-r--r--@  1 islam  staff    1328 Sep 16 23:54 run_final.py
+-rw-r--r--@  1 islam  staff    1129 Sep 17 00:02 run_final2.py
+-rw-r--r--@  1 islam  staff    2998 Sep 16 23:32 run_opt.py
+-rw-r--r--@  1 islam  staff     214 Sep 17 00:33 run_opt2.py
+-rw-r--r--@  1 islam  staff    1878 Sep 16 23:43 session.py
+-rw-r--r--@  1 islam  staff  579738 Sep 16 22:44 workloads.json
+-rw-r--r--@  1 islam  staff    4523 Sep 16 22:44 workloads.py
+
+/Users/islam/fun_fable_proj/qwen35_fast:
+total 88
+drwxr-xr-x@  3 islam  staff     96 Sep 16 23:27 __pycache__
+drwxr-xr-x@  6 islam  staff    192 Sep 16 23:24 .
+drwxr-xr-x@ 14 islam  staff    448 Sep 17 00:45 ..
+-rw-r--r--@  1 islam  staff  26808 Sep 17 00:47 engine.py
+-rw-r--r--@  1 islam  staff   8519 Sep 17 00:39 gemv.py
+-rw-r--r--@  1 islam  staff    700 Sep 16 23:01 hf_wrapper.py
+
+/Users/islam/fun_fable_proj/results:
+total 43824
+drwxr-xr-x@ 28 islam  staff       896 Sep 17 00:45 .
+drwxr-xr-x@ 14 islam  staff       448 Sep 17 00:45 ..
+-rw-r--r--@  1 islam  staff     28099 Sep 16 23:24 custom_screen.json
+-rw-r--r--@  1 islam  staff     13635 Sep 16 23:12 custom_screen.log
+-rw-r--r--@  1 islam  staff     16511 Sep 16 23:24 custom_screen3.log
+-rw-r--r--@  1 islam  staff     12832 Sep 16 23:31 eval_baselines_crash.log
+-rw-r--r--@  1 islam  staff   1021847 Sep 17 00:06 eval_baselines_full_dev.json
+-rw-r--r--@  1 islam  staff    137365 Sep 17 00:06 eval_baselines.log
+-rw-r--r--@  1 islam  staff    613793 Sep 17 00:39 eval_final_full_dev.json
+-rw-r--r--@  1 islam  staff    614727 Sep 17 00:39 eval_final_heldout_heldout.json
+-rw-r--r--@  1 islam  staff     84452 Sep 17 00:06 eval_hfcompile_full_dev.json
+-rw-r--r--@  1 islam  staff     16026 Sep 16 22:59 feasibility.json
+-rw-r--r--@  1 islam  staff    156952 Sep 16 22:59 feasibility.log
+-rw-r--r--@  1 islam  staff      9448 Sep 17 00:02 final3_optimize_gate.log
+-rw-r--r--@  1 islam  staff    194579 Sep 17 00:39 ifeval_custom_k0.json
+-rw-r--r--@  1 islam  staff    191254 Sep 17 00:39 ifeval_custom_k3.json
+-rw-r--r--@  1 islam  staff    203407 Sep 17 00:39 ifeval_hf.json
+-rw-r--r--@  1 islam  staff     99658 Sep 17 00:45 opt_ledger.json
+-rw-r--r--@  1 islam  staff     15789 Sep 16 23:19 profile_step.json
+-rw-r--r--@  1 islam  staff     10400 Sep 16 23:19 profile_step.log
+-rw-r--r--@  1 islam  staff      7193 Sep 17 00:41 RESULTS.md
+-rw-r--r--@  1 islam  staff      9448 Sep 17 00:02 run_final.log
+-rw-r--r--@  1 islam  staff    115816 Sep 17 00:39 run_final2.log
+-rw-r--r--@  1 islam  staff     13764 Sep 16 23:34 run_opt.json
+-rw-r--r--@  1 islam  staff      5909 Sep 16 23:34 run_opt.log
+-rw-r--r--@  1 islam  staff     72283 Sep 17 00:45 run_opt2.log
+-rw-r--r--@  1 islam  staff      8539 Sep 17 00:47 run_opt3.log
+-rw-r--r--@  1 islam  staff  18567399 Sep 16 23:19 trace_k0.json
+[0m
+[0m$ [0mfind /Users/islam/fun_fable_proj -name "test_*.py" -o -name "*_test.py" | grep -v .venv
+(no output)
+[0m
+[0m→ [0mRead bench/common.py
+[0m→ [0mRead bench/workloads.py
+total 24
+drwxr-xr-x@ 4 islam  staff   128 Sep 17 00:47 .
+drwxr-xr-x@ 7 islam  staff   224 Sep 17 00:47 ..
+-rw-r--r--@ 1 islam  staff  5255 Sep 17 00:47 opencode.log
+-rw-r--r--@ 1 islam  staff  1378 Sep 17 00:47 TASK.md
+[0m
+[0m$ [0mfind /Users/islam/fun_fable_proj -maxdepth 2 -name "pyproject.toml" -o -maxdepth 2 -name "pytest.ini" -o -maxdepth 2 -name "setup.cfg" -o -maxdepth 2 -name "conftest.py" -o -maxdepth 2 -name "tox.ini" | grep -v .venv
+(no output)
+[0m
+[0m$ [0mls -R /Users/islam/fun_fable_proj/candidates/review1 /Users/islam/fun_fable_proj/candidates/gemv /Users/islam/fun_fable_proj/candidates/gemv2 2>/dev/null
+/Users/islam/fun_fable_proj/candidates/gemv:
+opencode.log
+TASK.md
+
+/Users/islam/fun_fable_proj/candidates/gemv2:
+opencode.log
+TASK.md
+
+/Users/islam/fun_fable_proj/candidates/review1:
+hf_reference_modeling_qwen3_5.py
+opencode.log
+REVIEW.md
+TASK.md
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && grep -rn "Engine(" bench/*.py | head -40
+bench/evaluate.py:79:        t = time.perf_counter(); self.e = Engine(model_path(), spec_k=spec_k, **kw)
+bench/evaluate.py:93:    if name == "hf_eager": return HFEngine()
+bench/evaluate.py:95:        e = HFEngine(compile=True); e.name = "hf_compile"; return e
+bench/evaluate.py:96:    if name == "vllm_plain": return VLLMEngine(0)
+bench/evaluate.py:97:    if name.startswith("vllm_mtp"): return VLLMEngine(int(name[8:]))
+bench/evaluate.py:98:    if name.startswith("custom_k"): return CustomEngine(int(name[8:]))
+bench/evaluate.py:99:    if name == "custom": return CustomEngine(3)
+bench/ifeval.py:57:        eng = Engine(model_path(), spec_k=int(a.engine.split("_k")[1]), max_len=4096, **kw)
+bench/optimize.py:113:            eng = Engine(path, **kw)
+bench/profile_step.py:19:    eng = Engine(path, spec_k=k)
+bench/run_custom.py:41:        t = time.perf_counter(); eng = Engine(path, spec_k=k, mtp_hidden=hidden, compile_blocks=bool(comp)); load_s = time.perf_counter() - t
+bench/run_opt.py:28:            eng = Engine(path, spec_k=k, compile_blocks=True, use_gemv=use_gemv)
+[0m
+[0m→ [0mRead bench/evaluate.py[90m [offset=60, limit=70][0m
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && .venv/bin/python -c "import sys, torch; print(sys.version); print(torch.__version__); print('cuda', torch.cuda.is_available())" 2>&1 | head; .venv/bin/python -m pytest --version 2>&1 | head
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'torch'
+/Users/islam/fun_fable_proj/.venv/bin/python: No module named pytest
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && cat requirements.txt && ls .venv/lib/*/site-packages 2>/dev/null | head -30; which python3; python3 -c "import torch, pytest; print(torch.__version__, pytest.__version__)" 2>&1 | tail -2
+# Pinned environment used inside the Modal H100 image (bench/session.py). Local tooling only needs modal + transformers (tokenizer).
+vllm==0.29.0            # pulls torch==2.13.0+cu130, triton 3.6.x, transformers>=5.10.4 (5.17.0 resolved)
+flash-linear-attention==0.5.2   # fla-core 0.5.2: chunk/fused-recurrent gated delta rule Triton kernels
+accelerate==1.15.0
+hf_transfer==0.1.9
+lm-eval==0.4.13
+datasets
+langdetect
+immutabledict
+nltk
+modal==1.5.5            # local
+__pycache__
+_virtualenv.pth
+_virtualenv.py
+_yaml
+aiohappyeyeballs
+aiohappyeyeballs-2.7.1.dist-info
+aiohttp
+aiohttp-3.14.3.dist-info
+aiosignal
+aiosignal-1.4.0.dist-info
+annotated_doc
+annotated_doc-0.0.5.dist-info
+anyio
+anyio-4.15.1.dist-info
+attr
+attrs
+attrs-26.1.0.dist-info
+cbor2
+cbor2-6.1.4.dist-info
+certifi
+certifi-2026.7.22.dist-info
+certifi-stubs
+click
+click-8.5.0.dist-info
+filelock
+filelock-4.0.0.dist-info
+frozenlist
+frozenlist-1.8.0.dist-info
+fsspec
+fsspec-2026.7.0.dist-info
+/opt/homebrew/bin/python3
+    ^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'torch'
+[0m
+[0m← [0mWrite tests/test_spec_rollback.py
+Wrote file successfully.
+[0m
+I've read the engine and supporting code. Now creating the test file.
+[0m$ [0mcd /Users/islam/fun_fable_proj && python3 -m py_compile tests/test_spec_rollback.py && echo COMPILE_OK && wc -l tests/test_spec_rollback.py
+COMPILE_OK
+      80 tests/test_spec_rollback.py
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && git status --short && git check-ignore -v tests/test_spec_rollback.py 2>/dev/null; echo "---"; cat .gitignore
+M qwen35_fast/engine.py
+ M results/run_opt2.log
+ M results/run_opt3.log
+?? .claude/
+?? candidates/tests/
+?? results/opt_ledger.json
+?? tests/
+---
+.venv/
+.cache/
+__pycache__/
+*.pyc
+results/traces/
+*.safetensors
+.env
+results/trace_*.json
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && git diff --stat qwen35_fast/engine.py && git diff qwen35_fast/engine.py | head -60
+qwen35_fast/engine.py | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+diff --git a/qwen35_fast/engine.py b/qwen35_fast/engine.py
+index a651112..b55d784 100644
+--- a/qwen35_fast/engine.py
++++ b/qwen35_fast/engine.py
+@@ -343,8 +343,9 @@ class Engine:
+ 
+     # ---------------------------------------------------------------- steps
+     @torch.no_grad()
+-    def prefill(self, ids):
+-        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending)."""
++    def prefill(self, ids, on_first_token=None):
++        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending).
++        on_first_token(g) is called right after the main-model argmax (before MTP drafting) for TTFT accounting."""
+         self.reset()
+         T = len(ids)
+         tokens = torch.tensor(ids, device=self.dev)
+@@ -353,6 +354,8 @@ class Engine:
+         self.last_hn = hn[-1:]
+         g = self._argmax(hn[-1:])
+         self.n.fill_(T); self.pending.copy_(g[0])
++        if on_first_token is not None:
++            on_first_token(g)          # host sync here: first token available -> TTFT boundary
+         if self.spec_k > 0:
+             hid = hn if self.mtp_hidden == "post_norm" else hp
+             # MTP over the whole prompt: inputs (h_i, t_{i+1}) for i < T-1, and (h_{T-1}, g) for the last row
+@@ -460,10 +463,11 @@ class Engine:
+             self.ensure_graph()   # one-time startup cost, excluded from timing
+         torch.cuda.synchronize()
+         t0 = time.perf_counter()
+-        first = self.prefill(ids)
+-        ev_first = torch.cuda.Event(enable_timing=True); ev_first.record()
+-        first_tok = first.item()  # sync: first token complete
+-        t_first = time.perf_counter()
++        ft = {}
++        def on_first(g):
++            ft["tok"] = g.item(); ft["t"] = time.perf_counter()   # sync: first token complete on host
++        self.prefill(ids, on_first_token=on_first)
++        first_tok, t_first = ft["tok"], ft["t"]
+         out = [first_tok]
+         T = self.spec_k + 1
+         host = torch.empty(T + 1, dtype=torch.long, pin_memory=True)
+[0m
+[0m→ [0mRead tests/test_spec_rollback.py
+[0m
+[0m← [0mEdit tests/test_spec_rollback.py
+Index: /Users/islam/fun_fable_proj/tests/test_spec_rollback.py
+===================================================================
+--- /Users/islam/fun_fable_proj/tests/test_spec_rollback.py
++++ /Users/islam/fun_fable_proj/tests/test_spec_rollback.py
+@@ -65,14 +65,16 @@
+ e3, _ = engines
+ e3.prefill(IDS)
+ T = e3.spec_k + 1
+ tokens = torch.cat([e3.pending.reshape(1), e3.drafts])
++init_rec = e3.rec_state.clone()
+ save = []
+ e3._body(tokens, e3.n + e3.arangeT, prefill=False, save=save)
+ assert len(save) > 0
+ refs = []
+-for _, rec0, q, k, v, g, beta, xc_all in save:
+-    _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=rec0.clone(),
++for i, (_, _, q, k, v, g, beta, xc_all) in enumerate(save):
++    assert torch.equal(e3.rec_state[i], init_rec[i])          # the forward must not touch state
++    _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=init_rec[i],
+                                              output_final_state=True, use_qk_l2norm_in_kernel=True)
+     refs.append((st, xc_all))
+ e3._commit(save, T)
+ for i, (st, xc_all) in enumerate(refs):
+
+[0m
+Let me strengthen the `_commit` test by snapshotting the initial state before the forward, so the reference genuinely starts from the pre-step state.
+[0m$ [0mcd /Users/islam/fun_fable_proj && python3 -m py_compile tests/test_spec_rollback.py && echo COMPILE_OK && wc -l tests/test_spec_rollback.py
+COMPILE_OK
+      82 tests/test_spec_rollback.py
+[0m
+[0m→ [0mRead tests/test_spec_rollback.py[90m [offset=63, limit=25][0m
+Created `tests/test_spec_rollback.py` (82 lines), implementing the spec:
+
+- Module-level `pytest.skip` when CUDA is unavailable, plus `sys.path` setup so `bench`/`qwen35_fast` import when run from the repo root.
+- Module-scoped fixture builds `Engine(model_path(), spec_k=3)` and `Engine(model_path(), spec_k=0)`.
+- `test_spec_rollback_matches_sequential`: for `a in 0..3`, prefills `dev-prose-128` on both engines, derives the true next tokens `g_0..g_a` by stepping the k=0 reference, scripts `e3.drafts` as `a` true tokens + one wrong token, runs `_step_impl()`, and asserts `step_acc == a`, equal `n`/`pending`, `rec_state` allclose (atol 1e-5/rel 1e-4), `conv_state` exactly equal, and KV rows `[0:n]` allclose across main attention layers. Then a T=1-equivalent step (all-wrong drafts → `step_acc == 0`) checks next-token logits via `last_hn @ embed.T` argmax-match.
+- `test_commit_full_recompute`: snapshots initial `rec_state`, runs a T-token `_body` with `save`, references `fused_recurrent_gated_delta_rule` per layer from that snapshot, calls `_commit(save, T)`, and asserts bit-identical `rec_state` and `conv_state`.
+
+No other files were modified. Note: cannot execute here (no `torch`/CUDA in the local venv), but it compiles cleanly.

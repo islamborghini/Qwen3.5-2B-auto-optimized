@@ -38,3 +38,5 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | opt2: optimize loop with layer-level compile candidates (k0/k2/k3/k4 x layer/layer_at) | est ~.0 | launched (user authorized continued spend) |
 | 2026-09-17 | Modal H100 | final #4 done: custom_k0 0.58x / custom_k3 0.89x of vllm_mtp3 (dev, same session); heldout 0.57x/0.86x; IFEval hf .61 / k0 .64 / k3 .62 | ~.2 | results/RESULTS.md |
 | 2026-09-17 | Modal H100 | opt3: ep layer-compile candidates, k4, gemv v2 (DeepSeek) | est ~.0 | launched |
+| 2026-09-17 | Modal H100 | opt3 result: k3_compile 614 geomean best; layer-compile (ep) fails gate; gemv2 slower; mem gate was broken (process-wide peak), TTFT included MTP prefill+drafts -> fixed | ~.0 | results/opt_ledger_round3.json |
+| 2026-09-17 | Modal H100 | opt4: rerun loop with fixed mem/TTFT accounting (k0/k2/k3/k4 compile) | est ~/bin/zsh.5 | launched |
