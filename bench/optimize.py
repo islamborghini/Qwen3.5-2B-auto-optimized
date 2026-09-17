@@ -18,12 +18,13 @@ CANDIDATES = {  # name -> Engine kwargs (order = priority). gemv variants droppe
     "k0_compile": dict(spec_k=0, compile_blocks=True),   # except on lm_head (+7%), see LEDGER.md
     "k2_compile": dict(spec_k=2, compile_blocks=True),
     "k3_compile": dict(spec_k=3, compile_blocks=True),
-    "k0_layer": dict(spec_k=0, compile_mode="layer"),
-    "k0_layer_at": dict(spec_k=0, compile_mode="layer_at"),
-    "k3_layer_at": dict(spec_k=3, compile_mode="layer_at"),
-    "k3_layer": dict(spec_k=3, compile_mode="layer"),
-    "k2_layer_at": dict(spec_k=2, compile_mode="layer_at"),
-    "k4_layer_at": dict(spec_k=4, compile_mode="layer_at"),
+    "k0_layer_ep": dict(spec_k=0, compile_mode="layer"),        # ep = emulate_precision_casts (eager rounding)
+    "k0_layer_at_ep": dict(spec_k=0, compile_mode="layer_at"),
+    "k2_layer_at_ep": dict(spec_k=2, compile_mode="layer_at"),
+    "k3_layer_at_ep": dict(spec_k=3, compile_mode="layer_at"),
+    "k4_compile": dict(spec_k=4, compile_blocks=True),
+    "k2_compile_gemv2": dict(spec_k=2, compile_blocks=True, use_gemv=True),   # DeepSeek GEMV v2, per-shape selection
+    "k3_compile_gemv2": dict(spec_k=3, compile_blocks=True, use_gemv=True),
 }
 LEDGER = os.path.join(OUT, "opt_ledger.json")
 
@@ -77,7 +78,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--max_candidates", type=int, default=4)
     ap.add_argument("--max_minutes", type=float, default=20); ap.add_argument("--reps", type=int, default=2)
     a = ap.parse_args(); t0 = time.time()
-    led = json.load(open(LEDGER)) if os.path.exists(LEDGER) else {"candidates": {}, "incumbent": None}
+    seed = os.path.join(os.path.dirname(os.path.abspath(__file__)), "opt_ledger_seed.json")   # committed copy -> resumable across sessions
+    led = json.load(open(LEDGER)) if os.path.exists(LEDGER) else (json.load(open(seed)) if os.path.exists(seed) else {"candidates": {}, "incumbent": None})
     path = model_path(); wl = workloads("dev", [512, 2048])
     hf = load_hf(); ref = {}
     for w in wl:
@@ -110,6 +112,8 @@ if __name__ == "__main__":
         try:
             eng = Engine(path, **kw)
             ok, why = correctness(eng, wl, ref); rec["correct"] = ok; rec["why"] = why
+            if not ok:   # for the record only (never promoted): 1-rep speed screen of the rejected candidate
+                rec["screen_rejected"] = {k_: statistics.median(v["tps"]) for k_, v in screen(eng, wl, 1).items()}
             if ok:
                 rec["screen"] = screen(eng, wl, a.reps); rec["geomean"] = geo(rec["screen"]); rec["spread"] = spread(rec["screen"])
                 inc = led["incumbent"]; checks = {}

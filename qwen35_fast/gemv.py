@@ -1,43 +1,48 @@
 """gemv.py - batch-1 bf16 decode GEMV, y = x @ W.T, tuned for H100 HBM3 bandwidth.
 
-    from qwen35_fast.gemv import gemv, test, bench
     y = gemv(x, W)        # x:[M,K] bf16, W:[N,K] bf16 (nn.Linear layout), y:[M,N] bf16; M in 1..4
     test()                # GPU: correctness vs torch.matmul, all shapes, M=1..4
     bench()               # GPU: achieved GB/s vs torch.matmul per shape
     bench(autotune=True)  # offline: sweep configs and print the best per shape
 
-W is streamed once over N blocks, coalesced along K (16-byte loads). When N*M cannot fill the GPU
-(e.g. N=32), SPLIT_K writes fp32 partials to a cached workspace and a tiny second kernel reduces
-them. Static (M,K,N) config table: no runtime autotune, no host syncs, no variable-size allocations.
+Classic (no tl.dot) skinny GEMV: each program owns BLOCK_N rows of W and streams K in BLOCK_K
+chunks with coalesced 16-byte loads; x is broadcast over the N rows and the K dot is a fp32
+tl.sum. The M<=4 x-rows share one W tile (W read once); grid = N/BLOCK_N keeps all SMs busy
+without tensor cores. When N*M cannot fill the GPU (N=32) SPLIT_K writes fp32 partials to a
+cached workspace that a tiny second kernel reduces. Static (M,K,N) config table + heuristic
+fallback: no runtime autotune, no host syncs, no variable-size allocations, CUDA-graph safe.
 """
 import torch
 import triton
 import triton.language as tl
 
+_MAX_TILE = 8192  # cap on BLOCK_M*BLOCK_N*BLOCK_K fp32 elements held live (register safety)
+
 
 @triton.jit
-def _gemv_kernel(
-    x_ptr, w_ptr, y_ptr, part_ptr,
-    M, N, K, stride_xm, stride_wn, stride_ym,
-    BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, BLOCK_K: tl.constexpr, SPLIT_K: tl.constexpr,
-):
+def _gemv_kernel(x_ptr, w_ptr, y_ptr, part_ptr, M, N, K, stride_xm, stride_wn, stride_ym,
+                 BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, BLOCK_K: tl.constexpr,
+                 SPLIT_K: tl.constexpr):
     pid_n = tl.program_id(0)
     pid_k = tl.program_id(1)
-    k_per_split = K // SPLIT_K
+    k_per = K // SPLIT_K
     offs_m = tl.arange(0, BLOCK_M)
     offs_n = pid_n * BLOCK_N + tl.arange(0, BLOCK_N)
     offs_k = tl.arange(0, BLOCK_K)
-    m_mask = offs_m[:, None] < M
-    n_mask = offs_n[:, None] < N
-    x_ptrs = x_ptr + offs_m[:, None] * stride_xm + (pid_k * k_per_split + offs_k)[None, :]
-    w_ptrs = w_ptr + offs_n[:, None] * stride_wn + (pid_k * k_per_split + offs_k)[None, :]
+    mmask = offs_m < M
+    nmask = offs_n < N
+    x_base = x_ptr + offs_m[:, None] * stride_xm
+    w_base = w_ptr + offs_n[:, None] * stride_wn
+    k_base = pid_k * k_per
     acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)
-    for k0 in range(0, k_per_split, BLOCK_K):
-        kmask = (k0 + offs_k) < k_per_split
-        x = tl.load(x_ptrs + k0, mask=m_mask & kmask[None, :], other=0.0)
-        w = tl.load(w_ptrs + k0, mask=n_mask & kmask[None, :], other=0.0)
-        acc += tl.dot(x, tl.trans(w))
-    out_mask = m_mask & (offs_n[None, :] < N)
+    for k0 in range(0, k_per, BLOCK_K):
+        kk = k_base + k0 + offs_k
+        kmask = (k0 + offs_k) < k_per
+        w = tl.load(w_base + kk[None, :], mask=nmask[:, None] & kmask[None, :], other=0.0)
+        x = tl.load(x_base + kk[None, :], mask=mmask[:, None] & kmask[None, :], other=0.0)
+        prod = x[:, None, :].to(tl.float32) * w[None, :, :].to(tl.float32)
+        acc += tl.sum(prod, axis=2)
+    out_mask = mmask[:, None] & nmask[None, :]
     if SPLIT_K == 1:
         tl.store(y_ptr + offs_m[:, None] * stride_ym + offs_n[None, :],
                  acc.to(tl.bfloat16), mask=out_mask)
@@ -47,69 +52,73 @@ def _gemv_kernel(
 
 
 @triton.jit
-def _reduce_kernel(part_ptr, y_ptr, M, N, stride_ym,
-                   BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, SPLIT_K: tl.constexpr):
+def _reduce_kernel(part_ptr, y_ptr, M, N, stride_ym, BLOCK_M: tl.constexpr,
+                   BLOCK_N: tl.constexpr, SPLIT_K: tl.constexpr):
     offs_n = tl.program_id(0) * BLOCK_N + tl.arange(0, BLOCK_N)
-    n_mask = offs_n < N
-    for m in tl.static_range(BLOCK_M):
-        mm = m < M
-        acc = tl.zeros((BLOCK_N,), dtype=tl.float32)
-        for s in tl.static_range(SPLIT_K):
-            acc += tl.load(part_ptr + m * (SPLIT_K * N) + s * N + offs_n,
-                           mask=n_mask & mm, other=0.0)
-        tl.store(y_ptr + m * stride_ym + offs_n, acc.to(tl.bfloat16), mask=n_mask & mm)
+    offs_m = tl.arange(0, BLOCK_M)
+    offs_s = tl.arange(0, SPLIT_K)
+    nmask = offs_n < N
+    mmask = offs_m < M
+    ptrs = (part_ptr + offs_m[:, None, None] * (SPLIT_K * N)
+            + offs_s[None, :, None] * N + offs_n[None, None, :])
+    part = tl.load(ptrs, mask=mmask[:, None, None] & nmask[None, None, :], other=0.0)
+    acc = tl.sum(part, axis=1)
+    tl.store(y_ptr + offs_m[:, None] * stride_ym + offs_n[None, :],
+             acc.to(tl.bfloat16), mask=mmask[:, None] & nmask[None, :])
 
 
 def _npow2(x):
-    p = 1
-    while p < x:
-        p *= 2
-    return p
+    return 1 << (x - 1).bit_length()
 
 
 # (K, N) -> (BLOCK_N, BLOCK_K, SPLIT_K, num_warps, num_stages)
-# Conservative tiles: 64x128 bf16 per stage = 16 KB, 3 stages; keeps well under the 228 KB SMEM limit.
-_BASE = {
-    (2048, 248320): (64, 128, 1, 4, 3),
-    (2048, 12288): (64, 128, 2, 4, 3),
-    (2048, 8224): (64, 128, 2, 4, 3),
-    (2048, 5120): (64, 128, 4, 4, 3),
-    (2048, 2048): (64, 128, 8, 4, 3),
-    (4096, 2048): (64, 128, 8, 4, 3),
-    (6144, 2048): (64, 128, 8, 4, 3),
-    (2048, 32): (32, 64, 32, 2, 2),
-}
-# Static table keyed by (M, K, N); M only affects row padding, so reuse the (K,N) entries.
+_BASE = {(2048, 248320): (16, 512, 1, 4, 3), (2048, 12288): (8, 512, 1, 4, 3),
+         (2048, 8224): (8, 512, 1, 4, 3), (2048, 5120): (8, 512, 1, 4, 3),
+         (2048, 2048): (8, 512, 2, 4, 3), (4096, 2048): (8, 512, 2, 4, 3),
+         (6144, 2048): (8, 512, 2, 4, 3), (2048, 32): (8, 128, 32, 4, 2)}
+# Static table keyed by (M, K, N); M only pads BLOCK_M, so reuse the (K, N) entries.
 _TABLE = {(m, k, n): c for m in (1, 2, 3, 4) for (k, n), c in _BASE.items()}
+
+
 def _heuristic(K, N):
-    bn = 64 if N > 64 else max(16, _npow2(N))
-    split = 1
-    while -(-N // bn) * split < 128 and split < 32 and K % (2 * split) == 0 and K // (2 * split) >= 64:
+    bn, bk, split = 8, 512, 1
+    while (N // bn) * split < 264 and split < 64 and K % (2 * split) == 0 and K // (2 * split) >= 64:
         split *= 2
-    return (bn, 128, split, 4, 3)
+    return (bn, bk, split, 4, 3)
+
+
 def _config(M, K, N):
     return _TABLE.get((M, K, N)) or _BASE.get((K, N)) or _heuristic(K, N)
+
+
 _WS = {}
+
+
 def _workspace(M, K, N, split, device):
     key = (M, K, N, split, str(device))
     if key not in _WS:
         _WS[key] = torch.empty((M, split, N), dtype=torch.float32, device=device)
     return _WS[key]
+
+
 def _run(x, W, cfg):
     M, K = x.shape
     N = W.shape[0]
     bn, bk, split, warps, stages = cfg
+    bm = _npow2(M)
+    while bm * bn * bk > _MAX_TILE and bk > 64:  # keep the reduce tile in registers
+        bk //= 2
     assert x.is_contiguous() and W.is_contiguous(), "gemv expects contiguous inputs"
     y = torch.empty((M, N), dtype=torch.bfloat16, device=x.device)
     part = y if split == 1 else _workspace(M, K, N, split, x.device)
-    _gemv_kernel[(-(-N // bn), split)](
+    _gemv_kernel[(triton.cdiv(N, bn), split)](
         x, W, y, part, M, N, K, x.stride(0), W.stride(0), y.stride(0),
-        BLOCK_M=16, BLOCK_N=bn, BLOCK_K=bk, SPLIT_K=split, num_warps=warps, num_stages=stages,
+        BLOCK_M=bm, BLOCK_N=bn, BLOCK_K=bk, SPLIT_K=split, num_warps=warps, num_stages=stages,
     )
     if split > 1:
-        rbn = min(1024, _npow2(N))
-        _reduce_kernel[(-(-N // rbn),)](part, y, M, N, y.stride(0),
-                                        BLOCK_M=_npow2(M), BLOCK_N=rbn, SPLIT_K=split, num_warps=4)
+        rbn = min(256, _npow2(N))
+        _reduce_kernel[(triton.cdiv(N, rbn),)](part, y, M, N, y.stride(0),
+                                               BLOCK_M=bm, BLOCK_N=rbn, SPLIT_K=split, num_warps=4)
     return y
 
 
@@ -123,6 +132,8 @@ def gemv(x, W):
 
 _SHAPES = [(2048, 8224), (2048, 12288), (6144, 2048), (2048, 5120),
            (2048, 2048), (4096, 2048), (2048, 248320), (2048, 32)]
+
+
 def _ulp_bf16(v):
     return torch.pow(2.0, torch.floor(torch.log2(v.abs().clamp_min(1e-30))) - 7)
 
@@ -142,7 +153,7 @@ def test():
             diff = (gemv(x, W).float() - ref).abs()
             tol = 2.0 * _ulp_bf16(ref) + 1e-3  # 2 bf16 ulps of reference magnitude, small floor
             bad += (diff > tol).sum().item()
-            print(f"K={K:6d} N={N:7d} M={M}  max|d|={diff.max().item():.4g}  "
+            print(f"K={K:6d} N={N:7d} M={M} max|d|={diff.max().item():.4g} "
                   f"worst={float((diff / tol).max()):.2f}x tol")
     assert bad == 0, f"{bad} element(s) exceeded the bf16 tolerance"
     print("test(): OK")
@@ -156,17 +167,17 @@ def _time(fn, iters=50, warmup=10):
     s.record()
     for _ in range(iters):
         fn()
-    e.record()
-    torch.cuda.synchronize()
+    e.record(); torch.cuda.synchronize()
     return s.elapsed_time(e) / iters
 
 
-_CANDS = [(bn, bk, sp) for bn in (32, 64, 128) for bk in (64, 128) for sp in (1, 2, 4, 8, 16)]
+_CANDS = [(bn, bk, sp) for bn in (4, 8, 16, 32) for bk in (128, 256, 512) for sp in (1, 2, 4, 8)]
+
+
 def _tune(x, W, nbytes, iters=30):
     M, K = x.shape
     N = W.shape[0]
-    ref = torch.matmul(x, W.t())
-    best = None
+    ref, best = torch.matmul(x, W.t()), None
     for bn, bk, sp in _CANDS:
         if bn > _npow2(N) or K % sp or K // sp < 16:
             continue
@@ -197,5 +208,5 @@ def bench(autotune=False):
             continue
         ours = nbytes / _time(lambda: gemv(x, W)) / 1e6
         torchgbs = nbytes / _time(lambda: torch.matmul(x, W.t())) / 1e6
-        print(f"K={K:6d} N={N:7d} M=1  cfg={_config(1, K, N)}  "
-              f"ours={ours:.1f} GB/s  torch={torchgbs:.1f} GB/s")
+        print(f"K={K:6d} N={N:7d} M=1 cfg={_config(1, K, N)} "
+              f"ours={ours:.1f} GB/s torch={torchgbs:.1f} GB/s")

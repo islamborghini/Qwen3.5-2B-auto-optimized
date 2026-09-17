@@ -36,3 +36,5 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | final #3: new gate results — HF noise floor 0.27-1.97; k0_compile ok (1.27); k2/k3 rejected: 2.50 > 2.47 (=2x floor 1.23) on structured-2048. Killed after gate to re-plan | ~$0.5 | results/final3_optimize_gate.log |
 | 2026-09-17 | Modal H100 | final #4 (lean): custom_k0 (official) + custom_k3 (reported) + vllm_mtp3, dev full + heldout, IFEval x3 | est ~$1.9 (over the $10 budget; see README costs) | launched |
 | 2026-09-17 | Modal H100 | opt2: optimize loop with layer-level compile candidates (k0/k2/k3/k4 x layer/layer_at) | est ~.0 | launched (user authorized continued spend) |
+| 2026-09-17 | Modal H100 | final #4 done: custom_k0 0.58x / custom_k3 0.89x of vllm_mtp3 (dev, same session); heldout 0.57x/0.86x; IFEval hf .61 / k0 .64 / k3 .62 | ~.2 | results/RESULTS.md |
+| 2026-09-17 | Modal H100 | opt3: ep layer-compile candidates, k4, gemv v2 (DeepSeek) | est ~.0 | launched |

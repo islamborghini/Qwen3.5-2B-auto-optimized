@@ -101,6 +101,8 @@ class Engine:
         self._layer_c = self._layer_dec
         if self.compile_mode in ("layer", "layer_at"):
             torch._dynamo.config.cache_size_limit = 64
+            import torch._inductor.config as icfg
+            icfg.emulate_precision_casts = True   # round intermediates exactly like eager bf16 (numerics == eager)
             mode = "max-autotune-no-cudagraphs" if self.compile_mode == "layer_at" else "default"
             self._layer_c = torch.compile(self._layer_dec, dynamic=False, mode=mode)
 

@@ -150,3 +150,383 @@ zsh:1: no matches found: --include=*.py
 /Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/integrations/gguf/utils.py
 /Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/integrations/gguf/kernels.py
 [0m
+[0m$ [0m/Users/islam/fun_fable_proj/.venv/bin/python -c "import triton, torch; print('triton', triton.__version__); print('torch', torch.__version__)" 2>&1 | head
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'triton'
+[0m
+[0m✱ [0mGrep "gemv|def bench|def test|autotune"[90m in bench/run_opt.py · 18 matches[0m
+[0m✱ [0mGrep "gemv"[90m in qwen35_fast/engine.py · 20 matches[0m
+Let me verify a few Triton semantics before writing, since there's no GPU here to test on.
+[0m◈ [0mParallel Web Search "triton language 3D tensor broadcasting newaxis tl.sum axis example"
+[0m◈ [0mParallel Web Search "triton tl.arange(0, 1) size 1 power of two allowed"
+[0m
+[0m← [0mWrite qwen35_fast/gemv.py
+Wrote file successfully.
+[0m
+No Triton installed here (and no GPU), so I'll write defensively against documented Triton semantics. Now writing the rewrite.
+[0m$ [0mcd /Users/islam/fun_fable_proj && /usr/bin/python3 -m py_compile qwen35_fast/gemv.py && echo "COMPILE OK" && wc -l qwen35_fast/gemv.py
+COMPILE OK
+     232 qwen35_fast/gemv.py
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [offset=95, limit=140][0m
+Over the ~200 line target. Let me compact it.
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -1,20 +1,17 @@
+ """gemv.py - batch-1 bf16 decode GEMV, y = x @ W.T, tuned for H100 HBM3 bandwidth.
+ 
+-    from qwen35_fast.gemv import gemv, test, bench
+     y = gemv(x, W)        # x:[M,K] bf16, W:[N,K] bf16 (nn.Linear layout), y:[M,N] bf16; M in 1..4
+     test()                # GPU: correctness vs torch.matmul, all shapes, M=1..4
+     bench()               # GPU: achieved GB/s vs torch.matmul per shape
+     bench(autotune=True)  # offline: sweep configs and print the best per shape
+ 
+-Classic (no tl.dot) skinny GEMV: each program owns BLOCK_N rows of W and streams K in
+-BLOCK_K chunks with coalesced 16-byte loads. x is broadcast over the N rows and the dot
+-over K is a fp32 tl.sum; the M<=4 x-rows share the same W tile so W is read once. Grid is
+-N/BLOCK_N (thousands of programs for N>=2048), so all SMs stay busy without tensor cores.
+-When N*M still cannot fill the GPU (e.g. N=32), SPLIT_K writes fp32 partials to a cached
+-workspace that a tiny second kernel reduces. Configs come from a static (M,K,N) table with
+-a heuristic fallback: no runtime autotune, no host syncs, no variable-size allocations,
+-so gemv is safe to capture in a CUDA graph.
++Classic (no tl.dot) skinny GEMV: each program owns BLOCK_N rows of W and streams K in BLOCK_K
++chunks with coalesced 16-byte loads; x is broadcast over the N rows and the K dot is a fp32
++tl.sum. The M<=4 x-rows share one W tile (W read once). Grid is N/BLOCK_N, so all SMs stay busy
++without tensor cores; when N*M cannot fill the GPU (N=32) SPLIT_K writes fp32 partials to a
++cached workspace that a tiny second kernel reduces. Static (M,K,N) config table + heuristic
++fallback: no runtime autotune, no host syncs, no variable-size allocations, CUDA-graph safe.
+ """
+ import torch
+ import triton
+ import triton.language as tl
+
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [offset=76, limit=50][0m
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -78,18 +78,12 @@
+     return p
+ 
+ 
+ # (K, N) -> (BLOCK_N, BLOCK_K, SPLIT_K, num_warps, num_stages)
+-_BASE = {
+-    (2048, 248320): (16, 512, 1, 4, 3),
+-    (2048, 12288): (16, 512, 1, 4, 3),
+-    (2048, 8224): (16, 512, 1, 4, 3),
+-    (2048, 5120): (16, 512, 1, 4, 3),
+-    (2048, 2048): (8, 512, 2, 4, 3),
+-    (4096, 2048): (8, 512, 2, 4, 3),
+-    (6144, 2048): (8, 512, 2, 4, 3),
+-    (2048, 32): (8, 128, 32, 4, 2),
+-}
++_BASE = {(2048, 248320): (16, 512, 1, 4, 3), (2048, 12288): (16, 512, 1, 4, 3),
++         (2048, 8224): (16, 512, 1, 4, 3), (2048, 5120): (16, 512, 1, 4, 3),
++         (2048, 2048): (8, 512, 2, 4, 3), (4096, 2048): (8, 512, 2, 4, 3),
++         (6144, 2048): (8, 512, 2, 4, 3), (2048, 32): (8, 128, 32, 4, 2)}
+ # Static table keyed by (M, K, N); M only pads BLOCK_M, so reuse the (K, N) entries.
+ _TABLE = {(m, k, n): c for m in (1, 2, 3, 4) for (k, n), c in _BASE.items()}
+ 
+ 
+
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [offset=143, limit=80][0m
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -71,12 +71,9 @@
+              acc.to(tl.bfloat16), mask=mmask[:, None] & nmask[None, :])
+ 
+ 
+ def _npow2(x):
+-    p = 1
+-    while p < x:
+-        p *= 2
+-    return p
++    return 1 << (x - 1).bit_length()
+ 
+ 
+ # (K, N) -> (BLOCK_N, BLOCK_K, SPLIT_K, num_warps, num_stages)
+ _BASE = {(2048, 248320): (16, 512, 1, 4, 3), (2048, 12288): (16, 512, 1, 4, 3),
+
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -158,9 +158,9 @@
+         ref = torch.matmul(x, W.t()).float()
+         diff = (gemv(x, W).float() - ref).abs()
+         tol = 2.0 * _ulp_bf16(ref) + 1e-3  # 2 bf16 ulps of reference magnitude, small floor
+         bad += (diff > tol).sum().item()
+-        print(f"K={K:6d} N={N:7d} M={M}  max|d|={diff.max().item():.4g}  "
++        print(f"K={K:6d} N={N:7d} M={M} max|d|={diff.max().item():.4g} "
+               f"worst={float((diff / tol).max()):.2f}x tol")
+ assert bad == 0, f"{bad} element(s) exceeded the bf16 tolerance"
+ print("test(): OK")
+ 
+
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -172,10 +172,9 @@
+     s, e = torch.cuda.Event(True), torch.cuda.Event(True)
+     s.record()
+     for _ in range(iters):
+         fn()
+-    e.record()
+-    torch.cuda.synchronize()
++    e.record(); torch.cuda.synchronize()
+     return s.elapsed_time(e) / iters
+ 
+ 
+ _CANDS = [(bn, bk, sp) for bn in (4, 8, 16, 32) for bk in (128, 256, 512) for sp in (1, 2, 4, 8)]
+
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [offset=203][0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [limit=75][0m
+[0m
+[0m← [0mWrite qwen35_fast/gemv.py
+Wrote file successfully.
+[0m
+Let me rewrite compactly to meet the ~200-line constraint.
+[0m$ [0mcd /Users/islam/fun_fable_proj && /usr/bin/python3 -m py_compile qwen35_fast/gemv.py && echo "COMPILE OK" && wc -l qwen35_fast/gemv.py
+COMPILE OK
+     212 qwen35_fast/gemv.py
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -19,13 +19,11 @@
+ _MAX_TILE = 8192  # cap on BLOCK_M*BLOCK_N*BLOCK_K fp32 elements held live (register safety)
+ 
+ 
+ @triton.jit
+-def _gemv_kernel(
+-    x_ptr, w_ptr, y_ptr, part_ptr,
+-    M, N, K, stride_xm, stride_wn, stride_ym,
+-    BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, BLOCK_K: tl.constexpr, SPLIT_K: tl.constexpr,
+-):
++def _gemv_kernel(x_ptr, w_ptr, y_ptr, part_ptr, M, N, K, stride_xm, stride_wn, stride_ym,
++                 BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, BLOCK_K: tl.constexpr,
++                 SPLIT_K: tl.constexpr):
+     pid_n, pid_k = tl.program_id(0), tl.program_id(1)
+     k_per = K // SPLIT_K
+     offs_m = tl.arange(0, BLOCK_M)
+     offs_n = pid_n * BLOCK_N + tl.arange(0, BLOCK_N)
+
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -49,12 +49,10 @@
+                  acc, mask=out_mask)
+ 
+ 
+ @triton.jit
+-def _reduce_kernel(
+-    part_ptr, y_ptr, M, N, stride_ym,
+-    BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, SPLIT_K: tl.constexpr,
+-):
++def _reduce_kernel(part_ptr, y_ptr, M, N, stride_ym, BLOCK_M: tl.constexpr,
++                   BLOCK_N: tl.constexpr, SPLIT_K: tl.constexpr):
+     offs_n = tl.program_id(0) * BLOCK_N + tl.arange(0, BLOCK_N)
+     offs_m, offs_s = tl.arange(0, BLOCK_M), tl.arange(0, SPLIT_K)
+     nmask, mmask = offs_n < N, offs_m < M
+     ptrs = (part_ptr + offs_m[:, None, None] * (SPLIT_K * N)
+
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && /usr/bin/python3 -m py_compile qwen35_fast/gemv.py && echo "COMPILE OK" && wc -l qwen35_fast/gemv.py
+COMPILE OK
+     208 qwen35_fast/gemv.py
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && (/usr/bin/python3 -m pyflakes qwen35_fast/gemv.py 2>&1 || .venv/bin/python -m pyflakes qwen35_fast/gemv.py 2>&1 || echo "pyflakes not available")
+(no output)
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [offset=20, limit=50][0m
+Let me lint with pyflakes (the repo workflow runs it before GPU launches) and review the final file.
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -22,14 +22,16 @@
+ @triton.jit
+ def _gemv_kernel(x_ptr, w_ptr, y_ptr, part_ptr, M, N, K, stride_xm, stride_wn, stride_ym,
+                  BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, BLOCK_K: tl.constexpr,
+                  SPLIT_K: tl.constexpr):
+-    pid_n, pid_k = tl.program_id(0), tl.program_id(1)
++    pid_n = tl.program_id(0)
++    pid_k = tl.program_id(1)
+     k_per = K // SPLIT_K
+     offs_m = tl.arange(0, BLOCK_M)
+     offs_n = pid_n * BLOCK_N + tl.arange(0, BLOCK_N)
+     offs_k = tl.arange(0, BLOCK_K)
+-    mmask, nmask = offs_m < M, offs_n < N
++    mmask = offs_m < M
++    nmask = offs_n < N
+     x_base = x_ptr + offs_m[:, None] * stride_xm
+     w_base = w_ptr + offs_n[:, None] * stride_wn
+     k_base = pid_k * k_per
+     acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)
+
+[0m
+Let me split tuple assignments for maximum Triton-frontend safety (a compile error would waste a GPU run).
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -54,10 +54,12 @@
+ @triton.jit
+ def _reduce_kernel(part_ptr, y_ptr, M, N, stride_ym, BLOCK_M: tl.constexpr,
+                    BLOCK_N: tl.constexpr, SPLIT_K: tl.constexpr):
+     offs_n = tl.program_id(0) * BLOCK_N + tl.arange(0, BLOCK_N)
+-    offs_m, offs_s = tl.arange(0, BLOCK_M), tl.arange(0, SPLIT_K)
+-    nmask, mmask = offs_n < N, offs_m < M
++    offs_m = tl.arange(0, BLOCK_M)
++    offs_s = tl.arange(0, SPLIT_K)
++    nmask = offs_n < N
++    mmask = offs_m < M
+     ptrs = (part_ptr + offs_m[:, None, None] * (SPLIT_K * N)
+             + offs_s[None, :, None] * N + offs_n[None, None, :])
+     part = tl.load(ptrs, mask=mmask[:, None, None] & nmask[None, None, :], other=0.0)
+     acc = tl.sum(part, axis=1)
+
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && /usr/bin/python3 -m py_compile qwen35_fast/gemv.py && (/usr/bin/python3 -m pyflakes qwen35_fast/gemv.py 2>&1 || true) && echo "OK" && wc -l qwen35_fast/gemv.py
+OK
+     212 qwen35_fast/gemv.py
+[0m
+[0m← [0mEdit qwen35_fast/gemv.py
+Index: /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+===================================================================
+--- /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
++++ /Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+@@ -71,10 +71,10 @@
+     return 1 << (x - 1).bit_length()
+ 
+ 
+ # (K, N) -> (BLOCK_N, BLOCK_K, SPLIT_K, num_warps, num_stages)
+-_BASE = {(2048, 248320): (16, 512, 1, 4, 3), (2048, 12288): (16, 512, 1, 4, 3),
+-         (2048, 8224): (16, 512, 1, 4, 3), (2048, 5120): (16, 512, 1, 4, 3),
++_BASE = {(2048, 248320): (16, 512, 1, 4, 3), (2048, 12288): (8, 512, 1, 4, 3),
++         (2048, 8224): (8, 512, 1, 4, 3), (2048, 5120): (8, 512, 1, 4, 3),
+          (2048, 2048): (8, 512, 2, 4, 3), (4096, 2048): (8, 512, 2, 4, 3),
+          (6144, 2048): (8, 512, 2, 4, 3), (2048, 32): (8, 128, 32, 4, 2)}
+ # Static table keyed by (M, K, N); M only pads BLOCK_M, so reuse the (K, N) entries.
+ _TABLE = {(m, k, n): c for m in (1, 2, 3, 4) for (k, n), c in _BASE.items()}
+
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [limit=8, offset=74][0m
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && /usr/bin/python3 -m py_compile qwen35_fast/gemv.py && (/usr/bin/python3 -m pyflakes qwen35_fast/gemv.py 2>&1 || true) && echo "OK $(wc -l < qwen35_fast/gemv.py) lines"
+OK      212 lines
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [offset=82, limit=55][0m
+[0m→ [0mRead qwen35_fast/gemv.py[90m [offset=137][0m
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && git status --short && echo "---diff stat---" && git diff --stat -- qwen35_fast/gemv.py
+M candidates/gemv2/opencode.log
+ M qwen35_fast/gemv.py
+ M results/run_final2.log
+ M results/run_opt2.log
+?? results/eval_final_full_dev.json
+?? results/eval_final_heldout_heldout.json
+?? results/ifeval_custom_k0.json
+?? results/ifeval_custom_k3.json
+?? results/ifeval_hf.json
+---diff stat---
+ qwen35_fast/gemv.py | 137 ++++++++++++++++++++++++++++------------------------
+ 1 file changed, 74 insertions(+), 63 deletions(-)
+[0m
+The rewrite is complete. Let me do a final review of the kernel math via a small numpy simulation to catch logic errors (pointer offsets and the split-K reduction), since Triton can't run here.
+[0m$ [0mcd /var/folders/65/7lq7vyg550ddtnxc4h_jj78r0000gn/T/opencode && cat > gemv_sim.py <<'EOF'
+import numpy as np
+
+def sim_gemv(x, W, bn, bk, split, bm_override=None):
+    M, K = x.shape; N, _ = W.shape
+    bm = 1
+    while bm < M: bm *= 2
+    while bm * bn * bk > 8192 and bk > 64: bk //= 2
+    k_per = K // split
+    part = np.zeros((M, split, N), dtype=np.float32)
+    for pid_n in range(-(-N // bn)):
+        for pid_k in range(split):
+            offs_m = np.arange(bm); offs_n = pid_n*bn + np.arange(bn); offs_k = np.arange(bk)
+            mmask = offs_m < M; nmask = offs_n < N
+            k_base = pid_k * k_per
+            acc = np.zeros((bm, bn), np.float32)
+            for k0 in range(0, k_per, bk):
+                kk = k_base + k0 + offs_k
+                kmask = (k0 + offs_k) < k_per
+                # loads (guard OOB like Triton masked loads)
+                w = np.zeros((bn, bk), np.float32)
+                for i,n in enumerate(offs_n):
+                    for j,k in enumerate(kk):
+                        if nmask[i] and kmask[j]: w[i,j] = W[n,k]
+                xx = np.zeros((bm, bk), np.float32)
+                for i,m in enumerate(offs_m):
+                    for j,k in enumerate(kk):
+                        if mmask[i] and kmask[j]: xx[i,j] = x[m,k]
+                prod = xx[:,None,:] * w[None,:,:]   # [bm,bn,bk]
+                acc += prod.sum(axis=2)
+            for i,m in enumerate(offs_m):
+                for j,n in enumerate(offs_n):
+                    if mmask[i] and nmask[j]:
+                        part[m, pid_k, n] += acc[i,j]
+    y = np.zeros((M,N), np.float32)
+    for m in range(M):
+        for n in range(N):
+            y[m,n] = part[m,:,n].sum()
+    return y.astype(np.float32)
+
+rng = np.random.default_rng(0)
+for (K,N) in [(37,13),(64,32),(128,9),(2048,32),(256,100),(512,64)]:
+    for M in (1,2,3,4):
+        x = rng.standard_normal((M,K)).astype(np.float32)
+        W = rng.standard_normal((N,K)).astype(np.float32)
+        ref = x @ W.T
+        for split in (1,2,4):
+            if K % split: continue
+            got = sim_gemv(x,W,8,64,split)
+            err = np.abs(got-ref).max()
+            assert err < 1e-2, (K,N,M,split,err)
+print("sim OK: pointer offsets + split-K reduction match x @ W.T")
+EOF
+/usr/bin/python3 gemv_sim.py
+sim OK: pointer offsets + split-K reduction match x @ W.T
+[0m
+Done. Rewrote `qwen35_fast/gemv.py` (only that file touched).
+
+**Design** (`_gemv_kernel`, no `tl.dot`):
+- Grid over `N/BLOCK_N` (× `SPLIT_K`); each program owns `BLOCK_N` consecutive W rows, streams K in `BLOCK_K` chunks with coalesced 16-byte loads.
+- x is broadcast over the N rows; the K-dot is a fp32 `tl.sum` (`x[:,None,:] * w[None,:,:]` → sum axis 2). M≤4 folds into `BLOCK_M` so W is read once.
+- `SPLIT_K>1` writes fp32 partials to a shape-cached workspace; `_reduce_kernel` sums the splits and casts to bf16.
+- Static `(M,K,N)` table + heuristic fallback; `num_warps=4`, `num_stages=3`; register clamp `BLOCK_M*BLOCK_N*BLOCK_K <= 8192`.
+
+**Kept:** `gemv(x,W)`, `test()` (2-ulp check), `bench()`/`bench(autotune=True)`, fp32 accumulation, bf16 out, no host syncs, cached workspace, CUDA-graph safe.
+
+**Configs chosen:** `(248320)→(16,512,1)`, `(12288/8224/5120)→(8,512,1)`, `N=2048 shapes→(8,512,2)`, `(32)→(8,128,32)`.
+
+Verification done here: `py_compile`, `pyflakes`, and a numpy simulation of the exact pointer offsets + split-K reduction against `x @ W.T`. Triton itself isn't installed and there's no GPU, so the actual kernel couldn't be compiled/run — `test()`/`bench(autotune=True)` on the H100 are the real check, and the autotune sweep can retune the table if any shape undershoots.

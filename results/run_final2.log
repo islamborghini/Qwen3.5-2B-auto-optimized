@@ -1379,3 +1379,53 @@ Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF
 [71/100] 1229 toks
 [72/100] 456 toks
 [73/100] 381 toks
+[74/100] 694 toks
+[75/100] 104 toks
+[76/100] 155 toks
+[77/100] 1280 toks
+[78/100] 241 toks
+[79/100] 396 toks
+[80/100] 108 toks
+[81/100] 1280 toks
+[82/100] 47 toks
+[83/100] 345 toks
+[84/100] 362 toks
+[85/100] 514 toks
+[86/100] 135 toks
+[87/100] 77 toks
+[88/100] 267 toks
+[89/100] 461 toks
+[90/100] 349 toks
+[91/100] 671 toks
+[92/100] 16 toks
+[93/100] 1280 toks
+[94/100] 43 toks
+[95/100] 960 toks
+[96/100] 1086 toks
+[97/100] 1188 toks
+[98/100] 57 toks
+[99/100] 128 toks
+[100/100] 210 toks
+saved ifeval_hf.json
+{
+ "name": "ifeval",
+ "alias": "ifeval",
+ "sample_len": 100,
+ "prompt_level_strict_acc,none": 0.61,
+ "prompt_level_strict_acc_stderr,none": 0.04902071300001973,
+ "inst_level_strict_acc,none": 0.7300613496932515,
+ "inst_level_strict_acc_stderr,none": "N/A",
+ "prompt_level_loose_acc,none": 0.65,
+ "prompt_level_loose_acc_stderr,none": 0.04793724854411023,
+ "inst_level_loose_acc,none": 0.7668711656441718,
+ "inst_level_loose_acc_stderr,none": "N/A"
+}
+saved results/eval_final_full_dev.json
+saved results/eval_final_heldout_heldout.json
+saved results/ifeval_custom_k0.json
+saved results/ifeval_custom_k3.json
+saved results/ifeval_hf.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-qtLUPhHOaZwnhvvHsRjdcc
