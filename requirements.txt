@@ -1,0 +1,11 @@
+# Pinned environment used inside the Modal H100 image (bench/session.py). Local tooling only needs modal + transformers (tokenizer).
+vllm==0.29.0            # pulls torch==2.13.0+cu130, triton 3.6.x, transformers>=5.10.4 (5.17.0 resolved)
+flash-linear-attention==0.5.2   # fla-core 0.5.2: chunk/fused-recurrent gated delta rule Triton kernels
+accelerate==1.15.0
+hf_transfer==0.1.9
+lm-eval==0.4.13
+datasets
+langdetect
+immutabledict
+nltk
+modal==1.5.5            # local

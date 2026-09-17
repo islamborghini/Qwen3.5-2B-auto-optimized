@@ -28,3 +28,4 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | baselines #2 killed: co-resident vLLM engines starved HF/others of CPU (HF 36 vs 55 TPS); protocol -> sequential, cpu=4 | ~/bin/zsh.9 | contaminated numbers discarded |
 | 2026-09-17 | Modal H100 | run_opt: compiled k0 2.53ms/step, 505 kernels (mm 1.62ms); gemv test failed (mask bug, fixed) | ~/bin/zsh.4 | results/run_opt.json |
 | 2026-09-17 | Modal H100 | baselines #3 (sequential, cpu=4) | est ~.0 | launched |
+| 2026-09-17 | Modal H100 | orphaned app from killed baselines #2 ran ~13 extra min before manual stop | ~/bin/zsh.9 | lesson: pkill does not stop ephemeral app; use modal app stop |

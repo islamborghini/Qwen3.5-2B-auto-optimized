@@ -35,12 +35,11 @@ class CustomLM(LM):
         return outs
     def loglikelihood(self, requests): raise NotImplementedError
     def loglikelihood_rolling(self, requests): raise NotImplementedError
-    def apply_chat_template(self, chat_history, add_generation_prompt=True):
+    def apply_chat_template(self, chat_history, add_generation_prompt=True, **kw):
         return self.tok.apply_chat_template(chat_history, tokenize=False, add_generation_prompt=add_generation_prompt, enable_thinking=False)
     @property
     def tokenizer_name(self): return "qwen35"
-    @property
-    def chat_template(self): return self.tok.chat_template
+    def chat_template(self, chat_template=False): return self.tok.chat_template
 
 
 if __name__ == "__main__":
