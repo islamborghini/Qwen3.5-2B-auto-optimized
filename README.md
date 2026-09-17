@@ -160,6 +160,17 @@ every top-1 disagreement sits at a genuine near-tie. Findings across seven sessi
 | lean decode path (T1) | -50 launches/step, residual+norm fusion | pass | +2-3% | merged (default) |
 | fused GDN step (T3) | 1 Triton launch per GDN layer | test fails | (+8% if fixed) | not enabled |
 
+## Costs and effort (estimates; see LEDGER.md for every session)
+| Resource | Used | Notes |
+|---|---|---|
+| Modal H100 (+4 CPU) | ~4.5 GPU-hours, ~$17-19 estimated at $3.95/h + CPU | over the nominal $10 (the user authorized continued spend); ~35% went to sessions killed or wasted by my own bugs (missing dependency, wrong filename, a shadowed import, an orphaned app, contaminated baselines) |
+| Claude Fable 5.1 | coordinator session + 4 forked workers (~0.4M tokens each) | $21 reported by the user at the mid-point; final figure in the user's dashboard |
+| DeepSeek V4.1 Flash (OpenCode) | 5 tasks (2 reviews, 2 GEMV kernels, 1 test file) | flat-rate subscription, $0 marginal |
+
+Startup overhead (excluded from decode TPS): custom engine 58 s (safetensors load ~10 s, torch.compile of the decode
+blocks ~40 s, CUDA-graph capture ~2 s); vLLM ~100 s (compile + graph capture; cached artifacts on the volume);
+HF eager 13 s. torch.compile/graph capture happens once per process.
+
 ## Limitations
 * Batch size 1 only; no continuous batching, no sampling (greedy only), no multi-turn/prefix reuse, text only.
 * The custom engine's prefill uses plain PyTorch/fla kernels and is not optimized (TTFT is reported, not tuned).
