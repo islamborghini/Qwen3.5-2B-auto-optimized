@@ -32,3 +32,4 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | final session: optimize loop (7 candidates) -> frozen config -> dev full + heldout vs vllm_mtp3 (same session) -> IFEval custom + HF | est ~.0 (uses reserve) | launched |
 | 2026-09-17 | Modal H100 | final #1 killed: greedy-divergence gate rejected spec candidates (structured-2048 @159, HF margin 11) and froze k0; gate replaced by teacher-forced decode-logit check | ~/bin/zsh.6 | gemv: lm_head 3060 vs cuBLAS 2866 GB/s; N=32 slower |
 | 2026-09-17 | Modal H100 | final #2: new decode-logit gate; candidates k0/k2/k3 compile; dev full + heldout vs vllm_mtp3 same-session; IFEval custom + HF | est ~.0 | launched |
+| 2026-09-17 | Modal H100 | final #2 crashed on logit-slice shape bug (HF load only) | ~/bin/zsh.3 | fixed; final #3 launched |

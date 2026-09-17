@@ -81,8 +81,9 @@ if __name__ == "__main__":
                              do_sample=False, output_logits=True, return_dict_in_generate=True)
         gen = o_.sequences[0, x.shape[1]:].tolist(); dec = torch.stack([l_[0] for l_ in o_.logits]).float().cpu()
         lg = hf_logits(hf, w["ids"] + gen)
-        full = lg[len(w["ids"]) - 1:].cpu()
+        full = lg[len(w["ids"]) - 1: len(w["ids"]) - 1 + len(gen)].cpu()
         floor = (dec - full).abs().max().item()   # HF's own decode path vs prefill path on identical tokens
+        assert dec.shape == full.shape, (dec.shape, full.shape)
         ref[w["id"]] = {"gen": gen, "logits_tail": lg[len(w["ids"]) - 1: len(w["ids"]) + 64].cpu(), "dec_logits": dec, "floor": floor}
         led.setdefault("hf_noise_floor", {})[w["id"]] = {"max_abs_diff": floor, "top1_disagree": int((dec.argmax(-1) != full.argmax(-1)).sum())}
         print("HF noise floor", w["id"], led["hf_noise_floor"][w["id"]], flush=True)
