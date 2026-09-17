@@ -1,0 +1,90 @@
+{
+ "lean0_k0": {
+  "step_ms": 2.552995010000103,
+  "tps": {
+   "dev-prose-512": 369.88986329144365,
+   "dev-prose-2048": 369.6580803227134,
+   "dev-structured-512": 371.02090554684884,
+   "dev-structured-2048": 369.09211939199804
+  },
+  "logit_diff": {
+   "dev-prose-512": {
+    "max_abs": 0.4375,
+    "hf_floor": 0.375,
+    "top1_disagree": 0
+   },
+   "dev-structured-2048": {
+    "max_abs": 2.15625,
+    "hf_floor": 1.40625,
+    "top1_disagree": 1
+   }
+  },
+  "kernels_per_step": 517.0
+ },
+ "lean0_k3": {
+  "step_ms": 4.815775890000111,
+  "tps": {
+   "dev-prose-512": 422.7054925894161,
+   "dev-prose-2048": 433.4825431811532,
+   "dev-structured-512": 701.4218420385195,
+   "dev-structured-2048": 728.1165990959768
+  },
+  "logit_diff": {
+   "dev-prose-512": {
+    "max_abs": 0.40625,
+    "hf_floor": 0.375,
+    "top1_disagree": 2
+   },
+   "dev-structured-2048": {
+    "max_abs": 2.625,
+    "hf_floor": 1.40625,
+    "top1_disagree": 0
+   }
+  },
+  "kernels_per_step": 882.0
+ },
+ "lean1_k0": {
+  "step_ms": 2.4952238100001978,
+  "tps": {
+   "dev-prose-512": 381.99905636944845,
+   "dev-prose-2048": 381.17174454396024,
+   "dev-structured-512": 383.6876533330511,
+   "dev-structured-2048": 381.9800952958595
+  },
+  "logit_diff": {
+   "dev-prose-512": {
+    "max_abs": 0.4375,
+    "hf_floor": 0.375,
+    "top1_disagree": 0
+   },
+   "dev-structured-2048": {
+    "max_abs": 2.15625,
+    "hf_floor": 1.40625,
+    "top1_disagree": 1
+   }
+  },
+  "kernels_per_step": 469.0
+ },
+ "lean1_k3": {
+  "step_ms": 4.747554679999837,
+  "tps": {
+   "dev-prose-512": 429.39112757398937,
+   "dev-prose-2048": 442.0747419892303,
+   "dev-structured-512": 711.1434780240859,
+   "dev-structured-2048": 742.4316841659702
+  },
+  "logit_diff": {
+   "dev-prose-512": {
+    "max_abs": 0.40625,
+    "hf_floor": 0.375,
+    "top1_disagree": 2
+   },
+   "dev-structured-2048": {
+    "max_abs": 2.625,
+    "hf_floor": 1.40625,
+    "top1_disagree": 0
+   }
+  },
+  "kernels_per_step": 828.0
+ }
+}
