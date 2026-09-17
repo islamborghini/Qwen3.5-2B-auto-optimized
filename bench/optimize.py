@@ -18,11 +18,8 @@ CANDIDATES = {  # name -> Engine kwargs (order = priority). Earlier rounds (resu
     # torch.compile fails the numerical gate; gemv kernels (DeepSeek v1/v2) are slower than cuBLAS except on lm_head.
     "k0_compile": dict(spec_k=0, compile_blocks=True),
     "k2_compile": dict(spec_k=2, compile_blocks=True),
-    "k3_compile": dict(spec_k=3, compile_blocks=True),
-    "k4_compile": dict(spec_k=4, compile_blocks=True),
     "k2_compile_fused": dict(spec_k=2, compile_blocks=True, fused_gdn=True),   # T3b two-kernel fused GDN step
-    "k3_compile_fused": dict(spec_k=3, compile_blocks=True, fused_gdn=True),
-    "k0_compile_fused": dict(spec_k=0, compile_blocks=True, fused_gdn=True),
+    # "k3_compile_fused"/"k0_compile_fused": pending the T3c illegal-memory-access fix (results/run_opt6.log)
 }
 LEDGER = os.path.join(OUT, "opt_ledger.json")
 
@@ -75,7 +72,7 @@ def spread(d):  # geomean of per-rep tps, min..max
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--max_candidates", type=int, default=4)
-    ap.add_argument("--max_minutes", type=float, default=20); ap.add_argument("--reps", type=int, default=2)
+    ap.add_argument("--max_minutes", type=float, default=20); ap.add_argument("--reps", type=int, default=3)
     a = ap.parse_args(); t0 = time.time()
     seed = os.path.join(os.path.dirname(os.path.abspath(__file__)), "opt_ledger_seed.json")   # committed copy -> resumable across sessions
     led = json.load(open(LEDGER)) if os.path.exists(LEDGER) else (json.load(open(seed)) if os.path.exists(seed) else {"candidates": {}, "incumbent": None})
@@ -119,7 +116,7 @@ if __name__ == "__main__":
                 rec["screen"] = screen(eng, wl, a.reps, static_mem); rec["geomean"] = geo(rec["screen"]); rec["spread"] = spread(rec["screen"])
                 inc = led["incumbent"]; checks = {}
                 if inc and inc_eng is not None and inc_name == inc:   # paired re-measurement of the incumbent right now
-                    I = screen(inc_eng, wl, 1, led["candidates"][inc].get("static_mem", 0)); rec["incumbent_paired"] = {w_: statistics.median(v["tps"]) for w_, v in I.items()}
+                    I = screen(inc_eng, wl, a.reps, led["candidates"][inc].get("static_mem", 0)); rec["incumbent_paired"] = {w_: statistics.median(v["tps"]) for w_, v in I.items()}
                 elif inc:
                     I = led["candidates"][inc]["screen"]
                 if inc:
