@@ -219,6 +219,10 @@ class Engine:
         self.stat_acc = torch.zeros((), dtype=torch.long, device=dev)
         self.arangeL = torch.arange(L, device=dev)
         self.arangeC = torch.arange(self.conv_k - 1, device=dev)
+        self.gdn_scr = torch.zeros(self.gh, self.gk, self.gv, dtype=torch.float32, device=dev)   # fused kernel: verify-pass state
+        self.gdn_o = torch.zeros(T, self.gh * self.gv, dtype=torch.bfloat16, device=dev)         # fused kernel: commit-pass output (unused)
+        self.ones_T = torch.ones(T, dtype=torch.float32, device=dev)
+        self.one_i = torch.ones((), dtype=torch.long, device=dev)
 
     def reset(self):
         self.conv_state.zero_(); self.rec_state.zero_(); self.n.zero_(); self.pending.zero_(); self.drafts.zero_()
@@ -262,10 +266,15 @@ class Engine:
             qkv, z, b, a = allp.split([self.conv_dim, self.gh * self.gv, self.gh, self.gh], -1)
         else:
             qkv, z, b, a = mm(x, w["qkv"]), mm(x, w["z"]), mm(x, w["b"]), mm(x, w["a"])
-        if not prefill and T == 1 and self.fused_gdn:   # single fused Triton kernel (conv+silu+delta rule+gated norm)
-            o = torch.empty(1, self.gh * self.gv, dtype=torch.bfloat16, device=x.device)
-            self._gdn_step(qkv[0], z[0], b[0], a[0], conv_state[0], w["conv_w"], w["neg_expA"], w["dt_bias"],
-                           w["gnorm"], rec_state[0], o[0], self.eps)
+        if not prefill and T <= 4 and self.fused_gdn:   # one Triton kernel: conv+silu+l2norm+delta rule+gated norm
+            o = torch.empty(T, self.gh * self.gv, dtype=torch.bfloat16, device=x.device)
+            if T == 1:   # commit directly (in place)
+                self._gdn_step(qkv, z, b, a, self.ones_T[:1], self.one_i, conv_state[0], w["conv_w"], w["neg_expA"],
+                               w["dt_bias"], w["gnorm"], rec_state[0], rec_state[0], o, self.eps)
+            else:        # verify pass -> scratch state; _commit re-runs it with the keep mask, in place
+                self._gdn_step(qkv, z, b, a, self.ones_T[:T], self.one_i, conv_state[0], w["conv_w"], w["neg_expA"],
+                               w["dt_bias"], w["gnorm"], rec_state[0], self.gdn_scr, o, self.eps, write_state=False)
+                save.append(("fused", conv_state, rec_state, qkv, z, b, a, w))
             return mm(o, w["out"])
         xc = qkv.T[None]                                                       # [1,conv_dim,T]
         cw = w["conv_w"]                                                       # [conv_dim,1,k]
@@ -355,7 +364,13 @@ class Engine:
     def _commit(self, save, n_acc):
         """Commit GDN/conv states for the first n_acc tokens of the last multi-token step (device-side, exact)."""
         keep = (self.arangeT < n_acc).to(torch.float32)[None, :, None]        # [1,T,1]
-        for conv_state, rec_state, q, k, v, g, beta, xc_all in save:
+        for item in save:
+            if item[0] == "fused":   # fused kernel: same inputs, keep mask, in-place state + conv shift by n_acc
+                _, conv_state, rec_state, qkv, z, b, a, w = item
+                self._gdn_step(qkv, z, b, a, keep[0, :, 0], n_acc, conv_state[0], w["conv_w"], w["neg_expA"],
+                               w["dt_bias"], w["gnorm"], rec_state[0], rec_state[0], self.gdn_o, self.eps)
+                continue
+            conv_state, rec_state, q, k, v, g, beta, xc_all = item
             _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g * keep, beta=beta * keep.to(beta.dtype),
                                                      initial_state=rec_state, output_final_state=True, use_qk_l2norm_in_kernel=True)
             rec_state.copy_(st)
