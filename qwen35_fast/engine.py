@@ -91,6 +91,10 @@ class Engine:
             self._gdn_step = torch._dynamo.disable(gdn_step)
         compile_blocks = self.compile_mode == "blocks"
         self.compile_blocks = compile_blocks
+        if fused_gdn:
+            from qwen35_fast import gdn_step as _G
+            if not getattr(_G, "TESTED_OK", False):
+                raise ValueError("fused_gdn=True requires qwen35_fast.gdn_step.TESTED_OK (kernel self-test passed); the full-tile v1 kernel is known-wrong")
         self.use_gemv = use_gemv
         self.mm = lambda x, W: x @ W.T
         self._mm_choice = {}
@@ -301,6 +305,7 @@ class Engine:
         return mm(act(g, u), w["down"])
 
     def _body(self, tokens, pos, prefill, save=None):
+        save = [] if save is None else save
         """Run the main model over tokens [T] at positions pos [T]. Returns post-final-norm hidden [T,H] and pre-norm hidden."""
         x = self.embed[tokens]
         cos, sin = self.cos[pos], self.sin[pos]

@@ -48,3 +48,5 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | gatecheck: max-diff is a single-step outlier (steps ~200-235 on structured prompts); p99 of all configs ~= HF's own p99 (0.25-1.1). lean vs nonlean: 4.25 vs 2.41 max on structured-512, p99 1.14 vs 0.81 | ~$0.3 | results/gatecheck.json |
 | 2026-09-17 | Modal H100 | opt5 (lean engine, paired incumbent): k0_compile failed gate (4.33>4.0, structured-512); k2_compile accepted (616 geomean); k3/k4 slower on prose | ~$0.6 | results/opt_ledger_round5.json |
 | 2026-09-17 | Modal H100 | final #5: frozen k2_compile(lean) + custom_k3 + vllm_mtp3: dev full, heldout, IFEval custom_k2 | est ~$1.5 | launched |
+| 2026-09-17 | Modal H100 | final #5 done: custom_k2 (lean) 540-737 TPS dev, 0.88x vllm_mtp3 same-session (heldout 0.87x); custom_k3 0.91x/0.89x; IFEval custom_k2 0.64 | ~$1.5 | results/RESULTS.md |
+| 2026-09-17 | DeepSeek | review #2 of merged engine: fused_gdn must be guarded (done), pre_norm option semantics (documented), save=None footgun (fixed) | $0 | candidates/review2 |

@@ -3,3 +3,1530 @@
 [0m
 [0m→ [0mRead candidates/review2/TASK.md
 [0m→ [0mRead qwen35_fast/engine.py
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj log --oneline -20
+5c0455e README: gate diagnostics and optimization ledger summary
+fcbdabd Final session #3 runner (k2 lean frozen), gate diagnostics, round-5 ledger
+7fc12f6 Paired incumbent re-measurement in optimize loop; kernel per-head diagnostics
+0779b65 Merge T1 (lean decode, -50 kernels) and T3 (fused GDN kernel, flagged off); debug tooling
+1675dcb Merge branch 'worktree-agent-ad9103af87df51269'
+3de7ee3 T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+2a68eaa WIP fused GDN decode-step Triton kernel (fused_gdn flag): 511->367 kernels/step, +6% step time; unit test FAILS (state update mismatch), do not enable
+28dea1f Fix optimizer memory accounting and TTFT boundary; round-3 ledger
+1ca4c35 Final #4 results (dev/heldout/IFEval), README results, GEMV v2 (DeepSeek), opt3 candidates
+1533f0c Layer-level torch.compile mode (graph break at fla), new optimization candidates
+273471c Lean final runner: both custom configs vs vLLM+MTP, IFEval x3; gate log
+1333be2 Fix HF reference logit slicing in optimize gate
+7ffdc94 Teacher-forced decode-logit correctness gate; trimmed final runner; results renderer
+f2dacf0 Final session runner trimmed to strongest baseline
+aba6aad README draft, pinned requirements, IFEval wrapper API fix
+5de958e Sequential evaluation protocol (CPU-contention fix), final session runner, gemv mask fix
+4a75706 GEMV kernel (DeepSeek) with per-shape selection; baseline runner with subprocess isolation
+7509e3f Engine: fused decode blocks (torch.compile), explicit decode attention, review fixes; screen #3 results
+958daaa Evaluator, IFEval harness, report/acceptance logic; fix fla kwarg bug in engine
+a48da86 Custom engine (CUDA graph + exact MTP spec decode), session runner, feasibility results
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj status --porcelain=v1 -b
+## main...origin/main [ahead 8]
+ M candidates/review2/opencode.log
+[0m
+[0m✱ [0mGlob "**/*.py"[90m 28 matches[0m
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj show --stat 0779b65
+commit 0779b651e4b60905ad24d976b9f754db52a487f9
+Merge: 1675dcb 2a68eaa
+Author: Islam Assanov <islamassanov66@gmail.com>
+Date:   Thu Sep 17 01:00:25 2026 -0700
+
+    Merge T1 (lean decode, -50 kernels) and T3 (fused GDN kernel, flagged off); debug tooling
+
+ bench/optimize.py       |   16 +-
+ bench/run_debug.py      |   43 +
+ bench/run_gdn.py        |   59 +
+ qwen35_fast/engine.py   |   11 +-
+ qwen35_fast/gdn_step.py |  127 ++
+ results/opt_ledger.json | 5017 ++++++++---------------------------------------
+ results/run_opt4.log    |   41 +
+ 7 files changed, 1118 insertions(+), 4196 deletions(-)
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj show --stat 3de7ee3
+commit 3de7ee3d4a415c28d243d9abbe1db6449bb0e09a
+Author: Islam Assanov <islamassanov66@gmail.com>
+Date:   Thu Sep 17 00:57:17 2026 -0700
+
+    T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+
+ bench/run_lean.py      | 56 +++++++++++++++++++++++++++++++
+ qwen35_fast/engine.py  | 72 +++++++++++++++++++++++++++++-----------
+ results/run_lean.json  | 90 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ results/run_lean2.json | 90 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 288 insertions(+), 20 deletions(-)
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj log --oneline --graph -12
+* 5c0455e README: gate diagnostics and optimization ledger summary
+* fcbdabd Final session #3 runner (k2 lean frozen), gate diagnostics, round-5 ledger
+* 7fc12f6 Paired incumbent re-measurement in optimize loop; kernel per-head diagnostics
+*   0779b65 Merge T1 (lean decode, -50 kernels) and T3 (fused GDN kernel, flagged off); debug tooling
+|\  
+| * 2a68eaa WIP fused GDN decode-step Triton kernel (fused_gdn flag): 511->367 kernels/step, +6% step time; unit test FAILS (state update mismatch), do not enable
+* |   1675dcb Merge branch 'worktree-agent-ad9103af87df51269'
+|\ \  
+| * | 3de7ee3 T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+| |/  
+* / 28dea1f Fix optimizer memory accounting and TTFT boundary; round-3 ledger
+|/  
+* 1ca4c35 Final #4 results (dev/heldout/IFEval), README results, GEMV v2 (DeepSeek), opt3 candidates
+* 1533f0c Layer-level torch.compile mode (graph break at fla), new optimization candidates
+* 273471c Lean final runner: both custom configs vs vLLM+MTP, IFEval x3; gate log
+* 1333be2 Fix HF reference logit slicing in optimize gate
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj show 0779b65 -- qwen35_fast/engine.py
+commit 0779b651e4b60905ad24d976b9f754db52a487f9
+Merge: 1675dcb 2a68eaa
+Author: Islam Assanov <islamassanov66@gmail.com>
+Date:   Thu Sep 17 01:00:25 2026 -0700
+
+    Merge T1 (lean decode, -50 kernels) and T3 (fused GDN kernel, flagged off); debug tooling
+
+diff --cc qwen35_fast/engine.py
+index e50b8a8,6ae9e3c..5dd4053
+--- a/qwen35_fast/engine.py
++++ b/qwen35_fast/engine.py
+@@@ -80,7 -67,7 +80,7 @@@ def apply_rope(q, k, cos, sin):  # q,k
+  
+  class Engine:
+      def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True,
+-                  compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False):
+ -                 compile_blocks=False, use_gemv=False, compile_mode=None, fused_gdn=False):
+++                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False, fused_gdn=False):
+          """compile_mode: None | "blocks" (fused elementwise helpers) | "layer" (whole decode layer compiled, graph
+          break at the fla kernel) | "layer_at" (same, inductor max-autotune for the GEMMs). compile_blocks=True == "blocks"."""
+          self.dev = torch.device(device)
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj diff 2a68eaa 0779b65 -- qwen35_fast/engine.py
+diff --git a/qwen35_fast/engine.py b/qwen35_fast/engine.py
+index 6ae9e3c..5dd4053 100644
+--- a/qwen35_fast/engine.py
++++ b/qwen35_fast/engine.py
+@@ -34,6 +34,19 @@ def gdn_pre(xc_all, conv_w, b, a, neg_expA, dt_bias, conv_dim):
+     return y, b.sigmoid()[None], (neg_expA * F.softplus(a.float() + dt_bias))[None]
+ 
+ 
++def add_norm(x, h, w, eps):
++    """x = x + h (bf16 rounding as eager), then zero-centered RMSNorm of the sum. Returns (sum, normed)."""
++    x = x + h
++    return x, rms_norm_zc(x, w, eps)
++
++
++def attn_qk(q, k, qn, kn, cos, sin, eps):
++    """q [T,nq,D], k [T,nkv,D] -> per-head RMSNorm + RoPE, layout [1,H,T,D]."""
++    q = rms_norm_zc(q, qn, eps).transpose(0, 1)[None]
++    k = rms_norm_zc(k, kn, eps).transpose(0, 1)[None]
++    return apply_rope(q, k, cos, sin)
++
++
+ def mlp_act(g, u):
+     return F.silu(g) * u
+ 
+@@ -67,7 +80,7 @@ def apply_rope(q, k, cos, sin):  # q,k: [B,H,T,D]; cos/sin: [T, rot]
+ 
+ class Engine:
+     def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True,
+-                 compile_blocks=False, use_gemv=False, compile_mode=None, fused_gdn=False):
++                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False, fused_gdn=False):
+         """compile_mode: None | "blocks" (fused elementwise helpers) | "layer" (whole decode layer compiled, graph
+         break at the fla kernel) | "layer_at" (same, inductor max-autotune for the GEMMs). compile_blocks=True == "blocks"."""
+         self.dev = torch.device(device)
+@@ -81,7 +94,12 @@ class Engine:
+         self.use_gemv = use_gemv
+         self.mm = lambda x, W: x @ W.T
+         self._mm_choice = {}
+-        fns = dict(norm=rms_norm_zc, gnorm=rms_norm_gated, gdn_pre=gdn_pre, mlp_act=mlp_act, attn_post=attn_post, rope=apply_rope, dec_attn=dec_attn)
++        self.lean = lean
++        fns = dict(norm=rms_norm_zc, gnorm=rms_norm_gated, gdn_pre=gdn_pre, mlp_act=mlp_act, attn_post=attn_post, rope=apply_rope,
++                   dec_attn=dec_attn, add_norm=add_norm, attn_qk=attn_qk)
++        if compile_blocks or self.compile_mode:
++            import torch._inductor.config as icfg
++            icfg.emulate_precision_casts = emulate_casts or self.compile_mode in ("layer", "layer_at")
+         if compile_blocks:
+             torch._dynamo.config.cache_size_limit = 64
+             fns = {k: torch.compile(v, dynamic=False) for k, v in fns.items()}
+@@ -105,8 +123,6 @@ class Engine:
+         self._layer_c = self._layer_dec
+         if self.compile_mode in ("layer", "layer_at"):
+             torch._dynamo.config.cache_size_limit = 64
+-            import torch._inductor.config as icfg
+-            icfg.emulate_precision_casts = True   # round intermediates exactly like eager bf16 (numerics == eager)
+             mode = "max-autotune-no-cudagraphs" if self.compile_mode == "layer_at" else "default"
+             self._layer_c = torch.compile(self._layer_dec, dynamic=False, mode=mode)
+ 
+@@ -220,11 +236,14 @@ class Engine:
+             q, k, v = mm(x, w["q"]), mm(x, w["k"]), mm(x, w["v"])
+         q, gate = q.view(T, self.nq, 2 * self.hd).chunk(2, -1)
+         gate = gate.reshape(T, -1)
+-        norm, rope = (rms_norm_zc, apply_rope) if prefill else (self.f["norm"], self.f["rope"])
+-        q = norm(q, w["qn"], self.eps).transpose(0, 1)[None]          # [1,nq,T,D]
+-        k = norm(k.view(T, self.nkv, self.hd), w["kn"], self.eps).transpose(0, 1)[None]
+         v = v.view(T, self.nkv, self.hd).transpose(0, 1)[None]
+-        q, k = rope(q, k, cos, sin)
++        if prefill or not self.lean:
++            norm, rope = (rms_norm_zc, apply_rope) if prefill else (self.f["norm"], self.f["rope"])
++            q = norm(q, w["qn"], self.eps).transpose(0, 1)[None]          # [1,nq,T,D]
++            k = norm(k.view(T, self.nkv, self.hd), w["kn"], self.eps).transpose(0, 1)[None]
++            q, k = rope(q, k, cos, sin)
++        else:
++            q, k = self.f["attn_qk"](q, k.view(T, self.nkv, self.hd), w["qn"], w["kn"], cos, sin, self.eps)
+         if prefill:
+             kc[:, :, :T] = k; vc[:, :, :T] = v
+             o = F.scaled_dot_product_attention(q, k, v, is_causal=True, enable_gqa=True)
+@@ -287,13 +306,14 @@ class Engine:
+         cos, sin = self.cos[pos], self.sin[pos]
+         li = ai = 0
+         norm = rms_norm_zc if prefill else self.f["norm"]
++        h = None   # decode/lean: pending residual, added inside the next norm block (one kernel instead of two)
+         for i, w in enumerate(self.layers):
+             if self.layer_types[i] == "linear_attention":
+                 if prefill:
+                     x = x + self._gdn(w, norm(x, w["ln1"], self.eps), self.conv_state[li], self.rec_state[li], True, None)
+                     x = x + self._mlp(w, norm(x, w["ln2"], self.eps), True)
+                 else:
+-                    x, sv = self._layer_c(w, x, cos, sin, pos, self.conv_state[li], self.rec_state[li], None, None, "gdn")
++                    x, h, sv = self._layer_c(w, x, h, cos, sin, pos, self.conv_state[li], self.rec_state[li], None, None, "gdn")
+                     if sv is not None:
+                         save.append(sv)
+                 li += 1
+@@ -302,24 +322,35 @@ class Engine:
+                     x = x + self._attn(w, norm(x, w["ln1"], self.eps), cos, sin, self.kc[ai], self.vc[ai], pos, True)
+                     x = x + self._mlp(w, norm(x, w["ln2"], self.eps), True)
+                 else:
+-                    x, _ = self._layer_c(w, x, cos, sin, pos, None, None, self.kc[ai], self.vc[ai], "attn")
++                    x, h, _ = self._layer_c(w, x, h, cos, sin, pos, None, None, self.kc[ai], self.vc[ai], "attn")
+                 ai += 1
++        if h is not None:
++            x, hn = self._pre_norm(x, h, self.final_norm)
++            return hn, x
+         return norm(x, self.final_norm, self.eps), x
+ 
+-    def _layer_dec(self, w, x, cos, sin, pos, conv_state, rec_state, kc, vc, ltype):
+-        """One decoder layer, decode path (T small). Compiled as a whole in compile_mode='layer*'."""
+-        norm = self.f["norm"]
+-        h = norm(x, w["ln1"], self.eps)
++    def _pre_norm(self, x, h, w):
++        """(x + h) then norm; h=None means no pending residual. Non-lean: separate add and norm (reference path)."""
++        if h is None:
++            return x, self.f["norm"](x, w, self.eps)
++        if self.lean:
++            return self.f["add_norm"](x, h, w, self.eps)
++        x = x + h
++        return x, self.f["norm"](x, w, self.eps)
++
++    def _layer_dec(self, w, x, h_in, cos, sin, pos, conv_state, rec_state, kc, vc, ltype):
++        """One decoder layer, decode path (T small). Takes the pending residual h_in; returns (x, pending residual, save).
++        Compiled as a whole in compile_mode='layer*'."""
++        x, hn = self._pre_norm(x, h_in, w["ln1"])
+         sv = None
+         if ltype == "gdn":
+             save = []
+-            h = self._gdn(w, h, conv_state, rec_state, False, save)
++            h = self._gdn(w, hn, conv_state, rec_state, False, save)
+             sv = save[0] if save else None
+         else:
+-            h = self._attn(w, h, cos, sin, kc, vc, pos, False)
+-        x = x + h
+-        x = x + self._mlp(w, norm(x, w["ln2"], self.eps), False)
+-        return x, sv
++            h = self._attn(w, hn, cos, sin, kc, vc, pos, False)
++        x, hn = self._pre_norm(x, h, w["ln2"])
++        return x, self._mlp(w, hn, False), sv
+ 
+     def _commit(self, save, n_acc):
+         """Commit GDN/conv states for the first n_acc tokens of the last multi-token step (device-side, exact)."""
+@@ -337,7 +368,8 @@ class Engine:
+             x = x + self._attn(m, norm(x, m["ln1"], self.eps), cos, sin, self.kc[-1], self.vc[-1], pos, True)
+             x = x + self._mlp(m, norm(x, m["ln2"], self.eps), True)
+         else:
+-            x, _ = self._layer_c(m, x, cos, sin, pos, None, None, self.kc[-1], self.vc[-1], "attn")
++            x, h, _ = self._layer_c(m, x, None, cos, sin, pos, None, None, self.kc[-1], self.vc[-1], "attn")
++            return self._pre_norm(x, h, m["norm"])[1]
+         return norm(x, m["norm"], self.eps)
+ 
+     def _mtp_in(self, hidden, tokens, prefill=False):
+@@ -352,8 +384,9 @@ class Engine:
+ 
+     # ---------------------------------------------------------------- steps
+     @torch.no_grad()
+-    def prefill(self, ids):
+-        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending)."""
++    def prefill(self, ids, on_first_token=None):
++        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending).
++        on_first_token(g) is called right after the main-model argmax (before MTP drafting) for TTFT accounting."""
+         self.reset()
+         T = len(ids)
+         tokens = torch.tensor(ids, device=self.dev)
+@@ -362,6 +395,8 @@ class Engine:
+         self.last_hn = hn[-1:]
+         g = self._argmax(hn[-1:])
+         self.n.fill_(T); self.pending.copy_(g[0])
++        if on_first_token is not None:
++            on_first_token(g)          # host sync here: first token available -> TTFT boundary
+         if self.spec_k > 0:
+             hid = hn if self.mtp_hidden == "post_norm" else hp
+             # MTP over the whole prompt: inputs (h_i, t_{i+1}) for i < T-1, and (h_{T-1}, g) for the last row
+@@ -469,10 +504,11 @@ class Engine:
+             self.ensure_graph()   # one-time startup cost, excluded from timing
+         torch.cuda.synchronize()
+         t0 = time.perf_counter()
+-        first = self.prefill(ids)
+-        ev_first = torch.cuda.Event(enable_timing=True); ev_first.record()
+-        first_tok = first.item()  # sync: first token complete
+-        t_first = time.perf_counter()
++        ft = {}
++        def on_first(g):
++            ft["tok"] = g.item(); ft["t"] = time.perf_counter()   # sync: first token complete on host
++        self.prefill(ids, on_first_token=on_first)
++        first_tok, t_first = ft["tok"], ft["t"]
+         out = [first_tok]
+         T = self.spec_k + 1
+         host = torch.empty(T + 1, dtype=torch.long, pin_memory=True)
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj diff 28dea1f 2a68eaa -- qwen35_fast/engine.py qwen35_fast/gdn_step.py
+diff --git a/qwen35_fast/engine.py b/qwen35_fast/engine.py
+index b55d784..6ae9e3c 100644
+--- a/qwen35_fast/engine.py
++++ b/qwen35_fast/engine.py
+@@ -67,11 +67,15 @@ def apply_rope(q, k, cos, sin):  # q,k: [B,H,T,D]; cos/sin: [T, rot]
+ 
+ class Engine:
+     def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True,
+-                 compile_blocks=False, use_gemv=False, compile_mode=None):
++                 compile_blocks=False, use_gemv=False, compile_mode=None, fused_gdn=False):
+         """compile_mode: None | "blocks" (fused elementwise helpers) | "layer" (whole decode layer compiled, graph
+         break at the fla kernel) | "layer_at" (same, inductor max-autotune for the GEMMs). compile_blocks=True == "blocks"."""
+         self.dev = torch.device(device)
+         self.compile_mode = compile_mode or ("blocks" if compile_blocks else None)
++        self.fused_gdn = fused_gdn
++        if fused_gdn:
++            from qwen35_fast.gdn_step import gdn_step
++            self._gdn_step = torch._dynamo.disable(gdn_step)
+         compile_blocks = self.compile_mode == "blocks"
+         self.compile_blocks = compile_blocks
+         self.use_gemv = use_gemv
+@@ -239,6 +243,11 @@ class Engine:
+             qkv, z, b, a = allp.split([self.conv_dim, self.gh * self.gv, self.gh, self.gh], -1)
+         else:
+             qkv, z, b, a = mm(x, w["qkv"]), mm(x, w["z"]), mm(x, w["b"]), mm(x, w["a"])
++        if not prefill and T == 1 and self.fused_gdn:   # single fused Triton kernel (conv+silu+delta rule+gated norm)
++            o = torch.empty(1, self.gh * self.gv, dtype=torch.bfloat16, device=x.device)
++            self._gdn_step(qkv[0], z[0], b[0], a[0], conv_state[0], w["conv_w"], w["neg_expA"], w["dt_bias"],
++                           w["gnorm"], rec_state[0], o[0], self.eps)
++            return mm(o, w["out"])
+         xc = qkv.T[None]                                                       # [1,conv_dim,T]
+         cw = w["conv_w"]                                                       # [conv_dim,1,k]
+         if prefill:
+@@ -343,9 +352,8 @@ class Engine:
+ 
+     # ---------------------------------------------------------------- steps
+     @torch.no_grad()
+-    def prefill(self, ids, on_first_token=None):
+-        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending).
+-        on_first_token(g) is called right after the main-model argmax (before MTP drafting) for TTFT accounting."""
++    def prefill(self, ids):
++        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending)."""
+         self.reset()
+         T = len(ids)
+         tokens = torch.tensor(ids, device=self.dev)
+@@ -354,8 +362,6 @@ class Engine:
+         self.last_hn = hn[-1:]
+         g = self._argmax(hn[-1:])
+         self.n.fill_(T); self.pending.copy_(g[0])
+-        if on_first_token is not None:
+-            on_first_token(g)          # host sync here: first token available -> TTFT boundary
+         if self.spec_k > 0:
+             hid = hn if self.mtp_hidden == "post_norm" else hp
+             # MTP over the whole prompt: inputs (h_i, t_{i+1}) for i < T-1, and (h_{T-1}, g) for the last row
+@@ -463,11 +469,10 @@ class Engine:
+             self.ensure_graph()   # one-time startup cost, excluded from timing
+         torch.cuda.synchronize()
+         t0 = time.perf_counter()
+-        ft = {}
+-        def on_first(g):
+-            ft["tok"] = g.item(); ft["t"] = time.perf_counter()   # sync: first token complete on host
+-        self.prefill(ids, on_first_token=on_first)
+-        first_tok, t_first = ft["tok"], ft["t"]
++        first = self.prefill(ids)
++        ev_first = torch.cuda.Event(enable_timing=True); ev_first.record()
++        first_tok = first.item()  # sync: first token complete
++        t_first = time.perf_counter()
+         out = [first_tok]
+         T = self.spec_k + 1
+         host = torch.empty(T + 1, dtype=torch.long, pin_memory=True)
+diff --git a/qwen35_fast/gdn_step.py b/qwen35_fast/gdn_step.py
+new file mode 100644
+index 0000000..96681bd
+--- /dev/null
++++ b/qwen35_fast/gdn_step.py
+@@ -0,0 +1,122 @@
++"""One Triton kernel for the whole Gated-DeltaNet single-token decode update (batch 1, T=1), one program per head:
++conv1d(4 taps)+SiLU on the head's q/k/v channels, conv-state shift, fp32 l2norm(q,k), q*scale, gated delta rule state
++update (in place), o = S^T q, gated RMSNorm(o, z). Op order/dtypes mirror the eager path (cuDNN conv -> bf16 -> silu ->
++bf16; fla fused_recurrent fp32 math; Qwen3_5RMSNormGated rounding). Usage: gdn_step(qkv, z, b, a, conv_state, conv_w,
++neg_expA, dt_bias, gnorm_w, rec_state, out). test() checks against the eager ops on a GPU."""
++import torch
++import triton
++import triton.language as tl
++from triton.language.extra import libdevice
++
++
++@triton.jit
++def _conv_silu(x_ptr, st_ptr, w_ptr, c):
++    x = tl.load(x_ptr + c)
++    s0 = tl.load(st_ptr + c * 3); s1 = tl.load(st_ptr + c * 3 + 1); s2 = tl.load(st_ptr + c * 3 + 2)
++    w0 = tl.load(w_ptr + c * 4); w1 = tl.load(w_ptr + c * 4 + 1); w2 = tl.load(w_ptr + c * 4 + 2); w3 = tl.load(w_ptr + c * 4 + 3)
++    acc = s0.to(tl.float32) * w0.to(tl.float32) + s1.to(tl.float32) * w1.to(tl.float32) \
++        + s2.to(tl.float32) * w2.to(tl.float32) + x.to(tl.float32) * w3.to(tl.float32)
++    yb = acc.to(tl.bfloat16).to(tl.float32)                     # conv output rounded to bf16
++    y = (yb * tl.sigmoid(yb)).to(tl.bfloat16).to(tl.float32)     # silu on bf16 -> bf16
++    # shift conv state in place (each channel owned by exactly one program)
++    tl.store(st_ptr + c * 3, s1); tl.store(st_ptr + c * 3 + 1, s2); tl.store(st_ptr + c * 3 + 2, x)
++    return y
++
++
++@triton.jit
++def _gdn_step_kernel(qkv_ptr, z_ptr, b_ptr, a_ptr, st_ptr, w_ptr, nega_ptr, dtb_ptr, gn_ptr, S_ptr, o_ptr,
++                     scale, eps, D: tl.constexpr, KOFF: tl.constexpr, VOFF: tl.constexpr, DBG: tl.constexpr):
++    h = tl.program_id(0)
++    offs = tl.arange(0, D)
++    q = _conv_silu(qkv_ptr, st_ptr, w_ptr, h * D + offs)
++    k = _conv_silu(qkv_ptr, st_ptr, w_ptr, KOFF + h * D + offs)
++    v = _conv_silu(qkv_ptr, st_ptr, w_ptr, VOFF + h * D + offs)
++    q = q / tl.sqrt(tl.sum(q * q) + 1e-6)
++    k = k / tl.sqrt(tl.sum(k * k) + 1e-6)
++    q = q * scale
++    if DBG:
++        tl.store(o_ptr + 3 * h * D + offs, q); tl.store(o_ptr + (3 * h + 1) * D + offs, k); tl.store(o_ptr + (3 * h + 2) * D + offs, v)
++        return
++    beta = tl.sigmoid(tl.load(b_ptr + h).to(tl.float32)).to(tl.bfloat16).to(tl.float32)   # HF: b.sigmoid() in bf16
++    ga = tl.load(a_ptr + h).to(tl.float32) + tl.load(dtb_ptr + h).to(tl.float32)
++    sp = tl.where(ga > 20.0, ga, libdevice.log1p(tl.exp(ga)))                            # torch softplus
++    g = tl.load(nega_ptr + h) * sp
++    Sp = S_ptr + h * D * D + offs[:, None] * D + offs[None, :]                            # S[k, v]
++    S = tl.load(Sp) * tl.exp(g)
++    kv = tl.sum(S * k[:, None], 0)
++    vn = beta * (v - kv)
++    S += k[:, None] * vn[None, :]
++    o = tl.sum(S * q[:, None], 0)
++    tl.store(Sp, S)
++    # gated RMSNorm (Qwen3_5RMSNormGated): input is the bf16 o, fp32 norm, bf16 * weight, * silu(z fp32), -> bf16
++    ob = o.to(tl.bfloat16).to(tl.float32)
++    hn = ob * tl.rsqrt(tl.sum(ob * ob) / D + eps)
++    hb = hn.to(tl.bfloat16).to(tl.float32)
++    hw = (tl.load(gn_ptr + offs).to(tl.float32) * hb).to(tl.bfloat16).to(tl.float32)
++    z = tl.load(z_ptr + h * D + offs).to(tl.float32)
++    out = hw * (z * tl.sigmoid(z))
++    tl.store(o_ptr + h * D + offs, out.to(tl.bfloat16))
++
++
++def gdn_step(qkv, z, b, a, conv_state, conv_w, neg_expA, dt_bias, gnorm_w, rec_state, out, eps=1e-6, dbg=False):
++    """qkv [6144] bf16 (pre-conv row), z [2048] bf16, b/a [16] bf16, conv_state [6144,3] bf16 (updated in place),
++    conv_w [6144,1,4] bf16, neg_expA [16] fp32, dt_bias [16], gnorm_w [128] bf16, rec_state [16,128,128] fp32 (in place),
++    out [2048] bf16. dbg=True: out is fp32 [3*H*D] and receives the post-l2norm q,k,v per head (test only)."""
++    H, D = rec_state.shape[0], rec_state.shape[1]
++    _gdn_step_kernel[(H,)](qkv, z, b, a, conv_state, conv_w, neg_expA, dt_bias, gnorm_w, rec_state, out,
++                           D ** -0.5, eps, D=D, KOFF=H * D, VOFF=2 * H * D, DBG=dbg, num_warps=8)
++    return out
++
++
++def _torch_ref(q, k, v, g, beta, S):
++    """Plain-torch gated delta rule for T=1 (q,k,v [H,D] fp32 post conv/silu, S [H,D,D]). Returns o [H,D], S_new."""
++    q = q / torch.sqrt((q * q).sum(-1, keepdim=True) + 1e-6) * q.shape[-1] ** -0.5
++    k = k / torch.sqrt((k * k).sum(-1, keepdim=True) + 1e-6)
++    S = S * g.exp()[:, None, None]
++    kv = (S * k[:, :, None]).sum(1)
++    vn = beta[:, None] * (v - kv)
++    S = S + k[:, :, None] * vn[:, None, :]
++    return (S * q[:, :, None]).sum(1), S
++
++
++def test(n=5):
++    import torch.nn.functional as F
++    from fla.ops.gated_delta_rule import fused_recurrent_gated_delta_rule
++    from qwen35_fast.engine import rms_norm_gated
++    torch.manual_seed(0); dev = "cuda"; H, D = 16, 128; C = 3 * H * D
++    worst_o = worst_s = 0.0; bad = 0; tot = 0
++    for i in range(n):
++        qkv = torch.randn(C, device=dev).bfloat16() * 2
++        z = torch.randn(H * D, device=dev).bfloat16(); b = torch.randn(H, device=dev).bfloat16(); a = torch.randn(H, device=dev).bfloat16()
++        cs = torch.randn(C, 3, device=dev).bfloat16(); cw = (torch.randn(C, 1, 4, device=dev) * 0.5).bfloat16()
++        neg_expA = -torch.rand(H, device=dev).mul(4).exp(); dt_bias = torch.randn(H, device=dev).bfloat16()
++        gn = (1 + 0.1 * torch.randn(D, device=dev)).bfloat16(); S = torch.randn(H, D, D, device=dev) * 0.3
++        # reference = the engine's eager T=1 path
++        cs_ref, S_ref = cs.clone(), S.clone()
++        xc_all = torch.cat([cs_ref[None], qkv[None, :, None]], -1)
++        y = F.silu(F.conv1d(xc_all, cw, groups=C))[0].T
++        q, k, v = [t.reshape(1, 1, H, D) for t in y.split([H * D] * 3, -1)]
++        beta = b.sigmoid()[None, None]; g = (neg_expA * F.softplus(a.float() + dt_bias))[None, None]
++        o, st = fused_recurrent_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=S_ref[None], output_final_state=True, use_qk_l2norm_in_kernel=True)
++        S_ref = st[0]; cs_ref = xc_all[0, :, 1:]
++        o_ref = rms_norm_gated(o.reshape(H, D), z.reshape(H, D), gn, 1e-6).reshape(-1)
++        if i == 0:  # diagnostics: where does the kernel diverge? (conv/silu+l2norm inputs, fla-vs-torch recurrence)
++            qf, kf, vf = [t.reshape(H, D).float() for t in y.split([H * D] * 3, -1)]
++            o_t, S_t = _torch_ref(qf, kf, vf, g[0, 0], beta[0, 0].float(), S.clone())
++            print(f"  fla vs torch-ref: state rel diff {((S_ref - S_t).abs().max() / S_t.abs().max()).item():.2e}, o max diff {(o.reshape(H, D).float() - o_t).abs().max().item():.3g}", flush=True)
++            dbg = torch.empty(3 * H * D, device=dev, dtype=torch.float32); cs_d, S_d = cs.clone(), S.clone()
++            gdn_step(qkv, z, b, a, cs_d, cw, neg_expA, dt_bias, gn, S_d, dbg, dbg=True)
++            dbg = dbg.reshape(H, 3, D)
++            qn = qf / torch.sqrt((qf * qf).sum(-1, keepdim=True) + 1e-6) * D ** -0.5; kn = kf / torch.sqrt((kf * kf).sum(-1, keepdim=True) + 1e-6)
++            print(f"  kernel q/k/v vs torch: {(dbg[:, 0] - qn).abs().max().item():.3g} {(dbg[:, 1] - kn).abs().max().item():.3g} {(dbg[:, 2] - vf).abs().max().item():.3g}", flush=True)
++        out = torch.empty(H * D, device=dev, dtype=torch.bfloat16)
++        gdn_step(qkv, z, b, a, cs, cw, neg_expA, dt_bias, gn, S, out)
++        if i == 0:
++            print(f"  kernel vs torch-ref: state rel diff {((S - S_t).abs().max() / S_t.abs().max()).item():.2e}", flush=True)
++        d = (out.float() - o_ref.float()).abs(); ulp = torch.pow(2.0, torch.floor(torch.log2(o_ref.float().abs().clamp_min(1e-30))) - 7)
++        bad += (d > 2 * ulp + 1e-3).sum().item(); tot += d.numel()
++        worst_o = max(worst_o, d.max().item()); worst_s = max(worst_s, ((S - S_ref).abs().max() / S_ref.abs().max()).item())
++        assert torch.equal(cs, cs_ref), "conv state mismatch"
++    print(f"gdn_step.test: max|o diff|={worst_o:.4g}, elements beyond 2ulp: {bad}/{tot} ({100*bad/tot:.3f}%), state max rel diff={worst_s:.2e}", flush=True)
++    assert bad / tot <= 1e-3 and worst_s <= 1e-4, "gdn_step tolerance exceeded"
++    return worst_o, bad / tot, worst_s
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj diff 0779b65 5c0455e -- qwen35_fast/engine.py qwen35_fast/gdn_step.py
+diff --git a/qwen35_fast/gdn_step.py b/qwen35_fast/gdn_step.py
+index dcb9246..72491ce 100644
+--- a/qwen35_fast/gdn_step.py
++++ b/qwen35_fast/gdn_step.py
+@@ -24,8 +24,8 @@ def _conv_silu(x_ptr, st_ptr, w_ptr, c):
+ 
+ 
+ @triton.jit
+-def _gdn_step_kernel(qkv_ptr, z_ptr, b_ptr, a_ptr, st_ptr, w_ptr, nega_ptr, dtb_ptr, gn_ptr, S_ptr, o_ptr,
+-                     scale, eps, D: tl.constexpr, KOFF: tl.constexpr, VOFF: tl.constexpr, DBG: tl.constexpr):
++def _gdn_step_kernel(qkv_ptr, z_ptr, b_ptr, a_ptr, st_ptr, w_ptr, nega_ptr, dtb_ptr, gn_ptr, S_ptr, S_out_ptr, o_ptr,
++                     scale, eps, D: tl.constexpr, KOFF: tl.constexpr, VOFF: tl.constexpr, DBG: tl.constexpr, BARRIER: tl.constexpr):
+     h = tl.program_id(0)
+     offs = tl.arange(0, D)
+     q = _conv_silu(qkv_ptr, st_ptr, w_ptr, h * D + offs)
+@@ -52,7 +52,14 @@ def _gdn_step_kernel(qkv_ptr, z_ptr, b_ptr, a_ptr, st_ptr, w_ptr, nega_ptr, dtb_
+     vn = beta * (v - kv)
+     S += k[:, None] * vn[None, :]
+     o = tl.sum(S * q[:, None], 0)
+-    tl.store(Sp, S)
++    if DBG == 3:   # dump head 0's post-update state and vn (diagnosis only)
++        if h == 0:
++            tl.store(o_ptr + offs[:, None] * D + offs[None, :], S)
++            tl.store(o_ptr + D * D + offs, vn)
++        return
++    if BARRIER:
++        tl.debug_barrier()
++    tl.store(S_out_ptr + h * D * D + offs[:, None] * D + offs[None, :], S)
+     # gated RMSNorm (Qwen3_5RMSNormGated): input is the bf16 o, fp32 norm, bf16 * weight, * silu(z fp32), -> bf16
+     ob = o.to(tl.bfloat16).to(tl.float32)
+     hn = ob * tl.rsqrt(tl.sum(ob * ob) / D + eps)
+@@ -63,13 +70,15 @@ def _gdn_step_kernel(qkv_ptr, z_ptr, b_ptr, a_ptr, st_ptr, w_ptr, nega_ptr, dtb_
+     tl.store(o_ptr + h * D + offs, out.to(tl.bfloat16))
+ 
+ 
+-def gdn_step(qkv, z, b, a, conv_state, conv_w, neg_expA, dt_bias, gnorm_w, rec_state, out, eps=1e-6, dbg=False):
++def gdn_step(qkv, z, b, a, conv_state, conv_w, neg_expA, dt_bias, gnorm_w, rec_state, out, eps=1e-6, dbg=False, rec_state_out=None, barrier=True):
+     """qkv [6144] bf16 (pre-conv row), z [2048] bf16, b/a [16] bf16, conv_state [6144,3] bf16 (updated in place),
+     conv_w [6144,1,4] bf16, neg_expA [16] fp32, dt_bias [16], gnorm_w [128] bf16, rec_state [16,128,128] fp32 (in place),
+     out [2048] bf16. dbg=True: out is fp32 [3*H*D] and receives the post-l2norm q,k,v per head (test only)."""
+     H, D = rec_state.shape[0], rec_state.shape[1]
+-    _gdn_step_kernel[(H,)](qkv, z, b, a, conv_state, conv_w, neg_expA, dt_bias, gnorm_w, rec_state, out,
+-                           D ** -0.5, eps, D=D, KOFF=H * D, VOFF=2 * H * D, DBG=int(dbg), num_warps=8)
++    if rec_state_out is None:
++        rec_state_out = rec_state          # in place
++    _gdn_step_kernel[(H,)](qkv, z, b, a, conv_state, conv_w, neg_expA, dt_bias, gnorm_w, rec_state, rec_state_out, out,
++                           D ** -0.5, eps, D=D, KOFF=H * D, VOFF=2 * H * D, DBG=int(dbg), BARRIER=int(barrier), num_warps=8)
+     return out
+[0m
+[0m$ [0mgrep -rn "prefill_s\|ttft_s\|decode_s\|on_first_token\|forced_decode_logits\|fused_gdn\|\.lean\|add_norm\|attn_qk" /Users/islam/fun_fable_proj --include=*.py --include=*.md | grep -v "qwen35_fast/engine.py"
+zsh:1: no matches found: --include=*.py
+[0m
+[0m$ [0mgrep -rn "\.item()\|int(\|float(\|\.cpu()\|tolist\|synchronize\|nonzero\|boolean_mask\|\.any()\|\.all()" /Users/islam/fun_fable_proj/qwen35_fast/engine.py
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:20:    xf = x.float()
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:21:    return (xf * torch.rsqrt(xf.pow(2).mean(-1, keepdim=True) + eps) * (1.0 + w.float())).to(x.dtype)
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:25:    xf = x.float()
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:28:    return (h * F.silu(gate.float())).to(x.dtype)
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:34:    return y, b.sigmoid()[None], (neg_expA * F.softplus(a.float() + dt_bias))[None]
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:62:    s = torch.matmul(qg, kc.transpose(-1, -2)).float() * scale                # [1,nkv,rep*T,L]
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:64:    s = s.masked_fill(~mask, float("-inf")).softmax(-1).to(q.dtype)
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:112:        self.rot = int(self.hd * c["rope_parameters"]["partial_rotary_factor"])
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:142:            t.record(); torch.cuda.synchronize(); return s.elapsed_time(t) / n
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:176:                d["neg_expA"] = -d["A_log"].float().exp()
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:200:        torch.cuda.synchronize()
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:459:        out[0] = (self.last_hn[-1:] @ self.embed.T).float()[0]
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:461:            i = int(self.n) - L                       # index of the gen token to feed next
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:468:            acc = int(self.step_acc) if k else 0
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:469:            lg = (self.last_hn @ self.embed.T).float()   # rows 0..acc are conditioned on true tokens
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:491:        torch.cuda.synchronize()
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:505:        torch.cuda.synchronize()
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:509:            ft["tok"] = g.item(); ft["t"] = time.perf_counter()   # sync: first token complete on host
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:518:            torch.cuda.synchronize(); t_end = time.perf_counter()
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:523:            ev.record(); ev.synchronize()
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:524:            acc = int(host[T]); new = host[: acc + 1].tolist()
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py:532:        st = {"steps": int(self.stat_steps), "accepted": int(self.stat_acc)}; self.stat_steps.zero_(); self.stat_acc.zero_()
+[0m
+[0m$ [0mgrep -rn "prefill_s\|ttft_s\|decode_s\|on_first_token\|forced_decode_logits\|fused_gdn\|\.lean\|add_norm\|attn_qk" /Users/islam/fun_fable_proj --include='*.py' --include='*.md' | grep -v "qwen35_fast/engine.py"
+/Users/islam/fun_fable_proj/candidates/engine_v1_backup.py:372:    def forced_decode_logits(self, prompt_ids, gen_ids):
+/Users/islam/fun_fable_proj/candidates/engine_v1_backup.py:422:        """Returns dict(tokens, ttft_s, decode_s, prefill_s, total_s). Timing per README measurement notes."""
+/Users/islam/fun_fable_proj/candidates/engine_v1_backup.py:438:            return {"tokens": out, "ttft_s": t_first - t0, "decode_s": 0.0, "total_s": t_end - t0}
+/Users/islam/fun_fable_proj/candidates/engine_v1_backup.py:452:        return {"tokens": out[:n_out], "ttft_s": t_first - t0, "decode_s": t_end - t_first, "total_s": t_end - t0, "spec": st}
+/Users/islam/fun_fable_proj/candidates/review2/TASK.md:5:(2) `_gdn` signature `(w, x, conv_state, rec_state, prefill, save)` and every call site; the `fused_gdn` branch;
+/Users/islam/fun_fable_proj/candidates/review2/TASK.md:6:(3) `_attn` with explicit `kc, vc` args and the MTP call using `self.kc[-1]`; (4) `prefill(ids, on_first_token)` and
+/Users/islam/fun_fable_proj/candidates/review2/TASK.md:8:(6) `forced_decode_logits`; (7) anything that would break CUDA-graph capture (host syncs, data-dependent shapes) in
+/Users/islam/fun_fable_proj/bench/optimize.py:34:        out[w["id"]] = {"tps": [255 / r["decode_s"] for r in runs], "ttft": [r["ttft_s"] for r in runs],
+/Users/islam/fun_fable_proj/bench/optimize.py:52:        el = eng.forced_decode_logits(w["ids"], hgen).cpu(); hl = R["dec_logits"]
+/Users/islam/fun_fable_proj/bench/run_lean.py:46:                r["tps"][w["id"]] = 255 / o["decode_s"]
+/Users/islam/fun_fable_proj/bench/run_lean.py:48:                el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu()
+/Users/islam/fun_fable_proj/bench/run_debug.py:62:        r = eng.generate(ids, 8, ignore_eos=True); t4 = r["ttft_s"]
+/Users/islam/fun_fable_proj/bench/feasibility.py:80:            hf_runs.append({"ttft_s": ts.t[1] - t0, "decode_tps": (len(gen) - 1) / (ts.t[-1] - ts.t[1]),
+/Users/islam/fun_fable_proj/bench/feasibility.py:110:            runs.append({"ttft_s": t1, "decode_tps": (len(gen) - 1) / (tN - t1), "total_s": tN, "n_gen": len(gen)})
+/Users/islam/fun_fable_proj/bench/run_gdn.py:32:    tag = f"fused_gdn={fused}"
+/Users/islam/fun_fable_proj/bench/run_gdn.py:34:        eng = Engine(path, spec_k=0, compile_blocks=True, fused_gdn=fused)
+/Users/islam/fun_fable_proj/bench/run_gdn.py:50:            o = eng.generate(w["ids"], 256, ignore_eos=True); r["tps"][w["id"]] = 255 / o["decode_s"]
+/Users/islam/fun_fable_proj/bench/run_gdn.py:51:            el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu(); hl = ref[w["id"]]["dec"]
+/Users/islam/fun_fable_proj/bench/common.py:34:    """Greedy generation with HF; returns (gen_ids, ttft_s, decode_tps, total_s). Timestamps via streamer (sync per token)."""
+/Users/islam/fun_fable_proj/bench/fill_results.py:43:                cells.append(f"{fmt(b)} | {med([r['decode_tps'] for r in b])/med([r['decode_tps'] for r in a]):.2f}x | {1000*med([r['ttft_s'] for r in b]):.1f} | {max(r['peak_mem_gb'] for r in b):.2f}")
+/Users/islam/fun_fable_proj/bench/fill_results.py:44:            out.append(f"| {w} | {fmt(a)} | " + " | ".join(cells) + f" | {1000*med([r['ttft_s'] for r in a]):.1f} |")
+/Users/islam/fun_fable_proj/bench/evaluate.py:4:  * prefill_s / ttft_s : request start -> first generated token available on host (prefill + first sampling).
+/Users/islam/fun_fable_proj/bench/evaluate.py:37:        return dict(tokens=gen, ttft_s=ttft, decode_tps=tps, total_s=tot, peak_mem_gb=torch.cuda.max_memory_allocated() / 1e9)
+/Users/islam/fun_fable_proj/bench/evaluate.py:65:        return dict(tokens=gen, ttft_s=ts[0] - t0, decode_tps=(len(gen) - 1) / (ts[-1] - ts[0]), total_s=ts[-1] - t0,
+/Users/islam/fun_fable_proj/bench/evaluate.py:86:        return dict(tokens=o["tokens"], ttft_s=o["ttft_s"], decode_tps=(len(o["tokens"]) - 1) / o["decode_s"],
+/Users/islam/fun_fable_proj/bench/evaluate.py:121:                    print(n, w["id"], f"tps={r['decode_tps']:.1f} ttft={r['ttft_s']*1000:.1f}ms", flush=True)
+/Users/islam/fun_fable_proj/bench/evaluate.py:145:                           "ttft_ms_median": 1000 * statistics.median(r["ttft_s"] for r in runs),
+/Users/islam/fun_fable_proj/bench/run_opt.py:37:                r["runs"][w["id"]] = {"tps": 255 / o["decode_s"], "acc": o["spec"], "tokens_head": o["tokens"][:32]}
+/Users/islam/fun_fable_proj/bench/run_gatecheck.py:23:        el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu(); d = (el - ref[w["id"]]["dec"]).abs().max(-1).values
+/Users/islam/fun_fable_proj/bench/run_custom.py:50:                    o["decode_tps"] = (len(o["tokens"]) - 1) / o["decode_s"]
+/Users/islam/fun_fable_proj/bench/run_custom.py:53:                item = {"decode_tps": [o["decode_tps"] for o in outs], "ttft_s": [o["ttft_s"] for o in outs],
+/Users/islam/fun_fable_proj/bench/profile_step.py:41:        o = eng.generate(w["ids"], 256, ignore_eos=True); o["decode_tps"] = 255 / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/candidates/engine_v1_backup.py:372:    def forced_decode_logits(self, prompt_ids, gen_ids):
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/candidates/engine_v1_backup.py:422:        """Returns dict(tokens, ttft_s, decode_s, prefill_s, total_s). Timing per README measurement notes."""
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/candidates/engine_v1_backup.py:438:            return {"tokens": out, "ttft_s": t_first - t0, "decode_s": 0.0, "total_s": t_end - t0}
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/candidates/engine_v1_backup.py:452:        return {"tokens": out[:n_out], "ttft_s": t_first - t0, "decode_s": t_end - t_first, "total_s": t_end - t0, "spec": st}
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/optimize.py:38:        out[w["id"]] = {"tps": [255 / r["decode_s"] for r in runs], "ttft": [r["ttft_s"] for r in runs],
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/optimize.py:56:        el = eng.forced_decode_logits(w["ids"], hgen).cpu(); hl = R["dec_logits"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/feasibility.py:80:            hf_runs.append({"ttft_s": ts.t[1] - t0, "decode_tps": (len(gen) - 1) / (ts.t[-1] - ts.t[1]),
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/feasibility.py:110:            runs.append({"ttft_s": t1, "decode_tps": (len(gen) - 1) / (tN - t1), "total_s": tN, "n_gen": len(gen)})
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/run_gdn.py:32:    tag = f"fused_gdn={fused}"
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/run_gdn.py:34:        eng = Engine(path, spec_k=0, compile_blocks=True, fused_gdn=fused)
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/run_gdn.py:50:            o = eng.generate(w["ids"], 256, ignore_eos=True); r["tps"][w["id"]] = 255 / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/run_gdn.py:51:            el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu(); hl = ref[w["id"]]["dec"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/common.py:34:    """Greedy generation with HF; returns (gen_ids, ttft_s, decode_tps, total_s). Timestamps via streamer (sync per token)."""
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/fill_results.py:43:                cells.append(f"{fmt(b)} | {med([r['decode_tps'] for r in b])/med([r['decode_tps'] for r in a]):.2f}x | {1000*med([r['ttft_s'] for r in b]):.1f} | {max(r['peak_mem_gb'] for r in b):.2f}")
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/fill_results.py:44:            out.append(f"| {w} | {fmt(a)} | " + " | ".join(cells) + f" | {1000*med([r['ttft_s'] for r in a]):.1f} |")
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/evaluate.py:4:  * prefill_s / ttft_s : request start -> first generated token available on host (prefill + first sampling).
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/evaluate.py:37:        return dict(tokens=gen, ttft_s=ttft, decode_tps=tps, total_s=tot, peak_mem_gb=torch.cuda.max_memory_allocated() / 1e9)
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/evaluate.py:65:        return dict(tokens=gen, ttft_s=ts[0] - t0, decode_tps=(len(gen) - 1) / (ts[-1] - ts[0]), total_s=ts[-1] - t0,
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/evaluate.py:86:        return dict(tokens=o["tokens"], ttft_s=o["ttft_s"], decode_tps=(len(o["tokens"]) - 1) / o["decode_s"],
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/evaluate.py:121:                    print(n, w["id"], f"tps={r['decode_tps']:.1f} ttft={r['ttft_s']*1000:.1f}ms", flush=True)
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/evaluate.py:145:                           "ttft_ms_median": 1000 * statistics.median(r["ttft_s"] for r in runs),
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/run_opt.py:37:                r["runs"][w["id"]] = {"tps": 255 / o["decode_s"], "acc": o["spec"], "tokens_head": o["tokens"][:32]}
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/run_custom.py:50:                    o["decode_tps"] = (len(o["tokens"]) - 1) / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/run_custom.py:53:                item = {"decode_tps": [o["decode_tps"] for o in outs], "ttft_s": [o["ttft_s"] for o in outs],
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/profile_step.py:41:        o = eng.generate(w["ids"], 256, ignore_eos=True); o["decode_tps"] = 255 / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/README.md:84:* `ttft_s` / prefill: request start -> first generated token on host (prefill + first argmax).
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/candidates/engine_v1_backup.py:372:    def forced_decode_logits(self, prompt_ids, gen_ids):
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/candidates/engine_v1_backup.py:422:        """Returns dict(tokens, ttft_s, decode_s, prefill_s, total_s). Timing per README measurement notes."""
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/candidates/engine_v1_backup.py:438:            return {"tokens": out, "ttft_s": t_first - t0, "decode_s": 0.0, "total_s": t_end - t0}
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/candidates/engine_v1_backup.py:452:        return {"tokens": out[:n_out], "ttft_s": t_first - t0, "decode_s": t_end - t_first, "total_s": t_end - t0, "spec": st}
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/optimize.py:34:        out[w["id"]] = {"tps": [255 / r["decode_s"] for r in runs], "ttft": [r["ttft_s"] for r in runs],
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/optimize.py:52:        el = eng.forced_decode_logits(w["ids"], hgen).cpu(); hl = R["dec_logits"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_lean.py:46:                r["tps"][w["id"]] = 255 / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_lean.py:48:                el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu()
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_debug.py:56:        r = eng.generate(ids, 8, ignore_eos=True); t4 = r["ttft_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/feasibility.py:80:            hf_runs.append({"ttft_s": ts.t[1] - t0, "decode_tps": (len(gen) - 1) / (ts.t[-1] - ts.t[1]),
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/feasibility.py:110:            runs.append({"ttft_s": t1, "decode_tps": (len(gen) - 1) / (tN - t1), "total_s": tN, "n_gen": len(gen)})
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_gdn.py:32:    tag = f"fused_gdn={fused}"
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_gdn.py:34:        eng = Engine(path, spec_k=0, compile_blocks=True, fused_gdn=fused)
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_gdn.py:50:            o = eng.generate(w["ids"], 256, ignore_eos=True); r["tps"][w["id"]] = 255 / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_gdn.py:51:            el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu(); hl = ref[w["id"]]["dec"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/common.py:34:    """Greedy generation with HF; returns (gen_ids, ttft_s, decode_tps, total_s). Timestamps via streamer (sync per token)."""
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/fill_results.py:43:                cells.append(f"{fmt(b)} | {med([r['decode_tps'] for r in b])/med([r['decode_tps'] for r in a]):.2f}x | {1000*med([r['ttft_s'] for r in b]):.1f} | {max(r['peak_mem_gb'] for r in b):.2f}")
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/fill_results.py:44:            out.append(f"| {w} | {fmt(a)} | " + " | ".join(cells) + f" | {1000*med([r['ttft_s'] for r in a]):.1f} |")
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/evaluate.py:4:  * prefill_s / ttft_s : request start -> first generated token available on host (prefill + first sampling).
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/evaluate.py:37:        return dict(tokens=gen, ttft_s=ttft, decode_tps=tps, total_s=tot, peak_mem_gb=torch.cuda.max_memory_allocated() / 1e9)
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/evaluate.py:65:        return dict(tokens=gen, ttft_s=ts[0] - t0, decode_tps=(len(gen) - 1) / (ts[-1] - ts[0]), total_s=ts[-1] - t0,
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/evaluate.py:86:        return dict(tokens=o["tokens"], ttft_s=o["ttft_s"], decode_tps=(len(o["tokens"]) - 1) / o["decode_s"],
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/evaluate.py:121:                    print(n, w["id"], f"tps={r['decode_tps']:.1f} ttft={r['ttft_s']*1000:.1f}ms", flush=True)
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/evaluate.py:145:                           "ttft_ms_median": 1000 * statistics.median(r["ttft_s"] for r in runs),
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_opt.py:37:                r["runs"][w["id"]] = {"tps": 255 / o["decode_s"], "acc": o["spec"], "tokens_head": o["tokens"][:32]}
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_custom.py:50:                    o["decode_tps"] = (len(o["tokens"]) - 1) / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_custom.py:53:                item = {"decode_tps": [o["decode_tps"] for o in outs], "ttft_s": [o["ttft_s"] for o in outs],
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/profile_step.py:41:        o = eng.generate(w["ids"], 256, ignore_eos=True); o["decode_tps"] = 255 / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/README.md:84:* `ttft_s` / prefill: request start -> first generated token on host (prefill + first argmax).
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/candidates/engine_v1_backup.py:372:    def forced_decode_logits(self, prompt_ids, gen_ids):
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/candidates/engine_v1_backup.py:422:        """Returns dict(tokens, ttft_s, decode_s, prefill_s, total_s). Timing per README measurement notes."""
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/candidates/engine_v1_backup.py:438:            return {"tokens": out, "ttft_s": t_first - t0, "decode_s": 0.0, "total_s": t_end - t0}
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/candidates/engine_v1_backup.py:452:        return {"tokens": out[:n_out], "ttft_s": t_first - t0, "decode_s": t_end - t_first, "total_s": t_end - t0, "spec": st}
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/optimize.py:38:        out[w["id"]] = {"tps": [255 / r["decode_s"] for r in runs], "ttft": [r["ttft_s"] for r in runs],
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/optimize.py:56:        el = eng.forced_decode_logits(w["ids"], hgen).cpu(); hl = R["dec_logits"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/run_lean.py:46:                r["tps"][w["id"]] = 255 / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/run_lean.py:48:                el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu()
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/feasibility.py:80:            hf_runs.append({"ttft_s": ts.t[1] - t0, "decode_tps": (len(gen) - 1) / (ts.t[-1] - ts.t[1]),
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/feasibility.py:110:            runs.append({"ttft_s": t1, "decode_tps": (len(gen) - 1) / (tN - t1), "total_s": tN, "n_gen": len(gen)})
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/common.py:34:    """Greedy generation with HF; returns (gen_ids, ttft_s, decode_tps, total_s). Timestamps via streamer (sync per token)."""
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/fill_results.py:43:                cells.append(f"{fmt(b)} | {med([r['decode_tps'] for r in b])/med([r['decode_tps'] for r in a]):.2f}x | {1000*med([r['ttft_s'] for r in b]):.1f} | {max(r['peak_mem_gb'] for r in b):.2f}")
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/fill_results.py:44:            out.append(f"| {w} | {fmt(a)} | " + " | ".join(cells) + f" | {1000*med([r['ttft_s'] for r in a]):.1f} |")
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/evaluate.py:4:  * prefill_s / ttft_s : request start -> first generated token available on host (prefill + first sampling).
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/evaluate.py:37:        return dict(tokens=gen, ttft_s=ttft, decode_tps=tps, total_s=tot, peak_mem_gb=torch.cuda.max_memory_allocated() / 1e9)
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/evaluate.py:65:        return dict(tokens=gen, ttft_s=ts[0] - t0, decode_tps=(len(gen) - 1) / (ts[-1] - ts[0]), total_s=ts[-1] - t0,
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/evaluate.py:86:        return dict(tokens=o["tokens"], ttft_s=o["ttft_s"], decode_tps=(len(o["tokens"]) - 1) / o["decode_s"],
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/evaluate.py:121:                    print(n, w["id"], f"tps={r['decode_tps']:.1f} ttft={r['ttft_s']*1000:.1f}ms", flush=True)
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/evaluate.py:145:                           "ttft_ms_median": 1000 * statistics.median(r["ttft_s"] for r in runs),
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/run_opt.py:37:                r["runs"][w["id"]] = {"tps": 255 / o["decode_s"], "acc": o["spec"], "tokens_head": o["tokens"][:32]}
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/run_custom.py:50:                    o["decode_tps"] = (len(o["tokens"]) - 1) / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/run_custom.py:53:                item = {"decode_tps": [o["decode_tps"] for o in outs], "ttft_s": [o["ttft_s"] for o in outs],
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/bench/profile_step.py:41:        o = eng.generate(w["ids"], 256, ignore_eos=True); o["decode_tps"] = 255 / o["decode_s"]
+/Users/islam/fun_fable_proj/.claude/worktrees/agent-ad9103af87df51269/README.md:84:* `ttft_s` / prefill: request start -> first generated token on host (prefill + first argmax).
+/Users/islam/fun_fable_proj/README.md:84:* `ttft_s` / prefill: request start -> first generated token on host (prefill + first argmax).
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/pygments/lexers/theorem.py:7:    See also :mod:`pygments.lexers.lean`
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/pygments/lexers/theorem.py:17:from pygments.lexers.lean import LeanLexer # noqa: F401
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/pygments/lexers/_mapping.py:282:    'Lean3Lexer': ('pygments.lexers.lean', 'Lean', ('lean', 'lean3'), ('*.lean',), ('text/x-lean', 'text/x-lean3')),
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/pygments/lexers/_mapping.py:283:    'Lean4Lexer': ('pygments.lexers.lean', 'Lean4', ('lean4',), ('*.lean',), ('text/x-lean4',)),
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/pygments/lexers/lean.py:2:    pygments.lexers.lean
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/pygments/lexers/lean.py:26:    filenames = ['*.lean']
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/pygments/lexers/lean.py:143:    filenames = ['*.lean']
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/fsspec/implementations/sftp.py:99:        stat = self._decode_stat(self.ftp.stat(path))
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/fsspec/implementations/sftp.py:104:    def _decode_stat(stat, parent_path=None):
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/fsspec/implementations/sftp.py:131:        stats = [self._decode_stat(stat, path) for stat in self.ftp.listdir_iter(path)]
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/configuration_utils.py:959:        return cls._decode_special_floats(config_dict)
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/configuration_utils.py:987:    def _decode_special_floats(cls, obj: Any) -> Any:
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/configuration_utils.py:1001:            return {k: cls._decode_special_floats(v) for k, v in obj.items()}
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/configuration_utils.py:1004:            return [cls._decode_special_floats(v) for v in obj]
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/pipelines/document_question_answering.py:62:def decode_spans(
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/pipelines/document_question_answering.py:124:    `decode_spans()` to generate probabilities for each span to be the actual answer.
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/pipelines/document_question_answering.py:162:    starts, ends, scores = decode_spans(start, end, top_k, max_answer_len, undesired_tokens)
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/inkling/modular_inkling.py:943:    def __init__(self, input_dim: int, output_dim: int, t_fold: int, hw_fold: int, add_norm: bool):
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/inkling/modular_inkling.py:946:        if add_norm:
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/inkling/modular_inkling.py:950:        self.add_norm = add_norm
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/inkling/modular_inkling.py:973:        if self.add_norm:
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/inkling/modular_inkling.py:1084:                    add_norm=i != config.num_hidden_layers - 1,
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/inkling/modeling_inkling.py:842:    def __init__(self, input_dim: int, output_dim: int, t_fold: int, hw_fold: int, add_norm: bool):
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/inkling/modeling_inkling.py:845:        if add_norm:
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/inkling/modeling_inkling.py:849:        self.add_norm = add_norm
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/inkling/modeling_inkling.py:872:        if self.add_norm:
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/inkling/modeling_inkling.py:983:                    add_norm=i != config.num_hidden_layers - 1,
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/focalnet/modeling_focalnet.py:182:        add_norm=False,
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/focalnet/modeling_focalnet.py:212:        if add_norm:
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/focalnet/modeling_focalnet.py:465:                add_norm=True,
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/esmfold2/modular_esmfold2.py:1699:    def decode_state(self, state: Tensor, pair_attention_mask: Tensor | None = None) -> Tensor:
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/esmfold2/modular_esmfold2.py:2268:        pair_states = self.parcae.decode_state(pair_states, pair_attention_mask=pair_mask)
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/esmfold2/modeling_esmfold2.py:1763:    def decode_state(self, state: Tensor, pair_attention_mask: Tensor | None = None) -> Tensor:
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/esmfold2/modeling_esmfold2.py:2336:        pair_states = self.parcae.decode_state(pair_states, pair_attention_mask=pair_mask)
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/mgp_str/processing_mgp_str.py:158:        decode_strs = [seq.replace(" ", "") for seq in self.char_tokenizer.batch_decode(sequences)]
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/mgp_str/processing_mgp_str.py:159:        return decode_strs
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/mgp_str/processing_mgp_str.py:183:        decode_strs = [seq.replace(" ", "") for seq in self.wp_tokenizer.batch_decode(sequences)]
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/mgp_str/processing_mgp_str.py:184:        return decode_strs
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/kosmos2/processing_kosmos2.py:514:# copied from https://github.com/microsoft/unilm/blob/97e4923e97d3ee10b57e97013556e3fd0d207a9b/kosmos-2/demo/decode_string.py#L35C1-L75C38
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/kosmos2/processing_kosmos2.py:559:# copied from https://github.com/microsoft/unilm/blob/97e4923e97d3ee10b57e97013556e3fd0d207a9b/kosmos-2/demo/decode_string.py#L4-L33
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/kosmos2/processing_kosmos2.py:648:# copied from https://github.com/microsoft/unilm/blob/97e4923e97d3ee10b57e97013556e3fd0d207a9b/kosmos-2/demo/decode_string.py#L77-L87
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/fun_asr_nano/modeling_fun_asr_nano.py:232:        add_norm: bool = False,
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/fun_asr_nano/modeling_fun_asr_nano.py:245:            nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps) if add_norm else nn.Identity()
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/fun_asr_nano/modeling_fun_asr_nano.py:305:                    add_norm=layer_idx in layer_norm_indices,
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/fun_asr_nano/modular_fun_asr_nano.py:323:        add_norm: bool = False,
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/fun_asr_nano/modular_fun_asr_nano.py:333:            nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps) if add_norm else nn.Identity()
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/models/fun_asr_nano/modular_fun_asr_nano.py:393:                    add_norm=layer_idx in layer_norm_indices,
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/cli/serving/utils.py:503:        self._decode_stream = DecodeStream([], skip_special_tokens=skip_special_tokens)
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/cli/serving/utils.py:525:            text = self._decode_stream.step(self._tokenizer, token_id)
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/cli/serving/utils.py:589:        self._decode_stream = DecodeStream([], skip_special_tokens=skip_special_tokens)
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/cli/serving/utils.py:603:            text = self._decode_stream.step(self._tokenizer, token_id)
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/integrations/gguf/gguf_conversion_mapping.py:80:            WeightRenaming(r"\.attn_qkv\.", ".linear_attn.in_proj_qkv."),
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/modeling_gguf_pytorch_utils.py:280:        if "attn_qkv" in name:
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/modeling_gguf_pytorch_utils.py:335:            "attn_qkv.weight" in name
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/yarl/_url.py:1754:    idna_decode_size: int | None = _DEFAULT_IDNA_SIZE,
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/yarl/_url.py:1789:    _idna_decode = lru_cache(idna_decode_size)(_idna_decode.__wrapped__)
+/Users/islam/fun_fable_proj/.cache/fla/fla/ops/gated_delta_rule/gate.py:320:def fused_gdn_gate(
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj diff 1675dcb 5c0455e -- qwen35_fast/engine.py
+diff --git a/qwen35_fast/engine.py b/qwen35_fast/engine.py
+index e50b8a8..5dd4053 100644
+--- a/qwen35_fast/engine.py
++++ b/qwen35_fast/engine.py
+@@ -80,11 +80,15 @@ def apply_rope(q, k, cos, sin):  # q,k: [B,H,T,D]; cos/sin: [T, rot]
+ 
+ class Engine:
+     def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True,
+-                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False):
++                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False, fused_gdn=False):
+         """compile_mode: None | "blocks" (fused elementwise helpers) | "layer" (whole decode layer compiled, graph
+         break at the fla kernel) | "layer_at" (same, inductor max-autotune for the GEMMs). compile_blocks=True == "blocks"."""
+         self.dev = torch.device(device)
+         self.compile_mode = compile_mode or ("blocks" if compile_blocks else None)
++        self.fused_gdn = fused_gdn
++        if fused_gdn:
++            from qwen35_fast.gdn_step import gdn_step
++            self._gdn_step = torch._dynamo.disable(gdn_step)
+         compile_blocks = self.compile_mode == "blocks"
+         self.compile_blocks = compile_blocks
+         self.use_gemv = use_gemv
+@@ -258,6 +262,11 @@ class Engine:
+             qkv, z, b, a = allp.split([self.conv_dim, self.gh * self.gv, self.gh, self.gh], -1)
+         else:
+             qkv, z, b, a = mm(x, w["qkv"]), mm(x, w["z"]), mm(x, w["b"]), mm(x, w["a"])
++        if not prefill and T == 1 and self.fused_gdn:   # single fused Triton kernel (conv+silu+delta rule+gated norm)
++            o = torch.empty(1, self.gh * self.gv, dtype=torch.bfloat16, device=x.device)
++            self._gdn_step(qkv[0], z[0], b[0], a[0], conv_state[0], w["conv_w"], w["neg_expA"], w["dt_bias"],
++                           w["gnorm"], rec_state[0], o[0], self.eps)
++            return mm(o, w["out"])
+         xc = qkv.T[None]                                                       # [1,conv_dim,T]
+         cw = w["conv_w"]                                                       # [conv_dim,1,k]
+         if prefill:
+[0m
+[0m$ [0mgit -C /Users/islam/fun_fable_proj diff 3de7ee3 5c0455e -- qwen35_fast/engine.py
+diff --git a/qwen35_fast/engine.py b/qwen35_fast/engine.py
+index e8b867f..5dd4053 100644
+--- a/qwen35_fast/engine.py
++++ b/qwen35_fast/engine.py
+@@ -80,11 +80,15 @@ def apply_rope(q, k, cos, sin):  # q,k: [B,H,T,D]; cos/sin: [T, rot]
+ 
+ class Engine:
+     def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True,
+-                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False):
++                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False, fused_gdn=False):
+         """compile_mode: None | "blocks" (fused elementwise helpers) | "layer" (whole decode layer compiled, graph
+         break at the fla kernel) | "layer_at" (same, inductor max-autotune for the GEMMs). compile_blocks=True == "blocks"."""
+         self.dev = torch.device(device)
+         self.compile_mode = compile_mode or ("blocks" if compile_blocks else None)
++        self.fused_gdn = fused_gdn
++        if fused_gdn:
++            from qwen35_fast.gdn_step import gdn_step
++            self._gdn_step = torch._dynamo.disable(gdn_step)
+         compile_blocks = self.compile_mode == "blocks"
+         self.compile_blocks = compile_blocks
+         self.use_gemv = use_gemv
+@@ -258,6 +262,11 @@ class Engine:
+             qkv, z, b, a = allp.split([self.conv_dim, self.gh * self.gv, self.gh, self.gh], -1)
+         else:
+             qkv, z, b, a = mm(x, w["qkv"]), mm(x, w["z"]), mm(x, w["b"]), mm(x, w["a"])
++        if not prefill and T == 1 and self.fused_gdn:   # single fused Triton kernel (conv+silu+delta rule+gated norm)
++            o = torch.empty(1, self.gh * self.gv, dtype=torch.bfloat16, device=x.device)
++            self._gdn_step(qkv[0], z[0], b[0], a[0], conv_state[0], w["conv_w"], w["neg_expA"], w["dt_bias"],
++                           w["gnorm"], rec_state[0], o[0], self.eps)
++            return mm(o, w["out"])
+         xc = qkv.T[None]                                                       # [1,conv_dim,T]
+         cw = w["conv_w"]                                                       # [conv_dim,1,k]
+         if prefill:
+@@ -375,8 +384,9 @@ class Engine:
+ 
+     # ---------------------------------------------------------------- steps
+     @torch.no_grad()
+-    def prefill(self, ids):
+-        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending)."""
++    def prefill(self, ids, on_first_token=None):
++        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending).
++        on_first_token(g) is called right after the main-model argmax (before MTP drafting) for TTFT accounting."""
+         self.reset()
+         T = len(ids)
+         tokens = torch.tensor(ids, device=self.dev)
+@@ -385,6 +395,8 @@ class Engine:
+         self.last_hn = hn[-1:]
+         g = self._argmax(hn[-1:])
+         self.n.fill_(T); self.pending.copy_(g[0])
++        if on_first_token is not None:
++            on_first_token(g)          # host sync here: first token available -> TTFT boundary
+         if self.spec_k > 0:
+             hid = hn if self.mtp_hidden == "post_norm" else hp
+             # MTP over the whole prompt: inputs (h_i, t_{i+1}) for i < T-1, and (h_{T-1}, g) for the last row
+@@ -492,10 +504,11 @@ class Engine:
+             self.ensure_graph()   # one-time startup cost, excluded from timing
+         torch.cuda.synchronize()
+         t0 = time.perf_counter()
+-        first = self.prefill(ids)
+-        ev_first = torch.cuda.Event(enable_timing=True); ev_first.record()
+-        first_tok = first.item()  # sync: first token complete
+-        t_first = time.perf_counter()
++        ft = {}
++        def on_first(g):
++            ft["tok"] = g.item(); ft["t"] = time.perf_counter()   # sync: first token complete on host
++        self.prefill(ids, on_first_token=on_first)
++        first_tok, t_first = ft["tok"], ft["t"]
+         out = [first_tok]
+         T = self.spec_k + 1
+         host = torch.empty(T + 1, dtype=torch.long, pin_memory=True)
+[0m
+[0m→ [0mRead candidates/engine_v1_backup.py
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj/candidates/review2/ /Users/islam/fun_fable_proj/candidates/review1/ /Users/islam/fun_fable_proj/candidates/
+/Users/islam/fun_fable_proj/candidates/:
+total 48
+drwxr-xr-x@  8 islam  staff    256 Sep 17 01:11 .
+drwxr-xr-x@ 15 islam  staff    480 Sep 17 00:49 ..
+-rw-r--r--@  1 islam  staff  24357 Sep 17 00:33 engine_v1_backup.py
+drwxr-xr-x@  4 islam  staff    128 Sep 16 23:20 gemv
+drwxr-xr-x@  4 islam  staff    128 Sep 17 00:33 gemv2
+drwxr-xr-x@  6 islam  staff    192 Sep 16 23:17 review1
+drwxr-xr-x@  4 islam  staff    128 Sep 17 01:11 review2
+drwxr-xr-x@  4 islam  staff    128 Sep 17 00:47 tests
+
+/Users/islam/fun_fable_proj/candidates/review1/:
+total 336
+drwxr-xr-x@ 6 islam  staff    192 Sep 16 23:17 .
+drwxr-xr-x@ 8 islam  staff    256 Sep 17 01:11 ..
+-rw-r--r--@ 1 islam  staff  95685 Sep 16 22:56 hf_reference_modeling_qwen3_5.py
+-rw-r--r--@ 1 islam  staff  56870 Sep 16 23:17 opencode.log
+-rw-r--r--@ 1 islam  staff   9623 Sep 16 23:17 REVIEW.md
+-rw-r--r--@ 1 islam  staff   1648 Sep 16 22:56 TASK.md
+
+/Users/islam/fun_fable_proj/candidates/review2/:
+total 272
+drwxr-xr-x@ 4 islam  staff    128 Sep 17 01:11 .
+drwxr-xr-x@ 8 islam  staff    256 Sep 17 01:11 ..
+-rw-r--r--@ 1 islam  staff  72247 Sep 17 01:14 opencode.log
+-rw-r--r--@ 1 islam  staff   1129 Sep 17 01:11 TASK.md
+[0m
+[0m$ [0mgrep -rn "TODO\|FIXME\|XXX\|BUG\|known\|do not enable\|FAILS" /Users/islam/fun_fable_proj/qwen35_fast/engine.py /Users/islam/fun_fable_proj/qwen35_fast/gdn_step.py
+(no output)
+[0m
+[0m→ [0mRead candidates/review1/REVIEW.md
+[0m→ [0mRead candidates/review1/TASK.md
+[0m
+[0m$ [0mwc -l /Users/islam/fun_fable_proj/candidates/review2/opencode.log; grep -n "REVIEW\|finding\|Finding\|fused_gdn\|_pre_norm\|residual\|off-by\|bug\|Bug" /Users/islam/fun_fable_proj/candidates/review2/opencode.log | head -80
+881 /Users/islam/fun_fable_proj/candidates/review2/opencode.log
+11:0779b65 Merge T1 (lean decode, -50 kernels) and T3 (fused GDN kernel, flagged off); debug tooling
+13:3de7ee3 T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+14:2a68eaa WIP fused GDN decode-step Triton kernel (fused_gdn flag): 511->367 kernels/step, +6% step time; unit test FAILS (state update mismatch), do not enable
+26:958daaa Evaluator, IFEval harness, report/acceptance logic; fix fla kwarg bug in engine
+41:    Merge T1 (lean decode, -50 kernels) and T3 (fused GDN kernel, flagged off); debug tooling
+44: bench/run_debug.py      |   43 +
+57:    T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+69:*   0779b65 Merge T1 (lean decode, -50 kernels) and T3 (fused GDN kernel, flagged off); debug tooling
+71:| * 2a68eaa WIP fused GDN decode-step Triton kernel (fused_gdn flag): 511->367 kernels/step, +6% step time; unit test FAILS (state update mismatch), do not enable
+74:| * | 3de7ee3 T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+89:    Merge T1 (lean decode, -50 kernels) and T3 (fused GDN kernel, flagged off); debug tooling
+100: -                 compile_blocks=False, use_gemv=False, compile_mode=None, fused_gdn=False):
+101:++                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False, fused_gdn=False):
+135:-                 compile_blocks=False, use_gemv=False, compile_mode=None, fused_gdn=False):
+136:+                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False, fused_gdn=False):
+186:+        h = None   # decode/lean: pending residual, added inside the next norm block (one kernel instead of two)
+206:+            x, hn = self._pre_norm(x, h, self.final_norm)
+214:+    def _pre_norm(self, x, h, w):
+215:+        """(x + h) then norm; h=None means no pending residual. Non-lean: separate add and norm (reference path)."""
+224:+        """One decoder layer, decode path (T small). Takes the pending residual h_in; returns (x, pending residual, save).
+226:+        x, hn = self._pre_norm(x, h_in, w["ln1"])
+239:+        x, hn = self._pre_norm(x, h, w["ln2"])
+250:+            return self._pre_norm(x, h, m["norm"])[1]
+302:+                 compile_blocks=False, use_gemv=False, compile_mode=None, fused_gdn=False):
+307:+        self.fused_gdn = fused_gdn
+308:+        if fused_gdn:
+318:+        if not prefill and T == 1 and self.fused_gdn:   # single fused Triton kernel (conv+silu+delta rule+gated norm)
+519:+        tl.debug_barrier()
+542:[0m$ [0mgrep -rn "prefill_s\|ttft_s\|decode_s\|on_first_token\|forced_decode_logits\|fused_gdn\|\.lean\|add_norm\|attn_qk" /Users/islam/fun_fable_proj --include=*.py --include=*.md | grep -v "qwen35_fast/engine.py"
+569:[0m$ [0mgrep -rn "prefill_s\|ttft_s\|decode_s\|on_first_token\|forced_decode_logits\|fused_gdn\|\.lean\|add_norm\|attn_qk" /Users/islam/fun_fable_proj --include='*.py' --include='*.md' | grep -v "qwen35_fast/engine.py"
+574:/Users/islam/fun_fable_proj/candidates/review2/TASK.md:5:(2) `_gdn` signature `(w, x, conv_state, rec_state, prefill, save)` and every call site; the `fused_gdn` branch;
+581:/Users/islam/fun_fable_proj/bench/run_debug.py:62:        r = eng.generate(ids, 8, ignore_eos=True); t4 = r["ttft_s"]
+584:/Users/islam/fun_fable_proj/bench/run_gdn.py:32:    tag = f"fused_gdn={fused}"
+585:/Users/islam/fun_fable_proj/bench/run_gdn.py:34:        eng = Engine(path, spec_k=0, compile_blocks=True, fused_gdn=fused)
+610:/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/run_gdn.py:32:    tag = f"fused_gdn={fused}"
+611:/Users/islam/fun_fable_proj/.claude/worktrees/agent-a768f69c23bc0819f/bench/run_gdn.py:34:        eng = Engine(path, spec_k=0, compile_blocks=True, fused_gdn=fused)
+636:/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_debug.py:56:        r = eng.generate(ids, 8, ignore_eos=True); t4 = r["ttft_s"]
+639:/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_gdn.py:32:    tag = f"fused_gdn={fused}"
+640:/Users/islam/fun_fable_proj/.claude/worktrees/agent-aa3480d868a691f93/bench/run_gdn.py:34:        eng = Engine(path, spec_k=0, compile_blocks=True, fused_gdn=fused)
+738:/Users/islam/fun_fable_proj/.cache/fla/fla/ops/gated_delta_rule/gate.py:320:def fused_gdn_gate(
+750:+                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False, fused_gdn=False):
+755:+        self.fused_gdn = fused_gdn
+756:+        if fused_gdn:
+766:+        if not prefill and T == 1 and self.fused_gdn:   # single fused Triton kernel (conv+silu+delta rule+gated norm)
+785:+                 compile_blocks=False, use_gemv=False, compile_mode=None, lean=True, emulate_casts=False, fused_gdn=False):
+790:+        self.fused_gdn = fused_gdn
+791:+        if fused_gdn:
+801:+        if not prefill and T == 1 and self.fused_gdn:   # single fused Triton kernel (conv+silu+delta rule+gated norm)
+867:-rw-r--r--@ 1 islam  staff   9623 Sep 16 23:17 REVIEW.md
+880:[0m→ [0mRead candidates/review1/REVIEW.md
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && ls .venv/bin | grep -iE "ruff|flake|mypy|pyright" ; python3 -c "print('ok')"
+pyflakes
+ok
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && .venv/bin/python -m pyflakes qwen35_fast/engine.py 2>&1 | head -40 || true
+(no output)
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && for d in .claude/worktrees/*/; do echo "=== $d"; git -C "$d" log --oneline -1 2>/dev/null; git -C "$d" status --porcelain 2>/dev/null | head; done
+=== .claude/worktrees/agent-a768f69c23bc0819f/
+2a68eaa WIP fused GDN decode-step Triton kernel (fused_gdn flag): 511->367 kernels/step, +6% step time; unit test FAILS (state update mismatch), do not enable
+?? results/run_gdn.json
+?? results/run_gdn.log
+?? results/run_gdn_1.log
+=== .claude/worktrees/agent-aa3480d868a691f93/
+6b9e462 T3b: chunked-K fused GDN kernel (T<=4, keep mask, scratch verify state), wired into _gdn/_commit
+?? results/run_gdn_t3b.log
+=== .claude/worktrees/agent-ad9103af87df51269/
+3de7ee3 T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+?? results/run_lean.log
+?? results/run_lean2.log
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && for f in .claude/worktrees/*/qwen35_fast/engine.py; do echo "=== $f"; diff -q "$f" qwen35_fast/engine.py; done
+=== .claude/worktrees/agent-a768f69c23bc0819f/qwen35_fast/engine.py
+Files .claude/worktrees/agent-a768f69c23bc0819f/qwen35_fast/engine.py and qwen35_fast/engine.py differ
+=== .claude/worktrees/agent-aa3480d868a691f93/qwen35_fast/engine.py
+Files .claude/worktrees/agent-aa3480d868a691f93/qwen35_fast/engine.py and qwen35_fast/engine.py differ
+=== .claude/worktrees/agent-ad9103af87df51269/qwen35_fast/engine.py
+Files .claude/worktrees/agent-ad9103af87df51269/qwen35_fast/engine.py and qwen35_fast/engine.py differ
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && diff -u qwen35_fast/engine.py .claude/worktrees/agent-aa3480d868a691f93/qwen35_fast/engine.py
+--- qwen35_fast/engine.py	2026-09-17 01:00:24
++++ .claude/worktrees/agent-aa3480d868a691f93/qwen35_fast/engine.py	2026-09-17 01:14:35
+@@ -219,6 +219,10 @@
+         self.stat_acc = torch.zeros((), dtype=torch.long, device=dev)
+         self.arangeL = torch.arange(L, device=dev)
+         self.arangeC = torch.arange(self.conv_k - 1, device=dev)
++        self.gdn_scr = torch.zeros(self.gh, self.gk, self.gv, dtype=torch.float32, device=dev)   # fused kernel: verify-pass state
++        self.gdn_o = torch.zeros(T, self.gh * self.gv, dtype=torch.bfloat16, device=dev)         # fused kernel: commit-pass output (unused)
++        self.ones_T = torch.ones(T, dtype=torch.float32, device=dev)
++        self.one_i = torch.ones((), dtype=torch.long, device=dev)
+ 
+     def reset(self):
+         self.conv_state.zero_(); self.rec_state.zero_(); self.n.zero_(); self.pending.zero_(); self.drafts.zero_()
+@@ -262,10 +266,15 @@
+             qkv, z, b, a = allp.split([self.conv_dim, self.gh * self.gv, self.gh, self.gh], -1)
+         else:
+             qkv, z, b, a = mm(x, w["qkv"]), mm(x, w["z"]), mm(x, w["b"]), mm(x, w["a"])
+-        if not prefill and T == 1 and self.fused_gdn:   # single fused Triton kernel (conv+silu+delta rule+gated norm)
+-            o = torch.empty(1, self.gh * self.gv, dtype=torch.bfloat16, device=x.device)
+-            self._gdn_step(qkv[0], z[0], b[0], a[0], conv_state[0], w["conv_w"], w["neg_expA"], w["dt_bias"],
+-                           w["gnorm"], rec_state[0], o[0], self.eps)
++        if not prefill and T <= 4 and self.fused_gdn:   # one Triton kernel: conv+silu+l2norm+delta rule+gated norm
++            o = torch.empty(T, self.gh * self.gv, dtype=torch.bfloat16, device=x.device)
++            if T == 1:   # commit directly (in place)
++                self._gdn_step(qkv, z, b, a, self.ones_T[:1], self.one_i, conv_state[0], w["conv_w"], w["neg_expA"],
++                               w["dt_bias"], w["gnorm"], rec_state[0], rec_state[0], o, self.eps)
++            else:        # verify pass -> scratch state; _commit re-runs it with the keep mask, in place
++                self._gdn_step(qkv, z, b, a, self.ones_T[:T], self.one_i, conv_state[0], w["conv_w"], w["neg_expA"],
++                               w["dt_bias"], w["gnorm"], rec_state[0], self.gdn_scr, o, self.eps, write_state=False)
++                save.append(("fused", conv_state, rec_state, qkv, z, b, a, w))
+             return mm(o, w["out"])
+         xc = qkv.T[None]                                                       # [1,conv_dim,T]
+         cw = w["conv_w"]                                                       # [conv_dim,1,k]
+@@ -355,7 +364,13 @@
+     def _commit(self, save, n_acc):
+         """Commit GDN/conv states for the first n_acc tokens of the last multi-token step (device-side, exact)."""
+         keep = (self.arangeT < n_acc).to(torch.float32)[None, :, None]        # [1,T,1]
+-        for conv_state, rec_state, q, k, v, g, beta, xc_all in save:
++        for item in save:
++            if item[0] == "fused":   # fused kernel: same inputs, keep mask, in-place state + conv shift by n_acc
++                _, conv_state, rec_state, qkv, z, b, a, w = item
++                self._gdn_step(qkv, z, b, a, keep[0, :, 0], n_acc, conv_state[0], w["conv_w"], w["neg_expA"],
++                               w["dt_bias"], w["gnorm"], rec_state[0], rec_state[0], self.gdn_o, self.eps)
++                continue
++            conv_state, rec_state, q, k, v, g, beta, xc_all = item
+             _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g * keep, beta=beta * keep.to(beta.dtype),
+                                                      initial_state=rec_state, output_final_state=True, use_qk_l2norm_in_kernel=True)
+             rec_state.copy_(st)
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && ls -R candidates/tests candidates/gemv candidates/gemv2 2>/dev/null | head -40
+candidates/gemv:
+opencode.log
+TASK.md
+
+candidates/gemv2:
+opencode.log
+TASK.md
+
+candidates/tests:
+opencode.log
+TASK.md
+[0m
+[0m→ [0mRead tests/test_spec_rollback.py
+[0m→ [0mRead bench/evaluate.py[90m [offset=1, limit=100][0m
+[0m→ [0mRead bench/run_debug.py
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && git show 28dea1f -- qwen35_fast/engine.py
+commit 28dea1f969322094ea5d771dee93a43702a136bd
+Author: Islam Assanov <islamassanov66@gmail.com>
+Date:   Thu Sep 17 00:52:57 2026 -0700
+
+    Fix optimizer memory accounting and TTFT boundary; round-3 ledger
+
+diff --git a/qwen35_fast/engine.py b/qwen35_fast/engine.py
+index a651112..b55d784 100644
+--- a/qwen35_fast/engine.py
++++ b/qwen35_fast/engine.py
+@@ -343,8 +343,9 @@ class Engine:
+ 
+     # ---------------------------------------------------------------- steps
+     @torch.no_grad()
+-    def prefill(self, ids):
+-        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending)."""
++    def prefill(self, ids, on_first_token=None):
++        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending).
++        on_first_token(g) is called right after the main-model argmax (before MTP drafting) for TTFT accounting."""
+         self.reset()
+         T = len(ids)
+         tokens = torch.tensor(ids, device=self.dev)
+@@ -353,6 +354,8 @@ class Engine:
+         self.last_hn = hn[-1:]
+         g = self._argmax(hn[-1:])
+         self.n.fill_(T); self.pending.copy_(g[0])
++        if on_first_token is not None:
++            on_first_token(g)          # host sync here: first token available -> TTFT boundary
+         if self.spec_k > 0:
+             hid = hn if self.mtp_hidden == "post_norm" else hp
+             # MTP over the whole prompt: inputs (h_i, t_{i+1}) for i < T-1, and (h_{T-1}, g) for the last row
+@@ -460,10 +463,11 @@ class Engine:
+             self.ensure_graph()   # one-time startup cost, excluded from timing
+         torch.cuda.synchronize()
+         t0 = time.perf_counter()
+-        first = self.prefill(ids)
+-        ev_first = torch.cuda.Event(enable_timing=True); ev_first.record()
+-        first_tok = first.item()  # sync: first token complete
+-        t_first = time.perf_counter()
++        ft = {}
++        def on_first(g):
++            ft["tok"] = g.item(); ft["t"] = time.perf_counter()   # sync: first token complete on host
++        self.prefill(ids, on_first_token=on_first)
++        first_tok, t_first = ft["tok"], ft["t"]
+         out = [first_tok]
+         T = self.spec_k + 1
+         host = torch.empty(T + 1, dtype=torch.long, pin_memory=True)
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && grep -n "class Qwen3_5.*MTP\|pre_fc_norm\|fc\b\|mtp\|class Qwen3_5RMSNorm\|class Qwen3_5DecoderLayer\|residual" candidates/review1/hf_reference_modeling_qwen3_5.py | head -60
+218:class Qwen3_5RMSNormGated(nn.Module):
+841:class Qwen3_5RMSNorm(nn.Module):
+861:class Qwen3_5DecoderLayer(GradientCheckpointingLayer):
+883:        residual = hidden_states
+906:        hidden_states = residual + hidden_states
+909:        residual = hidden_states
+912:        hidden_states = residual + hidden_states
+925:    _keys_to_ignore_on_load_unexpected = [r"^mtp.*"]
+1670:    _keys_to_ignore_on_load_unexpected = [r"^mtp.*", r"^model.visual.*"]
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && grep -n "self\._gdn(\|self\._attn(\|_layer_c(\|self\.f\[\"add_norm\"\]\|self\.f\[\"attn_qk\"\]\|_pre_norm(\|_body(" qwen35_fast/engine.py
+246:            q, k = self.f["attn_qk"](q, k.view(T, self.nkv, self.hd), w["qn"], w["kn"], cos, sin, self.eps)
+303:    def _body(self, tokens, pos, prefill, save=None):
+313:                    x = x + self._gdn(w, norm(x, w["ln1"], self.eps), self.conv_state[li], self.rec_state[li], True, None)
+316:                    x, h, sv = self._layer_c(w, x, h, cos, sin, pos, self.conv_state[li], self.rec_state[li], None, None, "gdn")
+322:                    x = x + self._attn(w, norm(x, w["ln1"], self.eps), cos, sin, self.kc[ai], self.vc[ai], pos, True)
+325:                    x, h, _ = self._layer_c(w, x, h, cos, sin, pos, None, None, self.kc[ai], self.vc[ai], "attn")
+328:            x, hn = self._pre_norm(x, h, self.final_norm)
+332:    def _pre_norm(self, x, h, w):
+337:            return self.f["add_norm"](x, h, w, self.eps)
+344:        x, hn = self._pre_norm(x, h_in, w["ln1"])
+348:            h = self._gdn(w, hn, conv_state, rec_state, False, save)
+351:            h = self._attn(w, hn, cos, sin, kc, vc, pos, False)
+352:        x, hn = self._pre_norm(x, h, w["ln2"])
+368:            x = x + self._attn(m, norm(x, m["ln1"], self.eps), cos, sin, self.kc[-1], self.vc[-1], pos, True)
+371:            x, h, _ = self._layer_c(m, x, None, cos, sin, pos, None, None, self.kc[-1], self.vc[-1], "attn")
+372:            return self._pre_norm(x, h, m["norm"])[1]
+394:        hn, hp = self._body(tokens, pos, prefill=True)
+427:        hn, hp = self._body(tokens, pos, prefill=False, save=save)
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && for f in candidates/tests/TASK.md candidates/gemv/TASK.md candidates/gemv2/TASK.md; do echo "===== $f"; cat "$f"; done
+===== candidates/tests/TASK.md
+Write `tests/test_spec_rollback.py` (pytest, GPU required, ~80 lines): a correctness test for the exact speculative-decoding
+state rollback in `qwen35_fast/engine.py`. Construct `Engine(model_path, spec_k=3)` (model path: use
+`bench.common.model_path()`), prefill dev workload `dev-prose-128` from `bench/workloads.json`, then compare two ways of
+advancing the state by the same accepted tokens: (A) the spec step `_step_impl()` with drafts deliberately set so that
+exactly `a` drafts are accepted (a in 0..3: set `eng.drafts` = the true next tokens for the first `a` positions obtained
+from a k=0 reference engine, then a wrong token), versus (B) a `spec_k=0` Engine that consumes the same `a+1` tokens one
+by one via `_step_impl()` (set `pending` before each step). After both, assert: `rec_state` allclose (atol 1e-5 rel 1e-4),
+`conv_state` exactly equal, `n` equal, KV cache rows [0:n] allclose for all attention layers, and the next-token logits
+from both engines (via `eng.last_hn @ eng.embed.T` after one more T=1-equivalent step) argmax-equal. Also test that
+`_commit` with n_acc = T leaves the state identical to a plain `fused_recurrent_gated_delta_rule` call over the T tokens.
+Use `pytest.skip` if no CUDA. Do not modify other files. Read engine.py first (methods: prefill, _step_impl, _commit,
+step_acc, pending, drafts, n, kc, vc, rec_state, conv_state, last_hn).
+===== candidates/gemv/TASK.md
+Write `qwen35_fast/gemv.py`: a Triton kernel for skinny bf16 matmul `y = x @ W.T` used for batch-1 LLM decode.
+- x: [M, K] bf16 with M in {1,2,3,4}; W: [N, K] bf16 row-major (nn.Linear layout); y: [M, N] bf16.
+- fp32 accumulation; output cast to bf16 once at the end. No bias.
+- Must be memory-bandwidth-bound-optimal on H100: read W exactly once, coalesced 16-byte loads along K,
+  enough parallelism to saturate HBM3 (grid over N blocks; add SPLIT_K with an fp32 partial buffer + a tiny reduce
+  kernel or atomic-free two-pass reduce when N*M is too small to fill the GPU, e.g. N=32).
+- Shapes that matter (K, N): (2048, 8224) (2048, 12288) (6144, 2048) (2048, 5120) (2048, 2048) (4096, 2048)
+  (2048, 248320). Also (2048, 32).
+- API: `gemv(x, W) -> y` picking a config by (M, K, N) from a small static table (no Triton autotune at runtime;
+  autotune once offline is fine if you expose `bench()` that prints the best config per shape).
+- Must be safe to call inside CUDA graph capture (no host syncs, no data-dependent Python, no allocations that vary).
+  Preallocate any split-K workspace per shape in a module-level cache keyed by (M,K,N,device).
+- Also include `test()` that, on a GPU, compares against `torch.matmul(x, W.T)` for all shapes and M=1..4 with
+  random inputs (atol/rtol chosen for bf16 output: assert max abs diff <= 2 bf16 ulps of the reference magnitude),
+  and `bench()` that reports achieved GB/s vs torch.matmul for each shape (use CUDA events, 50 iters after warmup).
+- No GPU is available here; write carefully, keep it under ~200 lines, plain Triton (triton 3.x), no other deps.
+Do not modify any other file. Put a short usage note at the top of gemv.py.
+===== candidates/gemv2/TASK.md
+Rewrite `qwen35_fast/gemv.py` (keep the same public API: gemv(x, W), test(), bench(); keep the file under ~200 lines).
+Measured on H100 with the current version (M=1, GB/s achieved, ours vs torch cuBLAS):
+  (K=2048,N=8224): 912 vs 2569   (2048,12288): 1391 vs 2405   (6144,2048): 698 vs 1622   (2048,5120): 580 vs 1618
+  (2048,2048): 233 vs 663        (4096,2048): 470 vs 1088     (2048,248320): 3060 vs 2866   (2048,32): 3.8 vs 10.6
+The tensor-core tl.dot design with BLOCK_M=16 padding is badly latency/occupancy bound for M=1.
+Goal: >= 2.9 TB/s on the big shapes and >= 1.5x cuBLAS on the small (N=2048) shapes, for M in {1,2,3,4}.
+Design hints: classic GEMV: each program owns BLOCK_N rows of W (e.g. 8-32 rows) and loops over K in BLOCK_K chunks
+(e.g. 512-1024, 16-byte vector loads: make K-chunk contiguous per row), multiplies by x (broadcast, x kept in registers/
+L1 as bf16->fp32), reduces with tl.sum over K (fp32), no tl.dot; grid = N/BLOCK_N (thousands of programs for N>=2048 so
+all 132 SMs stay busy); for N=2048 use small BLOCK_N (8) -> 256 programs, or SPLIT_K=2 with an fp32 workspace + tiny
+reduce. Handle M<=4 by looping over M rows inside the program (x rows loaded once). num_warps 4, num_stages 2-3.
+Keep: fp32 accumulation, bf16 output, no host syncs, no data-dependent allocations (workspace cached per shape),
+CUDA-graph safe, static config table by (K,N) + heuristic fallback, test() with the 2-ulp check, bench() printing GB/s.
+No GPU here: write carefully; I will run test()/bench() on the H100. Do not modify other files.
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && git branch -a -v && echo "--- all refs ---" && git for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short) %(objectname:short) %(subject)' | head -30
+* main                             5c0455e [ahead 8] README: gate diagnostics and optimization ledger summary
++ worktree-agent-a768f69c23bc0819f 2a68eaa WIP fused GDN decode-step Triton kernel (fused_gdn flag): 511->367 kernels/step, +6% step time; unit test FAILS (state update mismatch), do not enable
++ worktree-agent-aa3480d868a691f93 6b9e462 T3b: chunked-K fused GDN kernel (T<=4, keep mask, scratch verify state), wired into _gdn/_commit
++ worktree-agent-ad9103af87df51269 3de7ee3 T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+  remotes/origin/main              1ca4c35 Final #4 results (dev/heldout/IFEval), README results, GEMV v2 (DeepSeek), opt3 candidates
+--- all refs ---
+2026-09-17 worktree-agent-aa3480d868a691f93 6b9e462 T3b: chunked-K fused GDN kernel (T<=4, keep mask, scratch verify state), wired into _gdn/_commit
+2026-09-17 main 5c0455e README: gate diagnostics and optimization ledger summary
+2026-09-17 worktree-agent-ad9103af87df51269 3de7ee3 T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+2026-09-17 worktree-agent-a768f69c23bc0819f 2a68eaa WIP fused GDN decode-step Triton kernel (fused_gdn flag): 511->367 kernels/step, +6% step time; unit test FAILS (state update mismatch), do not enable
+2026-09-17 origin/main 1ca4c35 Final #4 results (dev/heldout/IFEval), README results, GEMV v2 (DeepSeek), opt3 candidates
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && git log --oneline 6b9e462 -12 && echo "--- T3b commit diff stat ---" && git show --stat 6b9e462 | head -40
+6b9e462 T3b: chunked-K fused GDN kernel (T<=4, keep mask, scratch verify state), wired into _gdn/_commit
+7fc12f6 Paired incumbent re-measurement in optimize loop; kernel per-head diagnostics
+0779b65 Merge T1 (lean decode, -50 kernels) and T3 (fused GDN kernel, flagged off); debug tooling
+1675dcb Merge branch 'worktree-agent-ad9103af87df51269'
+3de7ee3 T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+2a68eaa WIP fused GDN decode-step Triton kernel (fused_gdn flag): 511->367 kernels/step, +6% step time; unit test FAILS (state update mismatch), do not enable
+28dea1f Fix optimizer memory accounting and TTFT boundary; round-3 ledger
+1ca4c35 Final #4 results (dev/heldout/IFEval), README results, GEMV v2 (DeepSeek), opt3 candidates
+1533f0c Layer-level torch.compile mode (graph break at fla), new optimization candidates
+273471c Lean final runner: both custom configs vs vLLM+MTP, IFEval x3; gate log
+1333be2 Fix HF reference logit slicing in optimize gate
+7ffdc94 Teacher-forced decode-logit correctness gate; trimmed final runner; results renderer
+--- T3b commit diff stat ---
+commit 6b9e462889587c699c6f0d64b4d423cc271f9c3f
+Author: Islam Assanov <islamassanov66@gmail.com>
+Date:   Thu Sep 17 01:15:03 2026 -0700
+
+    T3b: chunked-K fused GDN kernel (T<=4, keep mask, scratch verify state), wired into _gdn/_commit
+
+ bench/run_gdn.py        |   7 +-
+ qwen35_fast/engine.py   |  25 ++++-
+ qwen35_fast/gdn_step.py | 238 ++++++++++++++++++++++++++----------------------
+ 3 files changed, 155 insertions(+), 115 deletions(-)
+[0m
+[0m→ [0mRead candidates/review1/hf_reference_modeling_qwen3_5.py[90m [offset=841, limit=100][0m
+[0m→ [0mRead bench/run_gdn.py
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && ls .claude/worktrees/agent-a768f69c23bc0819f/results/ 2>/dev/null && echo "---" && tail -60 .claude/worktrees/agent-a768f69c23bc0819f/results/run_gdn_1.log 2>/dev/null
+custom_screen.json
+custom_screen.log
+custom_screen3.log
+eval_baselines_crash.log
+eval_baselines_full_dev.json
+eval_baselines.log
+eval_final_full_dev.json
+eval_final_heldout_heldout.json
+eval_hfcompile_full_dev.json
+feasibility.json
+feasibility.log
+final3_optimize_gate.log
+ifeval_custom_k0.json
+ifeval_custom_k3.json
+ifeval_hf.json
+profile_step.json
+profile_step.log
+RESULTS.md
+run_final.log
+run_final2.log
+run_gdn_1.log
+run_gdn.json
+run_gdn.log
+run_opt.json
+run_opt.log
+run_opt2.log
+run_opt3.log
+trace_k0.json
+---
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+gdn_step.test: max|o diff|=5.531, elements beyond 2ulp: 1741/10240 (17.002%), state max rel diff=6.74e-01
+Traceback (most recent call last):
+  File "/work/bench/run_gdn.py", line 11, in <module>
+    res["test"] = gdn_step.test()
+                  ^^^^^^^^^^^^^^^
+  File "/work/qwen35_fast/gdn_step.py", line 96, in test
+    assert bad / tot <= 1e-3 and worst_s <= 1e-4, "gdn_step tolerance exceeded"
+AssertionError: gdn_step tolerance exceeded
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 756.08it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1139.23it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<03:29,  2.94it/s]
+[1ALoading weights:   6%|▌         | 34/617 [00:00<00:05, 99.62it/s]
+[1ALoading weights:   9%|▉         | 58/617 [00:00<00:04, 133.55it/s]
+[1ALoading weights:  15%|█▍        | 91/617 [00:00<00:02, 186.26it/s]
+[1ALoading weights:  20%|█▉        | 121/617 [00:00<00:02, 218.72it/s]
+[1ALoading weights:  24%|██▍       | 149/617 [00:00<00:02, 229.21it/s]
+[1ALoading weights:  30%|██▉       | 184/617 [00:00<00:01, 258.68it/s]
+[1ALoading weights:  35%|███▍      | 213/617 [00:01<00:01, 266.51it/s]
+[1ALoading weights:  40%|███▉      | 245/617 [00:01<00:01, 279.05it/s]
+[1ALoading weights:  45%|████▍     | 276/617 [00:01<00:01, 275.08it/s]
+[1ALoading weights:  49%|████▉     | 305/617 [00:01<00:01, 278.99it/s]
+[1ALoading weights:  57%|█████▋    | 353/617 [00:01<00:00, 336.44it/s]
+[1ALoading weights:  74%|███████▎  | 455/617 [00:01<00:00, 535.47it/s]
+[1ALoading weights:  93%|█████████▎| 571/617 [00:01<00:00, 711.32it/s]Loading weights: 100%|██████████| 617/617 [00:01<00:00, 351.57it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+HF floor dev-prose-512 0.2734375
+HF floor dev-structured-2048 1.1875
+USDT:2026-09-17 07:50:15 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 07:50:15 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+fused_gdn=False {"step_ms": 2.535406089999981, "kernels_per_step": 511.0, "tps": {"dev-prose-512": 372.0508904689318, "dev-structured-2048": 371.30522470657957}, "logit_diff": {"dev-prose-512": {"max": 0.421875, "floor": 0.2734375, "top1_disagree": 4}, "dev-structured-2048": {"max": 1.40625, "floor": 1.1875, "top1_disagree": 2}}}
+USDT:2026-09-17 07:50:33 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 07:50:33 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+fused_gdn=True {"step_ms": 2.3729315150001185, "kernels_per_step": 367.0, "tps": {"dev-prose-512": 401.5068593368777, "dev-structured-2048": 400.49332296354146}, "logit_diff": {"dev-prose-512": {"max": 8.15625, "floor": 0.2734375, "top1_disagree": 38}, "dev-structured-2048": {"max": 11.21875, "floor": 1.1875, "top1_disagree": 2}}}
+saved run_gdn.json
+saved results/run_gdn.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-W6DZmb9Sp2czHZzZcg09gK
+[0m
+[0m→ [0mRead bench/run_lean.py
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && cat .claude/worktrees/agent-ad9103af87df51269/results/run_lean2.log 2>/dev/null | tail -40
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<03:57,  2.60it/s]
+[1ALoading weights:   4%|▎         | 23/617 [00:00<00:09, 61.31it/s]
+[1ALoading weights:   7%|▋         | 41/617 [00:00<00:06, 93.32it/s]
+[1ALoading weights:  11%|█         | 67/617 [00:00<00:04, 136.53it/s]
+[1ALoading weights:  15%|█▌        | 95/617 [00:00<00:02, 174.28it/s]
+[1ALoading weights:  20%|██        | 125/617 [00:00<00:02, 200.98it/s]
+[1ALoading weights:  24%|██▍       | 148/617 [00:01<00:02, 199.10it/s]
+[1ALoading weights:  28%|██▊       | 172/617 [00:01<00:02, 205.76it/s]
+[1ALoading weights:  33%|███▎      | 201/617 [00:01<00:01, 221.60it/s]
+[1ALoading weights:  37%|███▋      | 226/617 [00:01<00:01, 225.97it/s]
+[1ALoading weights:  41%|████      | 251/617 [00:01<00:01, 231.94it/s]
+[1ALoading weights:  45%|████▌     | 278/617 [00:01<00:01, 232.95it/s]
+[1ALoading weights:  50%|████▉     | 307/617 [00:01<00:01, 244.72it/s]
+[1ALoading weights:  56%|█████▋    | 348/617 [00:01<00:00, 291.44it/s]
+[1ALoading weights:  65%|██████▍   | 398/617 [00:01<00:00, 350.34it/s]
+[1ALoading weights:  76%|███████▋  | 472/617 [00:01<00:00, 451.40it/s]
+[1ALoading weights:  92%|█████████▏| 567/617 [00:02<00:00, 594.20it/s]Loading weights: 100%|██████████| 617/617 [00:02<00:00, 287.45it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+HF floor dev-prose-512 0.28125
+HF floor dev-structured-2048 1.40625
+USDT:2026-09-17 07:55:18 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 07:55:19 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+lean1_emu0_k0 {"step_ms": 2.4575690800000416, "tps": {"dev-prose-512": 359.35419451511905, "dev-prose-2048": 358.96595523664536, "dev-structured-512": 359.74488484108906, "dev-structured-2048": 359.3920225194598}, "logit_diff": {"dev-prose-512": {"max_abs": 0.3125, "hf_floor": 0.28125, "top1_disagree": 4}, "dev-structured-2048": {"max_abs": 1.576171875, "hf_floor": 1.40625, "top1_disagree": 1}}, "kernels_per_step": 457.0}
+USDT:2026-09-17 07:55:54 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 07:55:54 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+lean1_emu0_k3 {"step_ms": 4.387165760000187, "tps": {"dev-prose-512": 455.736794393701, "dev-prose-2048": 479.6366769100756, "dev-structured-512": 728.0734949478131, "dev-structured-2048": 765.7692473713395}, "logit_diff": {"dev-prose-512": {"max_abs": 0.40625, "hf_floor": 0.28125, "top1_disagree": 4}, "dev-structured-2048": {"max_abs": 1.9375, "hf_floor": 1.40625, "top1_disagree": 2}}, "kernels_per_step": 824.0}
+USDT:2026-09-17 07:56:08 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 07:56:08 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+lean1_emu1_k0 {"step_ms": 2.462109699999928, "tps": {"dev-prose-512": 359.9092461313419, "dev-prose-2048": 360.7057075617012, "dev-structured-512": 360.2326691105825, "dev-structured-2048": 360.65179708264526}, "logit_diff": {"dev-prose-512": {"max_abs": 0.3125, "hf_floor": 0.28125, "top1_disagree": 4}, "dev-structured-2048": {"max_abs": 1.576171875, "hf_floor": 1.40625, "top1_disagree": 1}}, "kernels_per_step": 457.0}
+USDT:2026-09-17 07:56:33 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 07:56:33 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+lean1_emu1_k3 {"step_ms": 4.682157590000031, "tps": {"dev-prose-512": 428.9858173352315, "dev-prose-2048": 453.08578659119036, "dev-structured-512": 681.8595145376058, "dev-structured-2048": 721.4623733351826}, "logit_diff": {"dev-prose-512": {"max_abs": 0.40625, "hf_floor": 0.28125, "top1_disagree": 4}, "dev-structured-2048": {"max_abs": 1.9375, "hf_floor": 1.40625, "top1_disagree": 2}}, "kernels_per_step": 824.0}
+saved run_lean2.json
+saved results/run_lean2.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-YiVeyCmtsTFNeANkTIUsou
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && grep -rn "_gdn(\|_attn(\|_layer_dec\|_pre_norm\|\.forced_decode_logits\|_body(" --include='*.py' . | grep -v "\.venv" | grep -v "engine.py" | grep -v "engine_v1_backup"
+./candidates/review1/hf_reference_modeling_qwen3_5.py:889:            hidden_states = self.linear_attn(
+./candidates/review1/hf_reference_modeling_qwen3_5.py:897:            hidden_states, _ = self.self_attn(
+./bench/optimize.py:49:            hn, _ = eng._body(tok, pos, prefill=True); lg = (hn[-65:] @ eng.embed.T).float().cpu()
+./bench/optimize.py:52:        el = eng.forced_decode_logits(w["ids"], hgen).cpu(); hl = R["dec_logits"]
+./bench/run_lean.py:48:                el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu()
+./bench/run_debug.py:59:        with torch.no_grad(): hn, _ = eng._body(tok, pos, prefill=True)
+./bench/workloads.py:41:def render_body(kind, unit, n_units):
+./bench/workloads.py:49:    body = render_body(kind, unit, 4000)
+./bench/run_gdn.py:51:            el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu(); hl = ref[w["id"]]["dec"]
+./bench/run_gatecheck.py:23:        el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu(); d = (el - ref[w["id"]]["dec"]).abs().max(-1).values
+./bench/run_custom.py:65:                        hn, _ = eng._body(tokens, pos, prefill=True)
+./tests/test_spec_rollback.py:71:    e3._body(tokens, e3.n + e3.arangeT, prefill=False, save=save)
+./.claude/worktrees/agent-a768f69c23bc0819f/candidates/review1/hf_reference_modeling_qwen3_5.py:889:            hidden_states = self.linear_attn(
+./.claude/worktrees/agent-a768f69c23bc0819f/candidates/review1/hf_reference_modeling_qwen3_5.py:897:            hidden_states, _ = self.self_attn(
+./.claude/worktrees/agent-a768f69c23bc0819f/bench/optimize.py:53:            hn, _ = eng._body(tok, pos, prefill=True); lg = (hn[-65:] @ eng.embed.T).float().cpu()
+./.claude/worktrees/agent-a768f69c23bc0819f/bench/optimize.py:56:        el = eng.forced_decode_logits(w["ids"], hgen).cpu(); hl = R["dec_logits"]
+./.claude/worktrees/agent-a768f69c23bc0819f/bench/workloads.py:41:def render_body(kind, unit, n_units):
+./.claude/worktrees/agent-a768f69c23bc0819f/bench/workloads.py:49:    body = render_body(kind, unit, 4000)
+./.claude/worktrees/agent-a768f69c23bc0819f/bench/run_gdn.py:51:            el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu(); hl = ref[w["id"]]["dec"]
+./.claude/worktrees/agent-a768f69c23bc0819f/bench/run_custom.py:65:                        hn, _ = eng._body(tokens, pos, prefill=True)
+./.claude/worktrees/agent-aa3480d868a691f93/candidates/review1/hf_reference_modeling_qwen3_5.py:889:            hidden_states = self.linear_attn(
+./.claude/worktrees/agent-aa3480d868a691f93/candidates/review1/hf_reference_modeling_qwen3_5.py:897:            hidden_states, _ = self.self_attn(
+./.claude/worktrees/agent-aa3480d868a691f93/bench/optimize.py:49:            hn, _ = eng._body(tok, pos, prefill=True); lg = (hn[-65:] @ eng.embed.T).float().cpu()
+./.claude/worktrees/agent-aa3480d868a691f93/bench/optimize.py:52:        el = eng.forced_decode_logits(w["ids"], hgen).cpu(); hl = R["dec_logits"]
+./.claude/worktrees/agent-aa3480d868a691f93/bench/run_lean.py:48:                el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu()
+./.claude/worktrees/agent-aa3480d868a691f93/bench/run_debug.py:53:        with torch.no_grad(): hn, _ = eng._body(tok, pos, prefill=True)
+./.claude/worktrees/agent-aa3480d868a691f93/bench/workloads.py:41:def render_body(kind, unit, n_units):
+./.claude/worktrees/agent-aa3480d868a691f93/bench/workloads.py:49:    body = render_body(kind, unit, 4000)
+./.claude/worktrees/agent-aa3480d868a691f93/bench/run_gdn.py:52:            el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu(); hl = ref[w["id"]]["dec"]
+./.claude/worktrees/agent-aa3480d868a691f93/bench/run_custom.py:65:                        hn, _ = eng._body(tokens, pos, prefill=True)
+./.claude/worktrees/agent-aa3480d868a691f93/tests/test_spec_rollback.py:71:    e3._body(tokens, e3.n + e3.arangeT, prefill=False, save=save)
+./.claude/worktrees/agent-ad9103af87df51269/candidates/review1/hf_reference_modeling_qwen3_5.py:889:            hidden_states = self.linear_attn(
+./.claude/worktrees/agent-ad9103af87df51269/candidates/review1/hf_reference_modeling_qwen3_5.py:897:            hidden_states, _ = self.self_attn(
+./.claude/worktrees/agent-ad9103af87df51269/bench/optimize.py:53:            hn, _ = eng._body(tok, pos, prefill=True); lg = (hn[-65:] @ eng.embed.T).float().cpu()
+./.claude/worktrees/agent-ad9103af87df51269/bench/optimize.py:56:        el = eng.forced_decode_logits(w["ids"], hgen).cpu(); hl = R["dec_logits"]
+./.claude/worktrees/agent-ad9103af87df51269/bench/run_lean.py:48:                el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu()
+./.claude/worktrees/agent-ad9103af87df51269/bench/workloads.py:41:def render_body(kind, unit, n_units):
+./.claude/worktrees/agent-ad9103af87df51269/bench/workloads.py:49:    body = render_body(kind, unit, 4000)
+./.claude/worktrees/agent-ad9103af87df51269/bench/run_custom.py:65:                        hn, _ = eng._body(tokens, pos, prefill=True)
+./.cache/modeling_qwen3_5.py:889:            hidden_states = self.linear_attn(
+./.cache/modeling_qwen3_5.py:897:            hidden_states, _ = self.self_attn(
+./.cache/fla/fla/layers/deltaformer.py:142:        o = deltaformer_attn(
+./.cache/fla/fla/layers/yoco.py:415:                o = parallel_attn(q, shared_k, shared_v, window_size=self.window_size, cu_seqlens=cu_seqlens)
+./.cache/fla/fla/layers/yoco.py:418:            o = parallel_attn(q, shared_k, shared_v, window_size=self.window_size, cu_seqlens=cu_seqlens)
+./.cache/fla/fla/layers/yoco.py:434:            o = parallel_attn(q, shared_k, shared_v, window_size=self.window_size, cu_seqlens=cu_seqlens)
+./.cache/fla/fla/layers/wall_attn.py:189:                    o = parallel_wall_attn(q, k, v, g, g_scalar=gs, window_size=self.window_size)
+./.cache/fla/fla/layers/wall_attn.py:199:            o = parallel_wall_attn(q, k, v, g, g_scalar=gs, window_size=self.window_size, cu_seqlens=cu_seqlens)
+./.cache/fla/fla/layers/wall_attn.py:202:            o = parallel_wall_attn(q, k, v, g, g_scalar=gs, window_size=self.window_size, cu_seqlens=cu_seqlens)
+./.cache/fla/fla/layers/wall_attn.py:266:            return parallel_wall_attn(q, k, v, g, g_scalar=gs, scale=scale)
+./.cache/fla/fla/layers/rebased.py:88:            o, _ = fused_chunk_linear_attn(
+./.cache/fla/fla/layers/rebased.py:96:            o, _ = chunk_linear_attn(
+./.cache/fla/fla/layers/path_attn.py:128:            o, _ = parallel_path_attn(q=q, k=k, v=v, w=w, beta=beta, g=g, cu_seqlens=cu_seqlens)
+./.cache/fla/fla/layers/path_attn.py:207:                o, k_cache = parallel_path_attn(q=q, k=k, v=v, w=w, beta=beta, g=g,
+./.cache/fla/fla/layers/log_linear_mamba2.py:107:    y, state = chunk_log_linear_attn(
+./.cache/fla/fla/layers/based.py:61:            o, _ = fused_chunk_linear_attn(q, k, v, normalize=True, scale=1)
+./.cache/fla/fla/layers/based.py:64:            o, _ = chunk_linear_attn(q, k, v, normalize=True, scale=1)
+./.cache/fla/fla/layers/forgetting_attn.py:129:                o = parallel_forgetting_attn(q, k, v, f, cu_seqlens=cu_seqlens)
+./.cache/fla/fla/layers/forgetting_attn.py:131:            o = parallel_forgetting_attn(q, k, v, f, cu_seqlens=cu_seqlens)
+./.cache/fla/fla/layers/linear_attn.py:164:            o, final_state = chunk_linear_attn(
+./.cache/fla/fla/layers/linear_attn.py:173:            o, final_state = fused_chunk_linear_attn(
+./.cache/fla/fla/layers/linear_attn.py:182:            o, final_state = fused_recurrent_linear_attn(
+./.cache/fla/fla/models/samba/configuration_samba.py:25:def _is_legacy_default_attn(attn: HybridAttentionConfig) -> bool:
+./.cache/fla/fla/models/samba/configuration_samba.py:34:def _adapt_default_attn(num_hidden_layers: int) -> dict:
+./.cache/fla/fla/models/samba/configuration_samba.py:51:            and _is_legacy_default_attn(config_dict.get('attn'))
+./.cache/fla/fla/models/samba/configuration_samba.py:57:            config_dict['attn'] = _adapt_default_attn(num_hidden_layers)
+./.cache/fla/fla/models/samba/configuration_samba.py:119:            attn = _adapt_default_attn(num_hidden_layers)
+./.cache/fla/fla/models/rodimus/modeling_rodimus.py:213:                hidden_states, attentions, past_key_values = self.ska_attn(
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && echo "merge-base 1675dcb 2a68eaa:" && git merge-base 1675dcb 2a68eaa && echo "merge-base 3de7ee3 2a68eaa:" && git merge-base 3de7ee3 2a68eaa && echo "parents of 2a68eaa:" && git log --format='%h %p %s' -1 2a68eaa && echo "parents of 3de7ee3:" && git log --format='%h %p %s' -1 3de7ee3 && echo "parents of 1675dcb:" && git log --format='%h %p %s' -1 1675dcb
+merge-base 1675dcb 2a68eaa:
+1ca4c35ee0624e8c0ee2b85f9368aa2d487a7a0c
+merge-base 3de7ee3 2a68eaa:
+1ca4c35ee0624e8c0ee2b85f9368aa2d487a7a0c
+parents of 2a68eaa:
+2a68eaa 1ca4c35 WIP fused GDN decode-step Triton kernel (fused_gdn flag): 511->367 kernels/step, +6% step time; unit test FAILS (state update mismatch), do not enable
+parents of 3de7ee3:
+3de7ee3 1ca4c35 T1: lean decode path — fused residual+norm and q/k norm+rope blocks (-48..54 kernels/step, bit-identical logits); run_lean measurement
+parents of 1675dcb:
+1675dcb 28dea1f 3de7ee3 Merge branch 'worktree-agent-ad9103af87df51269'
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && sed -n '70,140p' README.md
+* prefill: fla `chunk_gated_delta_rule`, causal conv via `F.conv1d`, SDPA causal attention, exact final states;
+* decode: static KV cache with a device-side length pointer, explicit small-T attention over the cache (the cuDNN
+  masked-SDPA path was 400 us per call), fla `fused_recurrent_gated_delta_rule` for the GDN state, tiny in-place conv
+  state, tied-embedding argmax; **the whole step is one captured CUDA graph** replayed with zero host inputs;
+* `compile_blocks=True`: the pure-torch pieces between GEMMs/fla kernels (RMSNorms, gates, SiLU, RoPE, attention) are
+  `torch.compile`d into single fused kernels (1391 -> 505 kernels per step);
+* **exact MTP speculative decoding** (`spec_k` drafts): the MTP layer proposes `k` tokens; the target model verifies
+  `k+1` tokens in one pass; a draft is accepted only if it equals the target argmax, so greedy output is unchanged.
+  State rollback is device-side and exact: rejected tokens are undone by re-running the GDN recurrence with
+  `g=0, beta=0` for rejected positions (exp(0)=1, +0 -> bit-identical state), conv state by an indexed gather, and the
+  KV cache by the length pointer. Verification + commit + drafting is a single CUDA graph; the host reads the
+  accepted tokens with a one-step lag.
+
+## Measurement boundaries (identical for every engine)
+* `ttft_s` / prefill: request start -> first generated token on host (prefill + first argmax).
+* `decode_tps = (n_gen - 1) / (t_last - t_first)` with token completion times observed on the host: HF via the
+  generation streamer (its per-step `.cpu()` sync), vLLM via async stream chunk arrival, custom engine via a
+  per-step event sync after the graph replay. Host-side and launch overhead included; no extra syncs inside steps.
+  With speculative decoding several tokens complete at once; the tokens produced by the very first decode step
+  are counted in the numerator but not the denominator (bias <= k/255 in the candidate's favour, ~1%).
+* 256 generated tokens, EOS ignored, greedy, non-thinking chat template, no prefix caching, prompts as frozen token ids.
+* Model load, torch.compile, CUDA-graph capture, and warmup are excluded and reported as startup.
+* Peak memory: `torch.cuda.max_memory_allocated` (HF, custom); vLLM pre-allocates a KV pool (`gpu_memory_utilization`)
+  so its "peak" is not comparable and is reported as N/A.
+
+## Acceptance criteria (frozen in bench/report.py and bench/optimize.py)
+Score = geometric mean over the 12 workloads of `candidate TPS / strongest-original TPS` (per workload). A candidate
+replaces the incumbent only if its per-repetition geomean range does not overlap the incumbent's, no workload decode TPS
+regresses > 5%, and no workload TTFT or peak memory rises > 5%. Correctness gate: prefill logits on identical prefixes
+must agree in top-1 at every position (observed max abs logit diff ~0.3 on logits of magnitude ~35, i.e. ~1 bf16 ulp),
+and multi-step greedy decode must agree with HF eager until the first position where HF's own top-2 margin is < 0.5
+(bf16 kernel-order noise; vLLM itself diverges from HF at token 29 on the feasibility prompt for the same reason).
+
+## Roofline (why 2,000 TPS is out of reach at BF16 on H100)
+Per verification step the engine must stream ~2.74 GB of layer weights + 1.02 GB of tied lm_head (~3.76 GB). At the
+H100's 3.35 TB/s that is >= 1.12 ms/step -> <= ~890 TPS without speculation. With `k` MTP drafts the step also pays
+`k` extra lm_head reads for drafting (0.3 ms each) while yielding ~2.1-3.6 tokens/step at the measured acceptance
+rates -> <= ~1,100-1,300 TPS even at 100% bandwidth and zero launch overhead. Reaching 2,000 TPS would require reading
+fewer bytes per token (quantization, out of scope) or a larger accepted-tokens-per-step (a stronger draft head).
+
+## Results
+Rendered from `results/*.json` by `bench/fill_results.py` into `results/RESULTS.md` (all tables). Key figures:
+
+* Dev suite, strongest original per workload = vLLM+MTP (k=2 or 3): 527-914 TPS. `custom_k0` 388-390 TPS
+  (geomean 0.56x of strongest original, 7.7x HF eager); `custom_k3` 469-788 TPS (same-session geomean **0.89x** of
+  vLLM+MTP k=3, 1.1-1.8x vLLM plain, ~11x HF eager).
+* Held-out prompts (never used for tuning), same session: `custom_k0` 0.57x, `custom_k3` 0.86x of vLLM+MTP k=3.
+* Run-to-run variability: custom engine medians move < 0.5% between repetitions and sessions; vLLM+MTP 1-5%.
+* TTFT: custom 40 ms at 128-2048 input (vLLM 30 ms), 105 ms at 8192 (vLLM 135-145 ms). Peak memory 4.8-5.6 GB.
+* Startup: custom 58 s (load + torch.compile + graph capture), vLLM ~100 s, HF 13 s.
+* IFEval-100 (prompt-level strict): HF 0.61, custom_k0 0.64, custom_k3 0.62; 9-11 prompts change outcome in both
+  directions; only ~24/100 responses are byte-identical to HF because greedy near-ties flip under bf16 kernel-order
+  noise and the texts then diverge (vLLM shows the same behaviour vs HF). No systematic regression.
+
+### Correctness gate outcome (pre-registered, `bench/optimize.py`)
+Gate: teacher-forced decode logits through the candidate's real decode path vs HF's own decode-path logits over 256
+steps on six dev prompts; pass if max|diff| <= 2x HF's own prefill-vs-decode noise floor on that prompt (min 0.5) and
+every top-1 disagreement sits at a genuine near-tie. Findings across seven sessions (`results/opt_ledger_round*.json`,
+`results/gatecheck.json`):
+
+* HF's own floor is 0.27-0.44 on prose/code prompts and 1.2-2.0 on the structured prompts (repetitive JSON-like
+  continuations put the model in a numerically chaotic regime where the linear-attention state amplifies bf16 noise).
+* The max statistic is a single-step outlier (always steps ~185-235 of the structured prompts); the 99th percentile
+  over steps is 0.25-0.31 for every engine on prose/code and 0.8-1.2 on structured prompts, i.e. **indistinguishable
+  from HF's own p99 (0.25-1.07)** for all configurations, including the ones the max-gate rejected.
+* Consequently the gate verdict flips between sessions for identical code: the speculative configs were rejected by
+  1.3% in one session and passed in three others; the non-speculative config passed four times and failed once
+  (4.33 vs 4.0). Per the integrity rules the tolerance was never loosened; the ledger records every outcome, the
+  accepted incumbent is the last candidate that passed in its own session (`k2_compile`, lean decode path), and
+  candidates rejected by the max-gate are reported with their numbers but never promoted.
+* Whole-layer `torch.compile` (with or without inductor's `emulate_precision_casts`) fails the max-gate on structured
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && sed -n '140,210p' README.md
+* Whole-layer `torch.compile` (with or without inductor's `emulate_precision_casts`) fails the max-gate on structured
+  prompts (2.5-3.0 vs 2.4) and gains only 1-2%, so it was dropped. DeepSeek's two Triton GEMV kernels are correct but
+  slower than cuBLAS except on the tied lm_head (+7%), so they were dropped. The fused GDN decode-step Triton kernel
+  (Fable worker) removes 144 launches/step (-6.6% step time) but its in-place state write is corrupted in the
+  full-tile version; a K-chunked rewrite is in `candidates/`/branches if not merged.
+
+### Optimization ledger summary (dev screen: 512 + 2048 tokens, prose/code/structured, geomean decode TPS)
+| candidate | what | gate | geomean TPS | verdict |
+|---|---|---|---|---|
+| k0_eager | CUDA graph, eager blocks | pass | 233-392 (sessions) | first incumbent |
+| k0_compile | + fused elementwise blocks (torch.compile) | pass (4/5 sessions) | 390-410 | incumbent, then superseded |
+| k2_compile | + exact MTP speculation, 2 drafts | pass (3/4) | 565-616 | **accepted incumbent (lean)** |
+| k3_compile | 3 drafts | pass (3/4) | 582-614 | rejected: >5% slower than k2 on prose (chain drafts cost more than they yield there) |
+| k4_compile | 4 drafts | pass | 563-611 | rejected: slower on prose |
+| k*_layer(_at)(_ep) | whole-layer compile (+max-autotune, +cast emulation) | fail / marginal | 577-584 | rejected |
+| k*_gemv / gemv2 | Triton GEMV (DeepSeek v1/v2) per-shape selected | pass | = baseline | no gain |
+| lean decode path (T1) | -50 launches/step, residual+norm fusion | pass | +2-3% | merged (default) |
+| fused GDN step (T3) | 1 Triton launch per GDN layer | test fails | (+8% if fixed) | not enabled |
+
+## Limitations
+* Batch size 1 only; no continuous batching, no sampling (greedy only), no multi-turn/prefix reuse, text only.
+* The custom engine's prefill uses plain PyTorch/fla kernels and is not optimized (TTFT is reported, not tuned).
+* `hf_compile` with `mode="reduce-overhead"` segfaults on this hybrid model (CUDA-graph trees vs in-place conv-state
+  update); the default compile mode is what is reported.
+* IFEval subset is a local regression check, not a reproduction of Qwen's published score.
+[0m
+[0m$ [0mcd /Users/islam/fun_fable_proj && grep -rn '\["spec"\]\|get("spec"\|step_tokens\|step_acc' bench/*.py | head -40
+bench/profile_step.py:42:        acc.append({"id": w["id"], "tps": o["decode_tps"], **o["spec"]})
+bench/run_custom.py:55:                        "acc_rate": (outs[-1]["spec"]["accepted"] / max(1, outs[-1]["spec"]["steps"] * max(k, 1)))}
+bench/run_opt.py:37:                r["runs"][w["id"]] = {"tps": 255 / o["decode_s"], "acc": o["spec"], "tokens_head": o["tokens"][:32]}
+[0m
+[0m← [0mWrite candidates/review2/REVIEW.md
+Wrote file successfully.
+[0m
+Wrote `candidates/review2/REVIEW.md`. Summary of what it found:
+
+1. **Critical** — the merged-in `fused_gdn` branch (`engine.py:265-269`, wired at `88-91`) calls a Triton kernel whose own `test()` fails (state rel-diff 0.67, 17% of outputs beyond 2 ulp) and which corrupts `conv_state`/`rec_state`; end-to-end gate shows `max|diff|=8.16` vs HF floor `0.27`, 38 top-1 disagreements (vs 4 eager). It is selectable at runtime with no guard. Fix: don't enable/remove the branch until the kernel is rewritten (T3b scratch-state + keep-mask version).
+2. **Medium** — `mtp_hidden="pre_norm"` (`113`, `401`, `442`) feeds the pre-final-norm residual to the MTP, which expects the post-norm hidden; `hp` itself is correctly the true residual stream, so the option is the defect.
+3. **Low** — `_body(prefill=False)` with the default `save=None` would `AttributeError` on a multi-token GDN layer (`303`, `318`).
+4. **Low** — `generate()`'s early-EOS return (`517-519`) skips stat reset and omits the `"spec"` key that callers read.
+
+Also documented what I verified as correct: the lean residual/`_pre_norm` algebra, all `_gdn`/`_attn`/`_layer_c`/`_pre_norm` call sites, the `self.kc[-1]` MTP slot, the TTFT boundary, `_commit`'s tuple/rollback math, `forced_decode_logits`, and the absence of host syncs/data-dependent shapes in the captured step.
