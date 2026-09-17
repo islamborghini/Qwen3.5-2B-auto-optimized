@@ -20,6 +20,9 @@ CANDIDATES = {  # name -> Engine kwargs (order = priority). Earlier rounds (resu
     "k2_compile": dict(spec_k=2, compile_blocks=True),
     "k3_compile": dict(spec_k=3, compile_blocks=True),
     "k4_compile": dict(spec_k=4, compile_blocks=True),
+    "k2_compile_fused": dict(spec_k=2, compile_blocks=True, fused_gdn=True),   # T3b two-kernel fused GDN step
+    "k3_compile_fused": dict(spec_k=3, compile_blocks=True, fused_gdn=True),
+    "k0_compile_fused": dict(spec_k=0, compile_blocks=True, fused_gdn=True),
 }
 LEDGER = os.path.join(OUT, "opt_ledger.json")
 

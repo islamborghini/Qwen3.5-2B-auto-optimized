@@ -28,10 +28,11 @@ for w in wl:
     print("HF floor", w["id"], ref[w["id"]]["floor"], flush=True)
 del hf; torch.cuda.empty_cache()
 
-for fused in [False, True]:
-    tag = f"fused_gdn={fused}"
+for spec_k, fused in [(0, False), (0, True), (2, False), (2, True)]:
+    tag = f"spec_k={spec_k} fused_gdn={fused}"
     try:
-        eng = Engine(path, spec_k=0, compile_blocks=True, fused_gdn=fused)
+        torch._dynamo.reset()
+        eng = Engine(path, spec_k=spec_k, compile_blocks=True, fused_gdn=fused)
         eng.generate(wl[0]["ids"], 8, ignore_eos=True)
         eng.prefill(wl[0]["ids"]); torch.cuda.synchronize(); t = time.perf_counter()
         for _ in range(200): eng.step()
