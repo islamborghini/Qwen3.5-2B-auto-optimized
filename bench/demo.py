@@ -5,7 +5,9 @@
 
 Each loads its model (base ~20 s, engine ~70 s incl. compile), then both start generating at the same instant
 (120 s after launch) and stream tokens live. Single run: omit --start-in. Long runs: --n-out 10000 (when the model ends its answer, the same follow-up
-prompt is sent as a new turn, in both panes identically, until the target is reached; --follow-ups N caps the turns).
+prompt is sent as a new turn, in both panes identically, until the target is reached). Each turn is capped at
+--turn-max tokens (default 1500) and continued in a fresh turn: greedy decoding of a 2B model degenerates into
+repetition on multi-thousand-token single answers (the base model itself loops after ~2.9k tokens).
 """
 import os, sys
 import modal
@@ -22,18 +24,18 @@ image = (
 
 
 @app.function(gpu="H100", cpu=4.0, memory=32768, image=image, volumes={"/hf": vol}, timeout=1200)
-def demo(prompt: str, n_out: int, mode: str, start_at: float, follow_ups: int, follow_up: str):
+def demo(prompt: str, n_out: int, mode: str, start_at: float, follow_ups: int, follow_up: str, turn_max: int):
     # Runs in a subprocess: the Modal function process's I/O threads contend for the GIL with HF's Python-bound loop.
     import subprocess
     env = dict(os.environ, PYTHONPATH="/work", OUT_DIR="/tmp/out")
-    subprocess.run([sys.executable, "-u", "/work/bench/demo_worker.py", prompt, str(n_out), mode, str(start_at), str(follow_ups), follow_up], env=env, check=False)
+    subprocess.run([sys.executable, "-u", "/work/bench/demo_worker.py", prompt, str(n_out), mode, str(start_at), str(follow_ups), follow_up, str(turn_max)], env=env, check=False)
 
 
 @app.local_entrypoint()
 def main(prompt: str = "Explain how a CPU cache hierarchy works and why it matters for performance.", n_out: int = 256,
-         mode: str = "engine", start_in: float = 0, follow_ups: int = 3,
+         mode: str = "engine", start_in: float = 0, follow_ups: int = 12, turn_max: int = 1500,
          follow_up: str = "Continue with the next chapters, in full and in the same format. Do not repeat earlier chapters."):
     """mode: 'engine' (optimized) or 'base' (HF transformers). start_in: seconds from now at which generation starts,
     so two terminals launched together begin at the same instant (models take different times to load)."""
     import time
-    demo.remote(prompt, n_out, mode, time.time() + start_in if start_in else 0, follow_ups, follow_up)
+    demo.remote(prompt, n_out, mode, time.time() + start_in if start_in else 0, follow_ups, follow_up, turn_max)

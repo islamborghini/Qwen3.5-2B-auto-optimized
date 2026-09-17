@@ -1,11 +1,11 @@
 """Demo worker (subprocess inside the Modal container; no modal import).
-argv: prompt n_out mode(base|engine) start_at(epoch s, 0=now) follow_ups(int) follow_up_text
+argv: prompt n_out mode(base|engine) start_at(epoch s, 0=now) follow_ups(int) follow_up_text turn_max(int)
 Multi-turn: when the model ends its answer, the same follow-up is sent as a new user turn (both panes identically)
 until n_out generated tokens are reached or follow_ups is exhausted. Coherent long output, no forced continuation."""
 import re, sys, time
 
 
-def _run(prompt, n_out, mode, start_at, follow_ups, follow_up):
+def _run(prompt, n_out, mode, start_at, follow_ups, follow_up, turn_max):
     sys.path.insert(0, "/work")
     import warnings; warnings.filterwarnings("ignore")
     import torch
@@ -83,21 +83,35 @@ def _run(prompt, n_out, mode, start_at, follow_ups, follow_up):
         while start_at - time.time() > 0.5: time.sleep(0.2)
         while time.time() < start_at: pass
 
-    messages = [{"role": "user", "content": prompt}]; total = 0; t_first = None; t_last = None; turn = 0; dec_s = 0.0
+    def loops(seq, block=48):   # first position where a 48-token block repeats an earlier block (greedy degeneration)
+        seen = {}
+        for i in range(0, len(seq) - block):
+            key = tuple(seq[i:i + block])
+            if key in seen and i - seen[key] >= block: return i
+            seen.setdefault(key, i)
+        return None
+    CONT = "Continue exactly where you left off, without repeating anything."
+    messages = [{"role": "user", "content": prompt}]; total = 0; t_first = None; t_last = None; turn = 0; dec_s = 0.0; all_toks = []
     t0 = time.perf_counter()
     while total < n_out and turn <= follow_ups:
         ids = encode(messages); st = Stream()
-        P(f"\n>>> {prompt}\n" if turn == 0 else f"\n\n>>> [follow-up {turn}] {follow_up}\n")
-        toks, ts = gen(ids, n_out - total, st); st.finish()
+        P(f"\n>>> {prompt}\n" if turn == 0 else f"\n\n>>> [turn {turn + 1}] {messages[-1]['content']}\n")
+        cap = min(turn_max, n_out - total)
+        toks, ts = gen(ids, cap, st); st.finish()
         if not toks: break
-        total += len(toks); t_first = t_first or ts[0]; t_last = ts[-1]; dec_s += ts[-1] - ts[0]
-        messages += [{"role": "assistant", "content": tok.decode(toks, skip_special_tokens=True)}, {"role": "user", "content": follow_up}]
+        total += len(toks); t_first = t_first or ts[0]; t_last = ts[-1]; dec_s += ts[-1] - ts[0]; all_toks += toks
+        # turns are capped at turn_max tokens: greedy decoding of a 2B model degenerates into repetition on very long
+        # single answers (HF itself loops after ~2.9k tokens on this prompt); a fresh turn breaks the loop attractor.
+        nxt = CONT if len(toks) >= cap else follow_up
+        messages += [{"role": "assistant", "content": tok.decode(toks, skip_special_tokens=True)}, {"role": "user", "content": nxt}]
         turn += 1
     tag = "[base]  " if mode == "base" else "[engine]"
     P(f"\n\n{tag} {total} tokens over {turn} turn(s)   |   decode {(total - turn) / max(dec_s, 1e-9):.0f} tokens/s   |   wall time {t_last - t0:.1f} s (incl. {t_last - t0 - dec_s:.1f} s of prompt processing)   |   first token after {1000*(t_first - t0):.0f} ms")
+    lp = loops(all_toks)
+    P(f"{tag} repetition check: " + ("none detected" if lp is None else f"a 48-token block repeats from token {lp}"))
     if mode == "base": P("[base]   (HF eager is CPU-bound; it measured 50 tokens/s under the controlled benchmark, host CPUs vary)")
     P("")
 
 
 if __name__ == "__main__":
-    _run(sys.argv[1], int(sys.argv[2]), sys.argv[3], float(sys.argv[4]), int(sys.argv[5]), sys.argv[6])
+    _run(sys.argv[1], int(sys.argv[2]), sys.argv[3], float(sys.argv[4]), int(sys.argv[5]), sys.argv[6], int(sys.argv[7]))
