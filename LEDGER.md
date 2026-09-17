@@ -58,3 +58,9 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | opt6 crashed (illegal memory access after fused k2 / at k3 fused) -> T3c worker; opt7: k0/k2/k2_fused, 3 paired reps | ~$0.7 | launched |
 | 2026-09-17 | Modal H100 | opt7: k2_compile_fused accepted (665 vs paired k2 ~592, +12%), gate ok; final #7 launched (vllm_mtp3 then custom_k2 fused; IFEval) | ~/bin/zsh.7 + est ~.3 | results/opt_ledger_round7.json |
 | 2026-09-17 | Fable agent T3c | opt6 IMA not reproducible under CUDA_LAUNCH_BLOCKING (all k, all phases); mitigation: Engine.close(), no dynamo.reset between candidates; k3 fused 529/890, k2 fused 598/777 | ~ Fable, ~/bin/zsh.5 Modal | merged |
+| 2026-09-17 | Modal H100 | final #7 (frozen k2_compile_fused): dev 582-848 TPS, geomean 1.02x vllm_mtp3 same-session; heldout 528-866, 1.01x; IFEval 0.65 | ~$1.3 | results/RESULTS.md |
+
+## Totals (estimates)
+* Modal H100 (+4 CPU): ~5.5 GPU-hours across ~30 sessions ≈ $21-24 (nominal budget $10; user authorized continued spend at the mid-point). ~30% wasted on my own bugs/kills/orphan.
+* Fable: coordinator + 5 forked workers (T1, T3, T3b, T1b, T3c; ~0.4-0.5M tokens each). User reported $21 at the mid-point; final figure on the dashboard.
+* DeepSeek V4.1 Flash via OpenCode: 6 tasks (reviews x2, GEMV v1/v2, rollback test), flat-rate subscription.

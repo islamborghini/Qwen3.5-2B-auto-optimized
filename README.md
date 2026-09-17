@@ -5,18 +5,18 @@ DeepSeek V4.1 Flash via an existing OpenCode subscription) on a concrete target:
 tokens/s** for `Qwen/Qwen3.5-2B` (revision `15852e8c`) on one Modal **H100**, keeping the original **BF16 weights**,
 text-only, non-thinking mode, and byte-identical semantics (greedy outputs preserved up to bf16 kernel-order noise).
 
-**Result summary.** A ~500-line custom engine (`qwen35_fast/engine.py`: one CUDA graph per decode step, fused decode
-blocks via `torch.compile`, and *exact* speculative decoding with the checkpoint's own MTP head) reaches **389 TPS**
-without speculation and **540-737 TPS** with 2 MTP drafts (accepted config) / **469-788** with 3 drafts on the
-12-workload dev suite (H100, batch 1, BF16). That is 11-15x HF transformers eager (50 TPS), 3-4.6x HF +
-torch.compile (170 TPS), 1.25-1.8x vLLM 0.29 without speculation, but **it does not beat the strongest existing
-engine overall**: vLLM 0.29 with its built-in MTP speculative decoding reaches 527-914 TPS on the same workloads
-(same-session geomean ratio custom/vLLM+MTP = 0.88x for k=2, 0.91x for k=3; the custom engine wins on prose prompts
-and loses on structured ones, where vLLM's higher accepted-tokens-per-step dominates). This is therefore a reproducible negative result against the
-strongest original baseline and a positive one against the eager/compiled originals. The 2,000 TPS stretch hypothesis
-was **not** reached and is not reachable at BF16 on this GPU: streaming the ~3.8 GB of weights per verification step
-bounds non-speculative decode near ~880 TPS and MTP speculation near ~1,100-1,300 TPS even at 100% of HBM bandwidth
-(see "Roofline"). Gains attributed separately (H100, dev suite medians):
+**Result summary.** A ~600-line custom engine (`qwen35_fast/engine.py` + two Triton kernels in
+`qwen35_fast/gdn_step.py`): one CUDA graph per decode step, fused decode blocks via `torch.compile`, a fused
+Gated-DeltaNet decode kernel, and *exact* speculative decoding with the checkpoint's own MTP head (2 drafts).
+Frozen config `k2_compile_fused` reaches **582-848 decode TPS** on the 12-workload dev suite and **528-866** on the
+held-out suite (H100, batch 1, BF16, greedy): **14x HF transformers eager** (50 TPS), 3.4-5x HF + torch.compile,
+1.35-1.95x vLLM 0.29 without speculation, and **1.02x (dev) / 1.01x (held-out) geomean of vLLM 0.29 with its
+built-in MTP speculative decoding** measured back-to-back in the same session (wins on prose and code prompts by
+8-14%, loses on structured prompts by 7-11% where vLLM accepts more draft tokens per step). Output quality is
+unchanged within noise (IFEval-100 strict 0.65 vs 0.61 for HF; differences are greedy near-tie flips). The 2,000 TPS
+stretch hypothesis was **not** reached and is not reachable at BF16 on this GPU: streaming ~3.8 GB of weights per
+verification step bounds non-speculative decode near ~880 TPS and MTP speculation near ~1,100-1,300 TPS even at 100%
+of HBM bandwidth (see "Roofline"). Gains attributed separately (H100, dev suite medians):
 
 | Source of gain | Decode TPS | Notes |
 |---|---|---|
@@ -26,8 +26,9 @@ bounds non-speculative decode near ~880 TPS and MTP speculation near ~1,100-1,30
 | Enabling existing engine: vLLM 0.29 (CUDA graphs, compiled) | 429-437 | |
 | Enabling existing feature: vLLM + MTP speculative decoding k=1/2/3 | 527-914 | strongest original baseline per workload (k=2 or k=3) |
 | Generated code: custom engine, no speculation (`custom_k0`) | 388-390 | 0.9x vLLM plain; 7.7x HF eager |
-| Generated code: custom engine + exact MTP speculation, 2 drafts (`custom_k2`, **accepted frozen config**, lean decode path) | 540-737 | 1.25-1.7x vLLM plain; 0.88x vLLM+MTP (same session), 0.87x on held-out prompts; beats vLLM+MTP on prose prompts |
-| Generated code: custom engine + 3 drafts (`custom_k3`) | 469-788 | 0.91x vLLM+MTP (dev), 0.89x held-out; rejected by the per-workload 5% rule (slower than k2 on prose) |
+| Generated code: + exact MTP speculation, 2 drafts, lean decode/spec glue (`k2_compile`) | 540-737 | 1.25-1.7x vLLM plain; 0.88x vLLM+MTP (same session) |
+| Generated code: + fused GDN decode kernel (`k2_compile_fused`, **frozen config**) | 582-848 | **1.02x vLLM+MTP (dev), 1.01x (held-out)**; 14x HF eager |
+| Generated code: 3 drafts (`custom_k3`, non-fused) | 469-788 | 0.91x vLLM+MTP; rejected by the per-workload 5% rule (slower than k2 on prose) |
 
 ## Attribution
 * **Claude Fable 5.1** (coordinator): all design, the engine, evaluator, workloads, benchmarks, most bug fixes, this README.
@@ -113,16 +114,18 @@ fewer bytes per token (quantization, out of scope) or a larger accepted-tokens-p
 ## Results
 Rendered from `results/*.json` by `bench/fill_results.py` into `results/RESULTS.md` (all tables). Key figures:
 
-* Dev suite, strongest original per workload = vLLM+MTP (k=2 or 3): 527-914 TPS. `custom_k2` (accepted) 540-737 TPS,
-  same-session geomean **0.88x** of vLLM+MTP k=3 (1.25-1.7x vLLM plain, ~13x HF eager); `custom_k3` 469-788 TPS,
-  **0.91x**; `custom_k0` 388-390 TPS (0.56x of the strongest original, 7.7x HF eager).
-* Held-out prompts (never used for tuning), same session: `custom_k2` **0.87x**, `custom_k3` 0.89x, `custom_k0` 0.57x
-  of vLLM+MTP k=3.
+* Dev suite, strongest original per workload = vLLM+MTP (k=2 or 3): 527-914 TPS. Frozen `k2_compile_fused`
+  582-848 TPS, same-session geomean **1.02x** of vLLM+MTP k=3 (per workload 0.93-1.14x), 14x HF eager. Earlier
+  accepted configs: `k2_compile` (no fused kernel) 0.88x; `custom_k0` 388-390 TPS (0.56x, 7.7x HF eager);
+  `custom_k3` 0.91x. Full tables: `results/RESULTS.md`; earlier-round tables in `results/final4_k0k3/`.
+* Held-out prompts (never used for tuning), same session: frozen config 528-866 TPS, **1.01x** of vLLM+MTP k=3
+  (0.89-1.14x per workload).
 * Run-to-run variability: custom engine medians move < 0.5% between repetitions and sessions; vLLM+MTP 1-5%.
-* TTFT: custom 40 ms at 128-2048 input (vLLM 30 ms), 105 ms at 8192 (vLLM 135-145 ms). Peak memory 4.8-5.6 GB.
-* Startup: custom 58 s (load + torch.compile + graph capture), vLLM ~100 s, HF 13 s.
-* IFEval-100 (prompt-level strict): HF 0.61, custom_k0 0.64, custom_k2 0.64, custom_k3 0.62; 9-11 prompts change
-  outcome in both directions; only ~24/100 responses are byte-identical to HF because greedy near-ties flip under bf16 kernel-order
+* TTFT: custom 36-38 ms at 128-2048 input (vLLM 29-30 ms; the custom prefill is unoptimized), 111-112 ms at 8192
+  (vLLM 126-129 ms). Peak memory 5.7 GB (vLLM pre-allocates its KV pool, not comparable).
+* Startup: custom 55 s (load + torch.compile + graph capture), vLLM ~100 s, HF 13 s.
+* IFEval-100 (prompt-level strict): HF 0.61, frozen custom_k2 0.65 (custom_k0 0.64, custom_k3 0.62); 9-12 prompts
+  change outcome in both directions; only ~24/100 responses are byte-identical to HF because greedy near-ties flip under bf16 kernel-order
   noise and the texts then diverge (vLLM shows the same behaviour vs HF). No systematic regression.
 
 ### Correctness gate outcome (pre-registered, `bench/optimize.py`)
