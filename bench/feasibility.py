@@ -11,9 +11,9 @@ N_OUT = 256
 app = modal.App("qwen35-feas")
 vol = modal.Volume.from_name("qwen35-hf-cache", create_if_missing=True)
 image = (
-    modal.Image.debian_slim(python_version="3.12")
+    modal.Image.from_registry("nvidia/cuda:13.0.1-devel-ubuntu24.04", add_python="3.12")
     .uv_pip_install("vllm==0.29.0", "flash-linear-attention==0.5.2", "hf_transfer==0.1.9", "accelerate==1.15.0")
-    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "HF_HOME": "/hf", "VLLM_CACHE_ROOT": "/hf/vllm_cache"})
+    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "HF_HOME": "/hf", "VLLM_CACHE_ROOT": "/hf/vllm_cache", "VLLM_USE_FLASHINFER_SAMPLER": "0"})
 )
 
 
