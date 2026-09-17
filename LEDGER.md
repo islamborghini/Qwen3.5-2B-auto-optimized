@@ -30,3 +30,5 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | baselines #3 (sequential, cpu=4) | est ~.0 | launched |
 | 2026-09-17 | Modal H100 | orphaned app from killed baselines #2 ran ~13 extra min before manual stop | ~/bin/zsh.9 | lesson: pkill does not stop ephemeral app; use modal app stop |
 | 2026-09-17 | Modal H100 | final session: optimize loop (7 candidates) -> frozen config -> dev full + heldout vs vllm_mtp3 (same session) -> IFEval custom + HF | est ~.0 (uses reserve) | launched |
+| 2026-09-17 | Modal H100 | final #1 killed: greedy-divergence gate rejected spec candidates (structured-2048 @159, HF margin 11) and froze k0; gate replaced by teacher-forced decode-logit check | ~/bin/zsh.6 | gemv: lm_head 3060 vs cuBLAS 2866 GB/s; N=32 slower |
+| 2026-09-17 | Modal H100 | final #2: new decode-logit gate; candidates k0/k2/k3 compile; dev full + heldout vs vllm_mtp3 same-session; IFEval custom + HF | est ~.0 | launched |

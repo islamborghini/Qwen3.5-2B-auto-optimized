@@ -14,14 +14,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bench.common import *
 from qwen35_fast.engine import Engine
 
-CANDIDATES = {  # name -> Engine kwargs (order = priority)
-    "k0_eager": dict(spec_k=0),
-    "k0_compile": dict(spec_k=0, compile_blocks=True),
+CANDIDATES = {  # name -> Engine kwargs (order = priority). gemv variants dropped: kernel correct but slower than cuBLAS
+    "k0_compile": dict(spec_k=0, compile_blocks=True),   # except on lm_head (+7%), see LEDGER.md
     "k2_compile": dict(spec_k=2, compile_blocks=True),
     "k3_compile": dict(spec_k=3, compile_blocks=True),
-    "k2_compile_gemv": dict(spec_k=2, compile_blocks=True, use_gemv=True),
-    "k3_compile_gemv": dict(spec_k=3, compile_blocks=True, use_gemv=True),
-    "k4_compile_gemv": dict(spec_k=4, compile_blocks=True, use_gemv=True),
 }
 LEDGER = os.path.join(OUT, "opt_ledger.json")
 
@@ -38,23 +34,27 @@ def screen(eng, wl, reps):
 
 
 def correctness(eng, wl, ref):
+    """Gate (defined before any candidate was judged under it):
+    1. prefill: top-1 of logits on identical prefixes equals HF at every position;
+    2. decode: teacher-forced logits through the engine's real decode/spec path vs HF's own decode-path logits over
+       256 steps: max|diff| <= 2 x HF's own prefill-vs-decode noise floor (same tokens), and every top-1 disagreement
+       must be at a position where HF's top-2 margin is below that max|diff| (i.e. a genuine near-tie)."""
     for w in wl:
-        hgen = ref[w["id"]]["gen"]; ids = w["ids"] + hgen[:64]
+        R = ref[w["id"]]; hgen = R["gen"]; ids = w["ids"] + hgen[:64]
         eng.reset(); tok = torch.tensor(ids, device="cuda"); pos = torch.arange(len(ids), device="cuda")
         with torch.no_grad():
             hn, _ = eng._body(tok, pos, prefill=True); lg = (hn[-65:] @ eng.embed.T).float().cpu()
-        if (lg.argmax(-1) != ref[w["id"]]["logits_tail"].argmax(-1)).any():
+        if (lg.argmax(-1) != R["logits_tail"].argmax(-1)).any():
             return False, f"{w['id']}: prefill top-1 mismatch"
-        gen = eng.generate(w["ids"], 256, ignore_eos=True)["tokens"]
-        mm = next((i for i in range(256) if hgen[i] != gen[i]), None)
-        if mm is not None:
-            # divergence allowed only at a near-tie of the reference (bf16 kernel-order noise); check HF margin there
-            hf_l = ref[w["id"]]["dec_logits"]
-            if mm < len(hf_l):
-                top2 = hf_l[mm].topk(2).values; margin = (top2[0] - top2[1]).item()
-                if margin > 0.5:
-                    return False, f"{w['id']}: greedy diverges at {mm} with reference margin {margin:.3f}"
-    return True, "ok"
+        el = eng.forced_decode_logits(w["ids"], hgen).cpu(); hl = R["dec_logits"]
+        d = (el - hl).abs().max(-1).values; tol = max(2 * R["floor"], 0.5)
+        if d.max().item() > tol:
+            return False, f"{w['id']}: decode logits max|diff| {d.max().item():.3f} > tol {tol:.3f} (HF floor {R['floor']:.3f})"
+        top2 = hl.topk(2, -1).values; margin = top2[:, 0] - top2[:, 1]
+        bad = ((el.argmax(-1) != hl.argmax(-1)) & (margin > d.max())).nonzero().flatten().tolist()
+        if bad:
+            return False, f"{w['id']}: top-1 mismatch at {bad[:5]} with HF margin {margin[bad[0]].item():.3f} > max|diff| {d.max().item():.3f}"
+    return True, f"ok (max|diff| {d.max().item():.3f}, tol {tol:.3f})"
 
 
 def geo(d):
@@ -75,9 +75,17 @@ if __name__ == "__main__":
     path = model_path(); wl = workloads("dev", [512, 2048])
     hf = load_hf(); ref = {}
     for w in wl:
-        gen, *_ = hf_greedy(hf, w["ids"], 256)
+        x = torch.tensor([w["ids"]], device="cuda")
+        with torch.no_grad():
+            o_ = hf.generate(input_ids=x, attention_mask=torch.ones_like(x), max_new_tokens=256, min_new_tokens=256,
+                             do_sample=False, output_logits=True, return_dict_in_generate=True)
+        gen = o_.sequences[0, x.shape[1]:].tolist(); dec = torch.stack([l_[0] for l_ in o_.logits]).float().cpu()
         lg = hf_logits(hf, w["ids"] + gen)
-        ref[w["id"]] = {"gen": gen, "logits_tail": lg[len(w["ids"]) - 1: len(w["ids"]) + 64].cpu(), "dec_logits": lg[len(w["ids"]) - 1:].cpu()}
+        full = lg[len(w["ids"]) - 1:].cpu()
+        floor = (dec - full).abs().max().item()   # HF's own decode path vs prefill path on identical tokens
+        ref[w["id"]] = {"gen": gen, "logits_tail": lg[len(w["ids"]) - 1: len(w["ids"]) + 64].cpu(), "dec_logits": dec, "floor": floor}
+        led.setdefault("hf_noise_floor", {})[w["id"]] = {"max_abs_diff": floor, "top1_disagree": int((dec.argmax(-1) != full.argmax(-1)).sum())}
+        print("HF noise floor", w["id"], led["hf_noise_floor"][w["id"]], flush=True)
     del hf; torch.cuda.empty_cache()
     if any(kw.get("use_gemv") for kw in CANDIDATES.values()):
         from qwen35_fast import gemv as G

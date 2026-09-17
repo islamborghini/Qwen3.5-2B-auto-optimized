@@ -314,6 +314,7 @@ class Engine:
         tokens = torch.tensor(ids, device=self.dev)
         pos = torch.arange(T, device=self.dev)
         hn, hp = self._body(tokens, pos, prefill=True)
+        self.last_hn = hn[-1:]
         g = self._argmax(hn[-1:])
         self.n.fill_(T); self.pending.copy_(g[0])
         if self.spec_k > 0:
@@ -344,6 +345,7 @@ class Engine:
         pos = self.n + self.arangeT
         save = []
         hn, hp = self._body(tokens, pos, prefill=False, save=save)
+        self.last_hn = hn
         g = self._argmax(hn)                                                   # [T]
         if self.spec_k == 0:
             self.step_tokens.copy_(g); self.step_acc.zero_()
@@ -365,6 +367,30 @@ class Engine:
         self.n.add_(n_acc)
         self._draft_chain(m_last, new_pending, self.n)
         self.pending.copy_(new_pending[0])
+
+    @torch.no_grad()
+    def forced_decode_logits(self, prompt_ids, gen_ids):
+        """Validation helper: teacher-force gen_ids through the REAL decode path (graph off, incl. spec verify/commit).
+        Returns fp32 logits [len(gen_ids), V]; row i predicts gen_ids[i] given prompt + gen_ids[:i]."""
+        self.prefill(prompt_ids)
+        L, G, k = len(prompt_ids), torch.tensor(gen_ids, device=self.dev), self.spec_k
+        Gp = torch.cat([G, torch.zeros(k + 1, dtype=torch.long, device=self.dev)])
+        out = torch.empty(len(gen_ids), self.embed.shape[0], dtype=torch.float32, device=self.dev)
+        out[0] = (self.last_hn[-1:] @ self.embed.T).float()[0]
+        while True:
+            i = int(self.n) - L                       # index of the gen token to feed next
+            if i + 1 >= len(gen_ids):
+                break
+            self.pending.copy_(Gp[i])
+            if k:
+                self.drafts.copy_(Gp[i + 1: i + 1 + k])
+            self._step_impl()
+            acc = int(self.step_acc) if k else 0
+            lg = (self.last_hn @ self.embed.T).float()   # rows 0..acc are conditioned on true tokens
+            for j in range(acc + 1):
+                if i + 1 + j < len(gen_ids):
+                    out[i + 1 + j] = lg[j]
+        return out
 
     @torch.no_grad()
     def ensure_graph(self):

@@ -5,7 +5,7 @@ here = os.path.dirname(os.path.abspath(__file__)); OUT = os.environ.get("OUT_DIR
 def run(args):
     print(">>>", " ".join(args), flush=True)
     return subprocess.run([sys.executable] + args).returncode
-run([os.path.join(here, "optimize.py"), "--max_candidates", "7", "--max_minutes", "25"])
+run([os.path.join(here, "optimize.py"), "--max_candidates", "3", "--max_minutes", "15"])
 led = json.load(open(os.path.join(OUT, "opt_ledger.json")))
 inc = led["incumbent"]; kw = led["candidates"][inc]["kwargs"]
 json.dump({"incumbent": inc, "kwargs": kw}, open(os.path.join(OUT, "frozen_config.json"), "w"))
