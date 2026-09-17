@@ -1,5 +1,5 @@
 ✓ Initialized. View run at 
-https://modal.com/apps/islamborghini/main/ap-vigReWY6H2j4hzSYRcScl4
+https://modal.com/apps/islamborghini/main/ap-dTQ2fzFeAm8OQAkHM4WONd
 ✓ Created objects.
 ├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
 ├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
@@ -26,19 +26,22 @@ kv     kernel vs ref: 8.940696716308594e-08 ref mag 0.5178049802780151
 vn kernel vs ref: 0.0 ref mag 4.108154296875
 S0 diff max: 1.1920928955078125e-07 S ref mag 1.7575252056121826 diff vs transposed-ref: 1.7511566877365112 diff vs decayed-only: 1.7575252056121826 diff vs undecayed+update: 1.3275028467178345
 diff top singular values: [1.8282608493791486e-07, 1.0978727260635424e-07, 7.2185137867109e-08, 7.041464300527878e-08]
-real-path per-head state rel diff: [0.496, 0.121, 0.2, 0.53, 0.646, 0.246, 0.618, 0.258, 0.124, 0.802, 0.404, 0.111, 0.427, 0.246, 0.337, 0.0]
-real-path head0 vs: ref 0.8714138269424438 | undecayed 2.6020097732543945 | decayed-only 1.7575252056121826
+real-path per-head state rel diff: [0.0, 0.403, 0.333, 0.513, 0.233, 0.473, 0.521, 0.0, 0.14, 0.81, 0.443, 0.14, 0.102, 0.476, 0.382, 0.184]
+real-path head0 vs: ref 1.1920928955078125e-07 | undecayed 2.6020097732543945 | decayed-only 1.7575252056121826
+barrier=False separate_out=False: max per-head rel diff 1.047
+barrier=False separate_out=True: max per-head rel diff 0.9913
+barrier=True separate_out=False: max per-head rel diff 1.1664
+barrier=True separate_out=True: max per-head rel diff 0.9913
   fla vs torch-ref: state rel diff 1.33e-07, o max diff 0.000148
   kernel q/k/v vs torch: 7.45e-09 5.96e-08 0
-  kernel vs torch-ref: state rel diff 4.73e-01
-gdn_step.test: max|o diff|=2.402, elements beyond 2ulp: 1815/10240 (17.725%), state max rel diff=6.03e-01
+  kernel vs torch-ref: state rel diff 5.19e-01
+gdn_step.test: max|o diff|=5.016, elements beyond 2ulp: 3732/10240 (36.445%), state max rel diff=8.40e-01
 gdn test: gdn_step tolerance exceeded
 
-[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
-[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 691.63it/s]
-k=0 reset/body/argmax+item/generate-ttft ms: [(0.07, 32.51, 0.4, 32.79), (0.07, 32.7, 0.4, 33.0)]
-k=2 reset/body/argmax+item/generate-ttft ms: [(0.08, 32.86, 0.4, 32.79), (0.08, 32.44, 0.4, 32.58)]
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1068.39it/s]
+k=0 reset/body/argmax+item/generate-ttft ms: [(0.07, 25.71, 0.38, 27.05), (0.07, 25.77, 0.39, 26.19)]
+k=2 reset/body/argmax+item/generate-ttft ms: [(0.07, 25.62, 0.39, 25.66), (0.07, 25.59, 0.39, 25.81)]
 exit code 0
 Stopping app - local entrypoint completed.
 ✓ App completed. View run at 
-https://modal.com/apps/islamborghini/main/ap-vigReWY6H2j4hzSYRcScl4
+https://modal.com/apps/islamborghini/main/ap-dTQ2fzFeAm8OQAkHM4WONd

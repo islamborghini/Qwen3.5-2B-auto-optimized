@@ -1,0 +1,58 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-iso5QMN0tmMolVjc69MpcU
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 883.57it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1274.13it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<03:38,  2.82it/s]
+[1ALoading weights:   4%|▍         | 26/617 [00:00<00:08, 72.21it/s]
+[1ALoading weights:   7%|▋         | 44/617 [00:00<00:05, 101.55it/s]
+[1ALoading weights:  12%|█▏        | 75/617 [00:00<00:03, 161.13it/s]
+[1ALoading weights:  16%|█▌        | 100/617 [00:00<00:02, 186.32it/s]
+[1ALoading weights:  21%|██        | 127/617 [00:00<00:02, 206.49it/s]
+[1ALoading weights:  25%|██▍       | 153/617 [00:00<00:02, 215.35it/s]
+[1ALoading weights:  30%|███       | 187/617 [00:01<00:01, 243.99it/s]
+[1ALoading weights:  36%|███▌      | 220/617 [00:01<00:01, 264.45it/s]
+[1ALoading weights:  40%|████      | 249/617 [00:01<00:01, 264.98it/s]
+[1ALoading weights:  47%|████▋     | 287/617 [00:01<00:01, 291.26it/s]
+[1ALoading weights:  51%|█████▏    | 317/617 [00:01<00:01, 285.26it/s]
+[1ALoading weights:  61%|██████    | 376/617 [00:01<00:00, 364.13it/s]
+[1ALoading weights:  80%|███████▉  | 493/617 [00:01<00:00, 588.06it/s]
+[1ALoading weights: 100%|██████████| 617/617 [00:01<00:00, 336.21it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+HF floors (max, p99 over steps): {'dev-prose-512': (0.375, 0.25), 'dev-prose-2048': (0.312, 0.25), 'dev-code-512': (0.438, 0.25), 'dev-code-2048': (0.438, 0.277), 'dev-structured-512': (1.938, 1.075), 'dev-structured-2048': (1.438, 0.694)}
+k0_nonlean {'dev-prose-512': (0.344, 0.304, 8), 'dev-prose-2048': (0.328, 0.304, 49), 'dev-code-512': (0.312, 0.312, 125), 'dev-code-2048': (0.312, 0.312, 0), 'dev-structured-512': (2.406, 0.813, 203), 'dev-structured-2048': (1.469, 1.21, 205)}
+k0_lean {'dev-prose-512': (0.312, 0.312, 77), 'dev-prose-2048': (0.375, 0.295, 157), 'dev-code-512': (0.344, 0.312, 76), 'dev-code-2048': (0.312, 0.312, 0), 'dev-structured-512': (4.254, 1.139, 235), 'dev-structured-2048': (1.485, 1.069, 226)}
+k0_eager_nonlean {'dev-prose-512': (0.5, 0.295, 8), 'dev-prose-2048': (0.562, 0.287, 181), 'dev-code-512': (0.359, 0.297, 13), 'dev-code-2048': (0.352, 0.312, 87), 'dev-structured-512': (2.375, 0.591, 235), 'dev-structured-2048': (2.5, 0.743, 185)}
+k3_lean {'dev-prose-512': (0.312, 0.281, 48), 'dev-prose-2048': (0.312, 0.264, 54), 'dev-code-512': (0.312, 0.288, 4), 'dev-code-2048': (0.312, 0.281, 0), 'dev-structured-512': (1.689, 1.071, 235), 'dev-structured-2048': (2.625, 1.0, 185)}
+saved gatecheck.json
+saved results/gatecheck.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-iso5QMN0tmMolVjc69MpcU

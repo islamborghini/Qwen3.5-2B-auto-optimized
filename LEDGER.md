@@ -42,3 +42,9 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | opt4: rerun loop with fixed mem/TTFT accounting (k0/k2/k3/k4 compile) | est ~/bin/zsh.5 | launched |
 | 2026-09-17 | Fable agents T1/T3 | T1: lean decode (-50 kernels, +2-3%, bit-identical) merged; T3: fused GDN Triton kernel (-144 kernels, -6.6% step) but state update wrong -> debugging | ~ Fable | branches merged |
 | 2026-09-17 | Modal H100 | opt4: spec configs rejected only by TTFT (+5.7%); mem accounting still broken -> fixed again; debug session (kernel dump + TTFT phases) | ~/bin/zsh.5 + ~/bin/zsh.2 | launched |
+| 2026-09-17 | Modal H100 | debug2: kernel decay/beta/kv/head0-state all exact -> store or other heads; debug3 per-head + opt5 (lean engine, paired incumbent checks) | ~/bin/zsh.2 + ~/bin/zsh.2 + ~/bin/zsh.6 | launched |
+| 2026-09-17 | Modal H100 | opt5: k0_compile (merged lean engine) FAILS gate on structured-512 (4.33 > 4.0, floor 2.0) -> gatecheck session: lean vs non-lean per-prompt diffs | ~/bin/zsh.3 | launched |
+| 2026-09-17 | Modal H100 | debug3/4: fused GDN kernel: math exact when dumped, stored state wrong regardless of barrier/separate buffer -> register-spill regime; rewrite delegated (T3b) | ~$0.4 | |
+| 2026-09-17 | Modal H100 | gatecheck: max-diff is a single-step outlier (steps ~200-235 on structured prompts); p99 of all configs ~= HF's own p99 (0.25-1.1). lean vs nonlean: 4.25 vs 2.41 max on structured-512, p99 1.14 vs 0.81 | ~$0.3 | results/gatecheck.json |
+| 2026-09-17 | Modal H100 | opt5 (lean engine, paired incumbent): k0_compile failed gate (4.33>4.0, structured-512); k2_compile accepted (616 geomean); k3/k4 slower on prose | ~$0.6 | results/opt_ledger_round5.json |
+| 2026-09-17 | Modal H100 | final #5: frozen k2_compile(lean) + custom_k3 + vllm_mtp3: dev full, heldout, IFEval custom_k2 | est ~$1.5 | launched |

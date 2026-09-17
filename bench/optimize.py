@@ -120,7 +120,8 @@ if __name__ == "__main__":
                 elif inc:
                     I = led["candidates"][inc]["screen"]
                 if inc:
-                    checks["exceeds_noise"] = rec["spread"][0] > led["candidates"][inc]["spread"][1]
+                    inc_hi = max(spread(I)[1], led["candidates"][inc]["spread"][1]) if "incumbent_paired" in rec else led["candidates"][inc]["spread"][1]
+                    checks["exceeds_noise"] = rec["spread"][0] > inc_hi
                     for wid in I:
                         C = rec["screen"][wid]
                         checks[f"{wid}:tps"] = statistics.median(C["tps"]) >= 0.95 * statistics.median(I[wid]["tps"])

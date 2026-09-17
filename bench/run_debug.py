@@ -37,6 +37,12 @@ vn_all = beta[:, None] * (vf - kv_ref); S_new = Sd + kn[:, :, None] * vn_all[:, 
 per_head = ((S_k - S_new).abs().amax((1, 2)) / S_new.abs().amax((1, 2))).tolist()
 print("real-path per-head state rel diff:", [round(x, 3) for x in per_head])
 print("real-path head0 vs: ref", (S_k[0] - S_new[0]).abs().max().item(), "| undecayed", (S_k[0] - S[0]).abs().max().item(), "| decayed-only", (S_k[0] - Sd[0]).abs().max().item(), flush=True)
+for barrier in (False, True):
+    for separate in (False, True):
+        S_k = S.clone(); S_o = torch.empty_like(S_k) if separate else None
+        G.gdn_step(qkv, z, b, a, cs.clone(), cw, neg_expA, dt_bias, gn, S_k, out, rec_state_out=S_o, barrier=barrier)
+        got = S_o if separate else S_k
+        print(f"barrier={barrier} separate_out={separate}: max per-head rel diff", round(((got - S_new).abs().amax((1, 2)) / S_new.abs().amax((1, 2))).max().item(), 4), flush=True)
 try:
     G.test()
 except Exception as e:

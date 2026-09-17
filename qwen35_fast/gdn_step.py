@@ -24,8 +24,8 @@ def _conv_silu(x_ptr, st_ptr, w_ptr, c):
 
 
 @triton.jit
-def _gdn_step_kernel(qkv_ptr, z_ptr, b_ptr, a_ptr, st_ptr, w_ptr, nega_ptr, dtb_ptr, gn_ptr, S_ptr, o_ptr,
-                     scale, eps, D: tl.constexpr, KOFF: tl.constexpr, VOFF: tl.constexpr, DBG: tl.constexpr):
+def _gdn_step_kernel(qkv_ptr, z_ptr, b_ptr, a_ptr, st_ptr, w_ptr, nega_ptr, dtb_ptr, gn_ptr, S_ptr, S_out_ptr, o_ptr,
+                     scale, eps, D: tl.constexpr, KOFF: tl.constexpr, VOFF: tl.constexpr, DBG: tl.constexpr, BARRIER: tl.constexpr):
     h = tl.program_id(0)
     offs = tl.arange(0, D)
     q = _conv_silu(qkv_ptr, st_ptr, w_ptr, h * D + offs)
@@ -57,7 +57,9 @@ def _gdn_step_kernel(qkv_ptr, z_ptr, b_ptr, a_ptr, st_ptr, w_ptr, nega_ptr, dtb_
             tl.store(o_ptr + offs[:, None] * D + offs[None, :], S)
             tl.store(o_ptr + D * D + offs, vn)
         return
-    tl.store(Sp, S)
+    if BARRIER:
+        tl.debug_barrier()
+    tl.store(S_out_ptr + h * D * D + offs[:, None] * D + offs[None, :], S)
     # gated RMSNorm (Qwen3_5RMSNormGated): input is the bf16 o, fp32 norm, bf16 * weight, * silu(z fp32), -> bf16
     ob = o.to(tl.bfloat16).to(tl.float32)
     hn = ob * tl.rsqrt(tl.sum(ob * ob) / D + eps)
@@ -68,13 +70,15 @@ def _gdn_step_kernel(qkv_ptr, z_ptr, b_ptr, a_ptr, st_ptr, w_ptr, nega_ptr, dtb_
     tl.store(o_ptr + h * D + offs, out.to(tl.bfloat16))
 
 
-def gdn_step(qkv, z, b, a, conv_state, conv_w, neg_expA, dt_bias, gnorm_w, rec_state, out, eps=1e-6, dbg=False):
+def gdn_step(qkv, z, b, a, conv_state, conv_w, neg_expA, dt_bias, gnorm_w, rec_state, out, eps=1e-6, dbg=False, rec_state_out=None, barrier=True):
     """qkv [6144] bf16 (pre-conv row), z [2048] bf16, b/a [16] bf16, conv_state [6144,3] bf16 (updated in place),
     conv_w [6144,1,4] bf16, neg_expA [16] fp32, dt_bias [16], gnorm_w [128] bf16, rec_state [16,128,128] fp32 (in place),
     out [2048] bf16. dbg=True: out is fp32 [3*H*D] and receives the post-l2norm q,k,v per head (test only)."""
     H, D = rec_state.shape[0], rec_state.shape[1]
-    _gdn_step_kernel[(H,)](qkv, z, b, a, conv_state, conv_w, neg_expA, dt_bias, gnorm_w, rec_state, out,
-                           D ** -0.5, eps, D=D, KOFF=H * D, VOFF=2 * H * D, DBG=int(dbg), num_warps=8)
+    if rec_state_out is None:
+        rec_state_out = rec_state          # in place
+    _gdn_step_kernel[(H,)](qkv, z, b, a, conv_state, conv_w, neg_expA, dt_bias, gnorm_w, rec_state, rec_state_out, out,
+                           D ** -0.5, eps, D=D, KOFF=H * D, VOFF=2 * H * D, DBG=int(dbg), BARRIER=int(barrier), num_warps=8)
     return out
 
 
