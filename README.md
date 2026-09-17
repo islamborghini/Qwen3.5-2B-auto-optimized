@@ -153,7 +153,7 @@ every top-1 disagreement sits at a genuine near-tie. Findings across seven sessi
 |---|---|---|---|---|
 | k0_eager | CUDA graph, eager blocks | pass | 233-392 (sessions) | first incumbent |
 | k0_compile | + fused elementwise blocks (torch.compile) | pass (4/5 sessions) | 390-410 | incumbent, then superseded |
-| k2_compile | + exact MTP speculation, 2 drafts | pass (3/4) | 565-616 | **accepted incumbent (lean)** |
+| k2_compile | + exact MTP speculation, 2 drafts | pass (4/5) | 565-636 | accepted (lean + lean spec glue), then superseded |
 | k3_compile | 3 drafts | pass (3/4) | 582-614 | rejected: >5% slower than k2 on prose (chain drafts cost more than they yield there) |
 | k4_compile | 4 drafts | pass | 563-611 | rejected: slower on prose |
 | k*_layer(_at)(_ep) | whole-layer compile (+max-autotune, +cast emulation) | fail / marginal | 577-584 | rejected |
@@ -161,7 +161,7 @@ every top-1 disagreement sits at a genuine near-tie. Findings across seven sessi
 | lean decode path (T1) | -50 launches/step, residual+norm fusion | pass | +2-3% | merged (default) |
 | lean speculative glue (T1b) | static token buffer, fused acceptance, batched keep-mask/state writes, MTP-input norms fused | pass (p99 unchanged) | k2: 803->663 launches, -6% step | merged (default) |
 | fused GDN step v1 (T3) | full 128x128 tile per program | test fails (register-spill regime) | (-6.6% step) | not enabled |
-| fused GDN step v2 (T3b) | pre kernel (conv/silu/l2norm, 48 programs) + rule kernel (per (head, 16-col) tile, T<=4, keep mask) | test exact (0/184k beyond 2 ulp) | k2: -8.5% step, +9-10% TPS | `fused_gdn=True` candidate |
+| k2_compile_fused (T3b kernel) | k2 + two-kernel fused GDN step (conv/silu/l2norm pre-kernel, 48 programs; delta-rule kernel per (head, 16-col) tile, T<=4, keep mask) | test exact (0/184k beyond 2 ulp); gate pass (2/2) | 665-670 (+12% vs paired k2) | **accepted frozen config** (`results/frozen_config.json`) |
 
 ## Costs and effort (estimates; see LEDGER.md for every session)
 | Resource | Used | Notes |

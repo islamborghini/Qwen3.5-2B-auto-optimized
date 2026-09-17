@@ -56,3 +56,4 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | opt6: k2_compile_fused accepted (670 geomean vs k2_compile 636); final #6 launched on frozen config | ~/bin/zsh.8 + est ~.5 | results/opt_ledger_round6.json |
 | 2026-09-17 | Modal H100 | final #6 (k2 non-fused) killed at start: fused k2 rejected only by a 1-rep TTFT check (prefill code identical) -> loop reps 3, paired | ~$0.2 | |
 | 2026-09-17 | Modal H100 | opt6 crashed (illegal memory access after fused k2 / at k3 fused) -> T3c worker; opt7: k0/k2/k2_fused, 3 paired reps | ~$0.7 | launched |
+| 2026-09-17 | Modal H100 | opt7: k2_compile_fused accepted (665 vs paired k2 ~592, +12%), gate ok; final #7 launched (vllm_mtp3 then custom_k2 fused; IFEval) | ~/bin/zsh.7 + est ~.3 | results/opt_ledger_round7.json |
