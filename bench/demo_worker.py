@@ -22,7 +22,7 @@ def _run(prompt, n_out, mode, start_at, follow_ups, follow_up, turn_max):
     first_ids = encode([{"role": "user", "content": prompt}])
     title = {"base": "BASE MODEL  -  Qwen3.5-2B in HF transformers (eager)",
              "engine": "OPTIMIZED  -  Qwen3.5-2B in qwen35_fast (CUDA graph + fused kernels + exact MTP speculation)"}[mode]
-    P("\n" + "=" * 100 + f"\n{title}\nGPU: {torch.cuda.get_device_name(0)} | bf16 weights, unchanged | greedy | target {n_out} tokens, up to {follow_ups} follow-up turns\n" + "=" * 100)
+    P(f"\n{title}\n{torch.cuda.get_device_name(0)} | bf16 weights, unchanged | greedy | {n_out} tokens\n")
 
     class Stream:
         """Incremental detokenization, flushed at most every ~30 ms (tiny per-token writes would throttle the engine)."""
@@ -95,7 +95,7 @@ def _run(prompt, n_out, mode, start_at, follow_ups, follow_up, turn_max):
     t0 = time.perf_counter()
     while total < n_out and turn <= follow_ups:
         ids = encode(messages); st = Stream()
-        P(f"\n>>> {prompt}\n" if turn == 0 else f"\n\n>>> [turn {turn + 1}] {messages[-1]['content']}\n")
+        P(f"\n>>> {prompt}\n" if turn == 0 else "\n")
         cap = min(turn_max, n_out - total)
         toks, ts = gen(ids, cap, st); st.finish()
         if not toks: break
@@ -106,10 +106,10 @@ def _run(prompt, n_out, mode, start_at, follow_ups, follow_up, turn_max):
         messages += [{"role": "assistant", "content": tok.decode(toks, skip_special_tokens=True)}, {"role": "user", "content": nxt}]
         turn += 1
     tag = "[base]  " if mode == "base" else "[engine]"
-    P(f"\n\n{tag} {total} tokens over {turn} turn(s)   |   decode {(total - turn) / max(dec_s, 1e-9):.0f} tokens/s   |   wall time {t_last - t0:.1f} s (incl. {t_last - t0 - dec_s:.1f} s of prompt processing)   |   first token after {1000*(t_first - t0):.0f} ms")
     lp = loops(all_toks)
-    P(f"{tag} repetition check: " + ("none detected" if lp is None else f"a 48-token block repeats from token {lp}"))
-    if mode == "base": P("[base]   (HF eager is CPU-bound; it measured 50 tokens/s under the controlled benchmark, host CPUs vary)")
+    P(f"\n\n{'-' * 90}\n{tag} {total} tokens in {t_last - t0:.1f} s   |   {(total - turn) / max(dec_s, 1e-9):.0f} tokens/s   |   first token after {1000*(t_first - t0):.0f} ms"
+      + (f"   |   {turn} turns" if turn > 1 else "") + ("" if lp is None else f"   |   repetition from token {lp}"))
+    if mode == "base": P("[base]   (HF eager is CPU-bound: 50 tokens/s under the controlled benchmark, slower on some hosts)")
     P("")
 
 

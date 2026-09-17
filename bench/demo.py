@@ -32,8 +32,8 @@ def demo(prompt: str, n_out: int, mode: str, start_at: float, follow_ups: int, f
 
 
 @app.local_entrypoint()
-def main(prompt: str = "Explain how a CPU cache hierarchy works and why it matters for performance.", n_out: int = 256,
-         mode: str = "engine", start_in: float = 0, follow_ups: int = 12, turn_max: int = 1500,
+def main(prompt: str = "Explain how a CPU cache hierarchy works and why it matters for performance.", n_out: int = 2000,
+         mode: str = "engine", start_in: float = 0, follow_ups: int = 12, turn_max: int = 2000,
          follow_up: str = "Continue with the next chapters, in full and in the same format. Do not repeat earlier chapters."):
     """mode: 'engine' (optimized) or 'base' (HF transformers). start_in: seconds from now at which generation starts,
     so two terminals launched together begin at the same instant (models take different times to load)."""
