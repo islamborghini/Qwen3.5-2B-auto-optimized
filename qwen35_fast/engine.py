@@ -67,11 +67,15 @@ def apply_rope(q, k, cos, sin):  # q,k: [B,H,T,D]; cos/sin: [T, rot]
 
 class Engine:
     def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True,
-                 compile_blocks=False, use_gemv=False, compile_mode=None):
+                 compile_blocks=False, use_gemv=False, compile_mode=None, fused_gdn=False):
         """compile_mode: None | "blocks" (fused elementwise helpers) | "layer" (whole decode layer compiled, graph
         break at the fla kernel) | "layer_at" (same, inductor max-autotune for the GEMMs). compile_blocks=True == "blocks"."""
         self.dev = torch.device(device)
         self.compile_mode = compile_mode or ("blocks" if compile_blocks else None)
+        self.fused_gdn = fused_gdn
+        if fused_gdn:
+            from qwen35_fast.gdn_step import gdn_step
+            self._gdn_step = torch._dynamo.disable(gdn_step)
         compile_blocks = self.compile_mode == "blocks"
         self.compile_blocks = compile_blocks
         self.use_gemv = use_gemv
@@ -239,6 +243,11 @@ class Engine:
             qkv, z, b, a = allp.split([self.conv_dim, self.gh * self.gv, self.gh, self.gh], -1)
         else:
             qkv, z, b, a = mm(x, w["qkv"]), mm(x, w["z"]), mm(x, w["b"]), mm(x, w["a"])
+        if not prefill and T == 1 and self.fused_gdn:   # single fused Triton kernel (conv+silu+delta rule+gated norm)
+            o = torch.empty(1, self.gh * self.gv, dtype=torch.bfloat16, device=x.device)
+            self._gdn_step(qkv[0], z[0], b[0], a[0], conv_state[0], w["conv_w"], w["neg_expA"], w["dt_bias"],
+                           w["gnorm"], rec_state[0], o[0], self.eps)
+            return mm(o, w["out"])
         xc = qkv.T[None]                                                       # [1,conv_dim,T]
         cw = w["conv_w"]                                                       # [conv_dim,1,k]
         if prefill:
