@@ -5,3 +5,82 @@ https://modal.com/apps/islamborghini/main/ap-UOaifIGrXvupHhM10V8C8O
 ├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
 ├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
 └── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 901.65it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1191.19it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<03:42,  2.77it/s]
+[1ALoading weights:   4%|▍         | 26/617 [00:00<00:08, 71.51it/s]
+[1ALoading weights:   8%|▊         | 51/617 [00:00<00:04, 121.95it/s]
+[1ALoading weights:  13%|█▎        | 78/617 [00:00<00:03, 163.38it/s]
+[1ALoading weights:  17%|█▋        | 105/617 [00:00<00:02, 190.10it/s]
+[1ALoading weights:  22%|██▏       | 138/617 [00:00<00:02, 225.95it/s]
+[1ALoading weights:  27%|██▋       | 166/617 [00:00<00:01, 234.86it/s]
+[1ALoading weights:  32%|███▏      | 198/617 [00:01<00:01, 255.68it/s]
+[1ALoading weights:  37%|███▋      | 228/617 [00:01<00:01, 268.35it/s]
+[1ALoading weights:  42%|████▏     | 257/617 [00:01<00:01, 264.49it/s]
+[1ALoading weights:  47%|████▋     | 287/617 [00:01<00:01, 273.43it/s]
+[1ALoading weights:  51%|█████     | 315/617 [00:01<00:01, 266.12it/s]
+[1ALoading weights:  60%|█████▉    | 368/617 [00:01<00:00, 341.32it/s]
+[1ALoading weights:  74%|███████▎  | 455/617 [00:01<00:00, 488.20it/s]
+[1ALoading weights:  91%|█████████ | 562/617 [00:01<00:00, 656.57it/s]
+[1ALoading weights: 100%|██████████| 617/617 [00:01<00:00, 325.07it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+HF noise floor dev-prose-512 {'max_abs_diff': 0.2734375, 'top1_disagree': 1}
+HF noise floor dev-prose-2048 {'max_abs_diff': 0.25, 'top1_disagree': 4}
+HF noise floor dev-code-512 {'max_abs_diff': 0.4375, 'top1_disagree': 3}
+HF noise floor dev-code-2048 {'max_abs_diff': 0.4375, 'top1_disagree': 1}
+HF noise floor dev-structured-512 {'max_abs_diff': 2.0, 'top1_disagree': 1}
+HF noise floor dev-structured-2048 {'max_abs_diff': 1.25, 'top1_disagree': 0}
+k0_compile {'correct': True, 'why': 'ok (max|diff| 1.812, tol 2.500)', 'geomean': 402.7631316382968, 'spread': (402.52487665943465, 403.00120669678995), 'accepted': True}
+k2_compile {'correct': True, 'why': 'ok (max|diff| 2.312, tol 2.500)', 'geomean': 636.0940682944498, 'spread': (635.6881401375236, 636.4989549951321), 'accepted': True}
+k3_compile {'correct': True, 'why': 'ok (max|diff| 1.625, tol 2.500)', 'geomean': 613.9524933178596, 'spread': (613.5560718367584, 614.3480634301258), 'accepted': False}
+k4_compile {'correct': True, 'why': 'ok (max|diff| 1.625, tol 2.500)', 'geomean': 602.7216677480718, 'spread': (602.2763730107562, 603.1662070251786), 'accepted': False}
+k2_compile_fused {'correct': True, 'why': 'ok (max|diff| 2.016, tol 2.500)', 'geomean': 670.1911914688953, 'spread': (669.7243736101984, 670.6573982577344), 'accepted': False}
+[gpu-health] [WARN] GPU-637b9e26-ee62-3815-1517-4817ab748a94: XID: NVRM: Xid (PCI:0000:84:00): 31, pid=248891, name=exe, channel 0x0000000a, intr 00000000. MMU Fault: ENGINE GRAPHICS GPC4 GPCCLIENT_T1_1 faulted @ 0x2af6_58000000. Fault is of type FAULT_PDE ACCESS_TYPE_VIRT_WRITE
+
+[W917 08:42:17.654882010 CachingHostAllocator.cpp:26] Warning: Exception in pinned allocator free(), rethrowing (function free)
+terminate called after throwing an instance of 'c10::AcceleratorError'
+  what():  CUDA error: an illegal memory access was encountered
+Search for `cudaErrorIllegalAddress' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+
+Exception raised from currentStreamCaptureStatusMayInitCtx at /__w/pytorch/pytorch/c10/cuda/CUDAGraphsC10Utils.h:73 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x2af11a557bfd in /usr/local/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0xc4e9 (0x2af11a07a4e9 in /usr/local/lib/python3.12/site-packages/torch/lib/libc10_cuda.so)
+frame #2: <unknown function> + 0xceba84 (0x2af1b84cca84 in /usr/local/lib/python3.12/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: <unknown function> + 0xce5971 (0x2af1b84c6971 in /usr/local/lib/python3.12/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0x86ae4 (0x2af11a534ae4 in /usr/local/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #5: c10::TensorImpl::~TensorImpl() + 0x9 (0x2af11a52f219 in /usr/local/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #6: <unknown function> + 0x8752b5 (0x2af1a1b952b5 in /usr/local/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #7: <unknown function> + 0x875341 (0x2af1a1b95341 in /usr/local/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+<omitting python frames>
+frame #26: <unknown function> + 0x2a1ca (0x2af1197321ca in /usr/lib/x86_64-linux-gnu/libc.so.6)
+frame #27: __libc_start_main + 0x8b (0x2af11973228b in /usr/lib/x86_64-linux-gnu/libc.so.6)
+frame #28: _start + 0x29 (0x6000a9 in /usr/local/bin/python)
+
+saved results/opt_ledger.json
+exit code 250
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-UOaifIGrXvupHhM10V8C8O
