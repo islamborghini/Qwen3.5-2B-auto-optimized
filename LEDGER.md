@@ -50,3 +50,4 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | final #5: frozen k2_compile(lean) + custom_k3 + vllm_mtp3: dev full, heldout, IFEval custom_k2 | est ~$1.5 | launched |
 | 2026-09-17 | Modal H100 | final #5 done: custom_k2 (lean) 540-737 TPS dev, 0.88x vllm_mtp3 same-session (heldout 0.87x); custom_k3 0.91x/0.89x; IFEval custom_k2 0.64 | ~$1.5 | results/RESULTS.md |
 | 2026-09-17 | DeepSeek | review #2 of merged engine: fused_gdn must be guarded (done), pre_norm option semantics (documented), save=None footgun (fixed) | $0 | candidates/review2 |
+| 2026-09-17 | Fable agent T3b | fused GDN v2 (pre + rule kernels, T<=4, keep mask): test exact; k2 step -8.5% (544/759 TPS) | ~ Fable, ~/bin/zsh.6 Modal (2 sessions) | merged |

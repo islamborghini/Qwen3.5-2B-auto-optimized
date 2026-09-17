@@ -25,8 +25,8 @@ for w in gate_wl:
     print("HF floor", w["id"], ref[w["id"]]["floor"], flush=True)
 del hf; torch.cuda.empty_cache()
 
-for lean, emu in ((True, False), (True, True)):
-    for k in (0, 3):
+for lean, emu in ((False, False), (True, False)):
+    for k in (0, 2, 3):
         tag = f"lean{int(lean)}_emu{int(emu)}_k{k}"
         try:
             eng = Engine(path, spec_k=k, compile_blocks=True, lean=lean, emulate_casts=emu)
@@ -46,11 +46,19 @@ for lean, emu in ((True, False), (True, True)):
                 r["tps"][w["id"]] = 255 / o["decode_s"]
             for w in gate_wl:
                 el = eng.forced_decode_logits(w["ids"], ref[w["id"]]["gen"]).cpu()
-                r["logit_diff"][w["id"]] = {"max_abs": (el - ref[w["id"]]["dec"]).abs().max().item(), "hf_floor": ref[w["id"]]["floor"],
+                dd = (el - ref[w["id"]]["dec"]).abs().max(-1).values
+                r["logit_diff"][w["id"]] = {"max_abs": dd.max().item(), "p99": dd.quantile(0.99).item(), "hf_floor": ref[w["id"]]["floor"],
                                             "top1_disagree": int((el.argmax(-1) != ref[w["id"]]["dec"].argmax(-1)).sum())}
+                ref[w["id"]].setdefault("engine_logits", {})[tag] = el
             res[tag] = r
             print(tag, json.dumps(r), flush=True)
             del eng; torch.cuda.empty_cache()
         except Exception:
             res[tag] = {"error": traceback.format_exc()}; print(res[tag]["error"], flush=True)
-save("run_lean2.json", res)
+for w in gate_wl:   # lean vs non-lean must be numerically identical per k
+    E = ref[w["id"]]["engine_logits"]
+    for k in (0, 2, 3):
+        a, b = E.get(f"lean0_emu0_k{k}"), E.get(f"lean1_emu0_k{k}")
+        if a is not None and b is not None:
+            res[f"lean_vs_nonlean_k{k}_{w['id']}"] = (a - b).abs().max().item(); print("lean vs nonlean max|diff|", k, w["id"], res[f"lean_vs_nonlean_k{k}_{w['id']}"], flush=True)
+save("run_lean3.json", res)
