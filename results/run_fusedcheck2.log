@@ -1,0 +1,69 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-9hvntive6lhtacmeUfugXM
+✓ Created objects.
+├── 🔨 Created mount 
+│   /Users/islam/fun_fable_proj/.claude/worktrees/agent-a4d85703b930e5630/bench/
+│   session.py
+├── 🔨 Created mount 
+│   /Users/islam/fun_fable_proj/.claude/worktrees/agent-a4d85703b930e5630/qwen35
+│   _fast
+├── 🔨 Created mount 
+│   /Users/islam/fun_fable_proj/.claude/worktrees/agent-a4d85703b930e5630/bench
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 942.03it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1427.07it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<03:59,  2.57it/s]
+[1ALoading weights:   4%|▍         | 26/617 [00:00<00:08, 68.16it/s]
+[1ALoading weights:   8%|▊         | 47/617 [00:00<00:05, 104.78it/s]
+[1ALoading weights:  13%|█▎        | 79/617 [00:00<00:03, 163.68it/s]
+[1ALoading weights:  17%|█▋        | 106/617 [00:00<00:02, 189.63it/s]
+[1ALoading weights:  22%|██▏       | 134/617 [00:00<00:02, 206.26it/s]
+[1ALoading weights:  26%|██▌       | 158/617 [00:01<00:02, 209.78it/s]
+[1ALoading weights:  30%|██▉       | 184/617 [00:01<00:01, 220.04it/s]
+[1ALoading weights:  34%|███▍      | 211/617 [00:01<00:01, 220.14it/s]
+[1ALoading weights:  39%|███▉      | 240/617 [00:01<00:01, 233.89it/s]
+[1ALoading weights:  44%|████▍     | 270/617 [00:01<00:01, 247.79it/s]
+[1ALoading weights:  48%|████▊     | 297/617 [00:01<00:01, 253.05it/s]
+[1ALoading weights:  53%|█████▎    | 326/617 [00:01<00:01, 262.23it/s]
+[1ALoading weights:  62%|██████▏   | 382/617 [00:01<00:00, 348.00it/s]
+[1ALoading weights:  79%|███████▉  | 490/617 [00:01<00:00, 561.47it/s]
+[1ALoading weights:  97%|█████████▋| 597/617 [00:01<00:00, 710.88it/s]
+[1ALoading weights: 100%|██████████| 617/617 [00:02<00:00, 306.14it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+HF noise floor dev-prose-512 {'max_abs_diff': 0.28125, 'top1_disagree': 1}
+HF noise floor dev-prose-2048 {'max_abs_diff': 0.3125, 'top1_disagree': 2}
+HF noise floor dev-code-512 {'max_abs_diff': 0.4375, 'top1_disagree': 3}
+HF noise floor dev-code-2048 {'max_abs_diff': 0.53125, 'top1_disagree': 1}
+HF noise floor dev-structured-512 {'max_abs_diff': 1.96875, 'top1_disagree': 1}
+HF noise floor dev-structured-2048 {'max_abs_diff': 1.1875, 'top1_disagree': 0}
+k2_compile {'correct': False, 'why': 'dev-code-2048: decode logits max|diff| 1.504 > tol 1.062 (HF floor 0.531)'}
+k2_compile_fused {'correct': True, 'why': 'ok (max|diff| 1.812, tol 2.375)', 'geomean': 665.2800997911113, 'spread': (664.7835210744411, 665.7761958224149), 'accepted': True}
+k3_compile_fused {'correct': True, 'why': 'ok (max|diff| 1.812, tol 2.375)', 'geomean': 669.2987134906042, 'spread': (668.4613432669307, 670.1354010895404), 'accepted': False}
+incumbent: k2_compile_fused
+saved results/opt_ledger.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-9hvntive6lhtacmeUfugXM

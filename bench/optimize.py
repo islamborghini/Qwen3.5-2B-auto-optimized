@@ -22,6 +22,8 @@ CANDIDATES = {  # name -> Engine kwargs (order = priority). Earlier rounds (resu
     # "k3_compile_fused"/"k0_compile_fused": pending the T3c illegal-memory-access fix (results/run_opt6.log)
 }
 LEDGER = os.path.join(OUT, "opt_ledger.json")
+if os.environ.get("QWEN35_CANDIDATES"):   # debugging aid: restrict the candidate list, e.g. "k2_compile,k2_compile_fused"
+    CANDIDATES = {k: v for k, v in CANDIDATES.items() if k in os.environ["QWEN35_CANDIDATES"].split(",")}
 
 
 def screen(eng, wl, reps, static_mem=0):
@@ -106,7 +108,9 @@ if __name__ == "__main__":
             continue
         n += 1; rec = {"kwargs": kw, "t": time.time()}
         try:
-            import gc; torch._dynamo.reset(); gc.collect(); torch.cuda.empty_cache(); base_mem = torch.cuda.memory_allocated()
+            # no torch._dynamo.reset() here: it invalidates inductor kernels that a live incumbent's captured CUDA graph
+            # still replays (suspected cause of the opt6 illegal-memory-access at teardown; not reproducible in isolation)
+            import gc; gc.collect(); torch.cuda.empty_cache(); base_mem = torch.cuda.memory_allocated()
             eng = Engine(path, **kw); torch.cuda.synchronize()
             static_mem = torch.cuda.memory_allocated() - base_mem
             ok, why = correctness(eng, wl, ref); rec["correct"] = ok; rec["why"] = why
@@ -130,9 +134,9 @@ if __name__ == "__main__":
                 rec["checks"] = checks; rec["accepted"] = all(checks.values()) if inc else True; rec["static_mem"] = static_mem
                 if rec["accepted"]:
                     led["incumbent"] = name
-                    if inc_eng is not None: del inc_eng
+                    if inc_eng is not None: inc_eng.close(); del inc_eng
                     inc_eng, inc_name = eng, name; eng = None
-            if eng is not None: del eng
+            if eng is not None: eng.close(); del eng
             torch.cuda.empty_cache()
         except Exception:
             import traceback; rec["error"] = traceback.format_exc()[-2000:]; rec["accepted"] = False
