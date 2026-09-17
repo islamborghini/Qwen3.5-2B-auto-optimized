@@ -1,0 +1,23 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-rTuWBonagrs4zZJCgvzOwc
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/feasibility.py
+└── 🔨 Created function feas.
+/usr/local/lib/python3.12/site-packages/huggingface_hub/constants.py:299: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 768.88it/s]
+{"gpu": "NVIDIA H100 80GB HBM3", "torch": "2.13.0+cu130", "download_s": 0.03035988899999964, "prompt_len": 512}
+Traceback (most recent call last):
+  File "/root/feasibility.py", line 68, in feas
+    model = Qwen3_5ForConditionalGeneration.from_pretrained(MODEL, revision=REV, dtype=torch.bfloat16, device_map="cuda")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/transformers/modeling_utils.py", line 4164, in from_pretrained
+    device_map = check_and_set_device_map(device_map)  # warn, error and fix the device map
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/transformers/integrations/accelerate.py", line 137, in check_and_set_device_map
+    raise ValueError(
+ValueError: Using a `device_map`, `tp_plan`, `torch.device` context manager or setting `torch.set_default_device(device)` requires `accelerate`. You can install it with `pip install accelerate`
+
+INFO 09-17 05:44:12 [api_utils.py:286] non-default args: {'dtype': 'bfloat16', 'max_model_len': 9216, 'gpu_memory_utilization': 0.6, 'disable_log_stats': True, 'revision': '15852e8c16360a2fea060d615a32b45270f8a8fc', 'limit_mm_per_prompt': {'image': 0, 'video': 0}, 'model': 'Qwen/Qwen3.5-2B'}
