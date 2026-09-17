@@ -14,7 +14,7 @@ image = (
 )
 
 
-@app.function(gpu="H100", cpu=4.0, image=image, volumes={"/hf": vol}, timeout=1200)
+@app.function(gpu="H100", cpu=4.0, memory=32768, image=image, volumes={"/hf": vol}, timeout=1200)
 def demo(prompt: str, n_out: int, skip_base: bool):
     sys.path.insert(0, "/work"); os.environ["OUT_DIR"] = "/tmp/out"
     import torch
@@ -22,6 +22,8 @@ def demo(prompt: str, n_out: int, skip_base: bool):
     from transformers import AutoTokenizer
     from qwen35_fast.engine import Engine
 
+    torch.set_num_threads(4)
+    print(f"[host] cpus visible: {os.cpu_count()}, torch threads: {torch.get_num_threads()}, gpu: {torch.cuda.get_device_name(0)}", flush=True)
     path = model_path(); tok = AutoTokenizer.from_pretrained(path)
     ids = tok.apply_chat_template([{"role": "user", "content": prompt}], add_generation_prompt=True, enable_thinking=False, tokenize=False)
     ids = tok(ids, add_special_tokens=False)["input_ids"]
@@ -50,7 +52,8 @@ def demo(prompt: str, n_out: int, skip_base: bool):
         with torch.no_grad():
             m.generate(input_ids=x, attention_mask=torch.ones_like(x), max_new_tokens=n_out, do_sample=False, streamer=s, eos_token_id=list(eos))
         stream_print(tok.decode(s.buf[len(s.buf) // 16 * 16:])); n = len(s.t); tps = (n - 1) / (s.t[-1] - s.t[0]) if n > 1 else 0
-        print(f"\n\n[base] {n} tokens | time to first token {1000*(s.t[0]-t0):.0f} ms | decode {tps:.0f} tokens/s | total {s.t[-1]-t0:.2f} s\n", flush=True)
+        print(f"\n\n[base] {n} tokens | time to first token {1000*(s.t[0]-t0):.0f} ms | decode {tps:.0f} tokens/s | total {s.t[-1]-t0:.2f} s", flush=True)
+        print("[base] note: HF eager is CPU-bound; under the controlled benchmark protocol it measured 50 tokens/s (results/RESULTS.md)\n", flush=True)
         del m; torch.cuda.empty_cache()
 
     print("=" * 30, "OPTIMIZED ENGINE: qwen35_fast (same weights, same H100)", "=" * 30, flush=True)
