@@ -56,7 +56,7 @@ def _run(prompt: str, n_out: int, mode: str, start_at: float, ignore_eos: bool):
         with torch.no_grad():
             m.generate(input_ids=x, attention_mask=torch.ones_like(x), max_new_tokens=n_out, do_sample=False, streamer=s,
                        **({"min_new_tokens": n_out} if ignore_eos else {"eos_token_id": list(eos)}))
-        n = len(s.t); tps = (n - 1) / (s.t[-1] - s.t[0]) if n > 1 else 0
+        s.st.finish(); n = len(s.t); tps = (n - 1) / (s.t[-1] - s.t[0]) if n > 1 else 0
         P(f"\n\n[base]  {n} tokens in {s.t[-1]-t0:.2f} s   |   {tps:.0f} tokens/s decode   |   first token after {1000*(s.t[0]-t0):.0f} ms")
         P("[base]  (HF eager is CPU-bound; it measured 50 tokens/s under the controlled benchmark, host CPUs vary)\n")
         return
@@ -78,7 +78,7 @@ def _run(prompt: str, n_out: int, mode: str, start_at: float, ignore_eos: bool):
         for tkn in host[: int(host[T]) + 1].tolist():
             if (tkn in eos and not ignore_eos) or len(out) >= n_out: done = True; break
             out.append(tkn); st.push(tkn)
-    t_end = time.perf_counter(); n = len(out)
+    t_end = time.perf_counter(); n = len(out); st.finish()
     P(f"\n\n[engine]  {n} tokens in {t_end-t0:.2f} s   |   {(n-1)/(t_end-ft['t']):.0f} tokens/s decode   |   first token after {1000*(ft['t']-t0):.0f} ms\n")
     eng.close()
 
