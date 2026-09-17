@@ -122,15 +122,39 @@ Rendered from `results/*.json` by `bench/fill_results.py` into `results/RESULTS.
   noise and the texts then diverge (vLLM shows the same behaviour vs HF). No systematic regression.
 
 ### Correctness gate outcome (pre-registered, `bench/optimize.py`)
-HF's own decode-vs-prefill logit noise floor per prompt is 0.27-2.0 (max abs diff, logits ~35). The gate requires a
-candidate's teacher-forced decode logits to be within 2x that per-prompt floor of HF's decode logits. Results across
-sessions: `custom_k0` (blocks-compiled) passed every time (max diff 1.27-1.39). The speculative configs `k2/k3` were
-**rejected in one session by 1.3%** (2.50 vs 2.47 on structured-2048) and **passed in the next** (1.47 vs 2.38 with a
-different HF greedy continuation): the gate is noise-limited on this repetitive prompt. Per the integrity rules the
-tolerance was not loosened; the ledger records both outcomes, `k2_compile` is the accepted incumbent from the session in
-which it passed, and `custom_k3` numbers are reported alongside. Whole-layer `torch.compile` variants fail the gate on
-prose prompts (max diff 0.7-0.8 vs a 0.55 tolerance): inductor's fusion changes intermediate rounding (see
-`emulate_precision_casts` candidates in the ledger).
+Gate: teacher-forced decode logits through the candidate's real decode path vs HF's own decode-path logits over 256
+steps on six dev prompts; pass if max|diff| <= 2x HF's own prefill-vs-decode noise floor on that prompt (min 0.5) and
+every top-1 disagreement sits at a genuine near-tie. Findings across seven sessions (`results/opt_ledger_round*.json`,
+`results/gatecheck.json`):
+
+* HF's own floor is 0.27-0.44 on prose/code prompts and 1.2-2.0 on the structured prompts (repetitive JSON-like
+  continuations put the model in a numerically chaotic regime where the linear-attention state amplifies bf16 noise).
+* The max statistic is a single-step outlier (always steps ~185-235 of the structured prompts); the 99th percentile
+  over steps is 0.25-0.31 for every engine on prose/code and 0.8-1.2 on structured prompts, i.e. **indistinguishable
+  from HF's own p99 (0.25-1.07)** for all configurations, including the ones the max-gate rejected.
+* Consequently the gate verdict flips between sessions for identical code: the speculative configs were rejected by
+  1.3% in one session and passed in three others; the non-speculative config passed four times and failed once
+  (4.33 vs 4.0). Per the integrity rules the tolerance was never loosened; the ledger records every outcome, the
+  accepted incumbent is the last candidate that passed in its own session (`k2_compile`, lean decode path), and
+  candidates rejected by the max-gate are reported with their numbers but never promoted.
+* Whole-layer `torch.compile` (with or without inductor's `emulate_precision_casts`) fails the max-gate on structured
+  prompts (2.5-3.0 vs 2.4) and gains only 1-2%, so it was dropped. DeepSeek's two Triton GEMV kernels are correct but
+  slower than cuBLAS except on the tied lm_head (+7%), so they were dropped. The fused GDN decode-step Triton kernel
+  (Fable worker) removes 144 launches/step (-6.6% step time) but its in-place state write is corrupted in the
+  full-tile version; a K-chunked rewrite is in `candidates/`/branches if not merged.
+
+### Optimization ledger summary (dev screen: 512 + 2048 tokens, prose/code/structured, geomean decode TPS)
+| candidate | what | gate | geomean TPS | verdict |
+|---|---|---|---|---|
+| k0_eager | CUDA graph, eager blocks | pass | 233-392 (sessions) | first incumbent |
+| k0_compile | + fused elementwise blocks (torch.compile) | pass (4/5 sessions) | 390-410 | incumbent, then superseded |
+| k2_compile | + exact MTP speculation, 2 drafts | pass (3/4) | 565-616 | **accepted incumbent (lean)** |
+| k3_compile | 3 drafts | pass (3/4) | 582-614 | rejected: >5% slower than k2 on prose (chain drafts cost more than they yield there) |
+| k4_compile | 4 drafts | pass | 563-611 | rejected: slower on prose |
+| k*_layer(_at)(_ep) | whole-layer compile (+max-autotune, +cast emulation) | fail / marginal | 577-584 | rejected |
+| k*_gemv / gemv2 | Triton GEMV (DeepSeek v1/v2) per-shape selected | pass | = baseline | no gain |
+| lean decode path (T1) | -50 launches/step, residual+norm fusion | pass | +2-3% | merged (default) |
+| fused GDN step (T3) | 1 Triton launch per GDN layer | test fails | (+8% if fixed) | not enabled |
 
 ## Limitations
 * Batch size 1 only; no continuous batching, no sampling (greedy only), no multi-turn/prefix reuse, text only.

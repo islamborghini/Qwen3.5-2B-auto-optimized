@@ -1,0 +1,25 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-wpgMY7T8afXs63AWOqxvDD
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+>>> /work/bench/evaluate.py --engines custom_k2,custom_k3,vllm_mtp3 --stage full --tag final_full
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 884.63it/s]
