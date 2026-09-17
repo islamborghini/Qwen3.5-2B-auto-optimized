@@ -47,6 +47,19 @@ def attn_qk(q, k, qn, kn, cos, sin, eps):
     return apply_rope(q, k, cos, sin)
 
 
+def accept(drafts, g, arangeT):
+    """Spec acceptance in one fused block: acc = #leading drafts equal to the target argmax; keep masks for the commit."""
+    ok = (drafts == g[:-1]).to(torch.long)
+    acc = torch.cumprod(ok, 0).sum()
+    keep = (arangeT < acc + 1).to(torch.float32)[None, :, None]
+    return acc, keep, keep.to(torch.bfloat16)
+
+
+def mtp_in_norms(e, h, pre_e, pre_h, eps):
+    """MTP input: RMSNorm(embedding) | RMSNorm(hidden) concatenated (one fused kernel)."""
+    return torch.cat([rms_norm_zc(e, pre_e, eps), rms_norm_zc(h, pre_h, eps)], -1)
+
+
 def mlp_act(g, u):
     return F.silu(g) * u
 
@@ -99,7 +112,7 @@ class Engine:
         self.mm = lambda x, W: x @ W.T
         self._mm_choice = {}
         self.lean = lean
-        fns = dict(norm=rms_norm_zc, gnorm=rms_norm_gated, gdn_pre=gdn_pre, mlp_act=mlp_act, attn_post=attn_post, rope=apply_rope,
+        fns = dict(norm=rms_norm_zc, gnorm=rms_norm_gated, gdn_pre=gdn_pre, mlp_act=mlp_act, attn_post=attn_post, rope=apply_rope, accept=accept, mtp_in=mtp_in_norms,
                    dec_attn=dec_attn, add_norm=add_norm, attn_qk=attn_qk)
         if compile_blocks or self.compile_mode:
             import torch._inductor.config as icfg
@@ -213,9 +226,10 @@ class Engine:
         self.conv_state = torch.zeros(n_lin, 1, self.conv_dim, self.conv_k - 1, dtype=torch.bfloat16, device=dev)
         self.rec_state = torch.zeros(n_lin, 1, self.gh, self.gk, self.gv, dtype=torch.float32, device=dev)
         self.n = torch.zeros((), dtype=torch.long, device=dev)          # committed length (main model)
-        self.pending = torch.zeros((), dtype=torch.long, device=dev)    # next token, not yet processed by main model
         T = self.spec_k + 1
-        self.drafts = torch.zeros(self.spec_k, dtype=torch.long, device=dev)
+        self.tok_buf = torch.zeros(T, dtype=torch.long, device=dev)      # [pending | drafts]: the step's input tokens
+        self.pending = self.tok_buf[0]                                   # next token, not yet processed by main model
+        self.drafts = self.tok_buf[1:]
         self.step_tokens = torch.zeros(T, dtype=torch.long, device=dev)  # greedy tokens produced by last step
         self.step_acc = torch.zeros((), dtype=torch.long, device=dev)    # number of accepted drafts in last step
         self.arangeT = torch.arange(T, device=dev)
@@ -357,14 +371,28 @@ class Engine:
         x, hn = self._pre_norm(x, h, w["ln2"])
         return x, self._mlp(w, hn, False), sv
 
-    def _commit(self, save, n_acc):
-        """Commit GDN/conv states for the first n_acc tokens of the last multi-token step (device-side, exact)."""
-        keep = (self.arangeT < n_acc).to(torch.float32)[None, :, None]        # [1,T,1]
-        for conv_state, rec_state, q, k, v, g, beta, xc_all in save:
-            _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g * keep, beta=beta * keep.to(beta.dtype),
+    def _commit(self, save, n_acc, keep=None, keep_b=None):
+        """Commit GDN/conv states for the first n_acc tokens of the last multi-token step (device-side, exact).
+        lean: keep-masking of g/beta and the state/conv writes are batched across the 18 layers (same arithmetic)."""
+        if keep is None:
+            keep = (self.arangeT < n_acc).to(torch.float32)[None, :, None]    # [1,T,1]
+            keep_b = keep.to(save[0][6].dtype)
+        if not self.lean:
+            for conv_state, rec_state, q, k, v, g, beta, xc_all in save:
+                _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g * keep, beta=beta * keep_b,
+                                                         initial_state=rec_state, output_final_state=True, use_qk_l2norm_in_kernel=True)
+                rec_state.copy_(st)
+                conv_state.copy_(xc_all.index_select(2, n_acc + self.arangeC))
+            return
+        gs = torch.stack([e[5] for e in save]) * keep                          # [nl,1,T,H] one mul for all layers
+        bs = torch.stack([e[6] for e in save]) * keep_b
+        sts = []
+        for i, (conv_state, rec_state, q, k, v, g, beta, xc_all) in enumerate(save):
+            _, st = fused_recurrent_gated_delta_rule(q, k, v, g=gs[i], beta=bs[i],
                                                      initial_state=rec_state, output_final_state=True, use_qk_l2norm_in_kernel=True)
-            rec_state.copy_(st)
-            conv_state.copy_(xc_all.index_select(2, n_acc + self.arangeC))
+            sts.append(st)
+        self.rec_state.copy_(torch.stack(sts).view(self.rec_state.shape))     # save order == layer order
+        self.conv_state.copy_(torch.stack([e[7] for e in save]).index_select(3, n_acc + self.arangeC))
 
     def _mtp_layer(self, x, cos, sin, pos, prefill=False):
         m = self.mtp
@@ -379,10 +407,13 @@ class Engine:
 
     def _mtp_in(self, hidden, tokens, prefill=False):
         m = self.mtp
-        norm = rms_norm_zc if prefill else self.f["norm"]
-        e = norm(self.embed[tokens], m["pre_e"], self.eps)
-        h = norm(hidden, m["pre_h"], self.eps)
-        return (torch.cat([e, h], -1) @ m["fc"].T) if prefill else self.mm(torch.cat([e, h], -1), m["fc"])
+        if prefill:
+            e = rms_norm_zc(self.embed[tokens], m["pre_e"], self.eps); h = rms_norm_zc(hidden, m["pre_h"], self.eps)
+            return torch.cat([e, h], -1) @ m["fc"].T
+        if self.lean:
+            return self.mm(self.f["mtp_in"](self.embed[tokens], hidden, m["pre_e"], m["pre_h"], self.eps), m["fc"])
+        e = self.f["norm"](self.embed[tokens], m["pre_e"], self.eps); h = self.f["norm"](hidden, m["pre_h"], self.eps)
+        return self.mm(torch.cat([e, h], -1), m["fc"])
 
     def _argmax(self, h):
         return self.mm(h, self.embed).argmax(-1)
@@ -417,16 +448,18 @@ class Engine:
         """Given MTP output hidden for the last committed position and the pending token, produce spec_k drafts."""
         d = self._argmax(m_last)
         self.drafts[0].copy_(d[0])
+        if self.spec_k > 1:   # chain positions pos0 + j - 1, j = 1..k-1: one gather each for pos/cos/sin
+            pc = (pos0 + self.arangeT[: self.spec_k - 1]) if isinstance(pos0, torch.Tensor) else torch.arange(pos0, pos0 + self.spec_k - 1, device=self.dev)
+            cc, sc = self.cos[pc], self.sin[pc]
         for j in range(1, self.spec_k):
-            p = (pos0 + (j - 1)).reshape(1) if isinstance(pos0, torch.Tensor) else torch.tensor([pos0 + j - 1], device=self.dev)
             x = self._mtp_in(m_last, d)
-            m_last = self._mtp_layer(x, self.cos[p], self.sin[p], p)
+            m_last = self._mtp_layer(x, cc[j - 1: j], sc[j - 1: j], pc[j - 1: j])
             d = self._argmax(m_last)
             self.drafts[j].copy_(d[0])
 
     def _step_impl(self):
         """One decode step (T = spec_k + 1 tokens). Updates state; writes self.step_tokens / self.step_acc."""
-        tokens = torch.cat([self.pending.reshape(1), self.drafts]) if self.spec_k else self.pending.reshape(1)
+        tokens = self.tok_buf
         pos = self.n + self.arangeT
         save = []
         hn, hp = self._body(tokens, pos, prefill=False, save=save)
@@ -437,10 +470,13 @@ class Engine:
             self.n.add_(1); self.pending.copy_(g[0])
             return
         # accepted drafts: longest prefix where draft_j == g_{j-1}
-        ok = (self.drafts == g[:-1]).to(torch.long)
-        acc = torch.cumprod(ok, 0).sum()                                       # 0..k
+        if self.lean:
+            acc, keep, keep_b = self.f["accept"](self.drafts, g, self.arangeT)  # acc: 0..k
+        else:
+            ok = (self.drafts == g[:-1]).to(torch.long)
+            acc = torch.cumprod(ok, 0).sum(); keep = keep_b = None
         n_acc = acc + 1                                                        # tokens committed by main model
-        self._commit(save, n_acc)
+        self._commit(save, n_acc, keep, keep_b)
         self.step_tokens.copy_(g); self.step_acc.copy_(acc)
         self.stat_steps.add_(1); self.stat_acc.add_(acc)
         # MTP pass over the T rows (rows beyond acceptance are harmless; their cache slots get overwritten later)
