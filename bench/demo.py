@@ -1,10 +1,10 @@
-"""Live demo on a Modal H100.
+"""Side-by-side live demo on Modal H100s. Open two terminals and run, within a few seconds of each other:
 
-    modal run bench/demo.py --prompt "write me an html page for a hotel reservation"
-    modal run bench/demo.py --prompt "..." --n-out 512 --skip-base
+    left : modal run bench/demo.py --mode base   --start-in 120 --prompt "write me an html page for a hotel reservation"
+    right: modal run bench/demo.py --mode engine --start-in 120 --prompt "write me an html page for a hotel reservation"
 
-Streams the optimized engine's answer token by token, then runs the base model (HF transformers) on the same prompt
-with the exact benchmark timing routine, and prints a summary.
+Each loads its model (base ~20 s, engine ~70 s incl. compile), then both start generating at the same instant
+(120 s after launch) and stream tokens live. Single run: omit --start-in.
 """
 import os, sys
 import modal
@@ -21,15 +21,17 @@ image = (
 
 
 @app.function(gpu="H100", cpu=4.0, memory=32768, image=image, volumes={"/hf": vol}, timeout=1200)
-def demo(prompt: str, n_out: int, skip_base: bool):
-    # Run in a subprocess: the Modal function process's I/O threads contend for the GIL with HF's Python-bound
-    # decode loop (14 tok/s in-process vs 50 tok/s in a subprocess); the benchmark used a subprocess too.
+def demo(prompt: str, n_out: int, mode: str, start_at: float):
+    # Runs in a subprocess: the Modal function process's I/O threads contend for the GIL with HF's Python-bound loop.
     import subprocess
     env = dict(os.environ, PYTHONPATH="/work", OUT_DIR="/tmp/out")
-    subprocess.run([sys.executable, "-u", "/work/bench/demo_worker.py", prompt, str(n_out), "1" if skip_base else "0"], env=env, check=False)
+    subprocess.run([sys.executable, "-u", "/work/bench/demo_worker.py", prompt, str(n_out), mode, str(start_at)], env=env, check=False)
 
 
 @app.local_entrypoint()
-def main(prompt: str = "Explain how a CPU cache hierarchy works and why it matters for performance.", n_out: int = 256, skip_base: bool = False):
-    demo.remote(prompt, n_out, skip_base)
-
+def main(prompt: str = "Explain how a CPU cache hierarchy works and why it matters for performance.", n_out: int = 256,
+         mode: str = "engine", start_in: float = 0):
+    """mode: 'engine' (optimized) or 'base' (HF transformers). start_in: seconds from now at which generation starts,
+    so two terminals launched together begin at the same instant (models take different times to load)."""
+    import time
+    demo.remote(prompt, n_out, mode, time.time() + start_in if start_in else 0)
