@@ -13,3 +13,5 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-16 | Modal H100 | feasibility run #3 (complete): HF eager 55 TPS, vLLM 423, vLLM+MTP k1/2/3 = 579/641/665 | ~$0.85 | ~13 min |
 | 2026-09-16 | DeepSeek | review #1 of qwen35_fast/engine.py vs HF reference | $0 (subscription) | candidates/review1 |
 | 2026-09-16 | Modal H100 | custom engine screen #1 (correctness + k=0..3, both MTP hidden variants) | est ~$0.6 | launched |
+| 2026-09-16 | Modal H100 | custom screen #1 result: prefill exact vs HF; decode wrong (fla positional-arg bug: beta passed as gk); crash at k=2 | ~$0.35 | bug found by reading fla-core source |
+| 2026-09-16 | Modal H100 | custom screen #2 (after fix) | est ~$0.6 | launched |

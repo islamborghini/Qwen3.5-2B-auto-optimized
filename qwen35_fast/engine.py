@@ -175,10 +175,10 @@ class Engine:
         beta = b.sigmoid()[None]                                               # [1,T,gh]
         g = (w["neg_expA"] * F.softplus(a.float() + w["dt_bias"]))[None]       # [1,T,gh] fp32
         if prefill:
-            o, st = chunk_gated_delta_rule(q, k, v, g, beta, initial_state=None, output_final_state=True, use_qk_l2norm_in_kernel=True)
+            o, st = chunk_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=None, output_final_state=True, use_qk_l2norm_in_kernel=True)
             self.rec_state[li].copy_(st); self.conv_state[li].copy_(xc_all[:, :, -(self.conv_k - 1):])
         else:
-            o, st = fused_recurrent_gated_delta_rule(q, k, v, g, beta, initial_state=self.rec_state[li],
+            o, st = fused_recurrent_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=self.rec_state[li],
                                                      output_final_state=True, use_qk_l2norm_in_kernel=True)
             if T == 1:
                 self.rec_state[li].copy_(st); self.conv_state[li].copy_(xc_all[:, :, 1:])
@@ -213,7 +213,7 @@ class Engine:
         """Commit GDN/conv states for the first n_acc tokens of the last multi-token step (device-side, exact)."""
         keep = (self.arangeT < n_acc).to(torch.float32)[None, :, None]        # [1,T,1]
         for li, q, k, v, g, beta, xc_all in save:
-            _, st = fused_recurrent_gated_delta_rule(q, k, v, g * keep, beta * keep.to(beta.dtype),
+            _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g * keep, beta=beta * keep.to(beta.dtype),
                                                      initial_state=self.rec_state[li], output_final_state=True, use_qk_l2norm_in_kernel=True)
             self.rec_state[li].copy_(st)
             self.conv_state[li].copy_(xc_all.index_select(2, n_acc + self.arangeC))

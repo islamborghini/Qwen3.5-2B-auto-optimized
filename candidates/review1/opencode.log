@@ -291,3 +291,53 @@ facec27 Feasibility bench + frozen workloads (exact token-id prompts, dev/heldou
 a71cb2e Init: ledger, gitignore
 [0m
 [0m→ [0mRead .cache/vllm_qwen3_5_mtp.py
+[0m
+[0m$ [0mgrep -n "torch_recurrent_gated_delta_rule\|torch_chunk_gated_delta_rule\|from fla\|import fla\|use_qk_l2norm\|gated_delta" /Users/islam/fun_fable_proj/candidates/review1/hf_reference_modeling_qwen3_5.py | head -40
+300:@use_kernel_func_from_hub_with_fallback("chunk_gated_delta_rule", "fla")
+301:def torch_chunk_gated_delta_rule(
+310:    use_qk_l2norm_in_kernel: bool = False,
+325:        use_qk_l2norm_in_kernel: If this flag is set to True, query and key vectors are L2-normalized.
+343:    if use_qk_l2norm_in_kernel:
+437:@use_kernel_func_from_hub_with_fallback("fused_recurrent_gated_delta_rule", "fla")
+438:def torch_recurrent_gated_delta_rule(
+446:    use_qk_l2norm_in_kernel: bool = False,
+450:    Same args and return value as torch_chunk_gated_delta_rule, except for `chunk_size` because the sequence dim is not
+463:    if use_qk_l2norm_in_kernel:
+502:    [torch_recurrent_gated_delta_rule, torch_chunk_gated_delta_rule, causal_conv1d_fn, causal_conv1d_update]
+626:            core_attn_out, last_recurrent_state = torch_recurrent_gated_delta_rule(
+634:                use_qk_l2norm_in_kernel=True,
+639:            core_attn_out, last_recurrent_state = torch_chunk_gated_delta_rule(
+647:                use_qk_l2norm_in_kernel=True,
+[0m
+[0m→ [0mRead candidates/review1/hf_reference_modeling_qwen3_5.py[90m [limit=180, offset=300][0m
+[0m
+[0m$ [0mfind / -name "config.json" -path "*Qwen3.5*" 2>/dev/null | head; find /Users/islam -maxdepth 6 -type d -iname "*Qwen3.5*" 2>/dev/null | head; ls ~/.cache/huggingface 2>/dev/null
+(no output)
+
+<shell_metadata>
+shell tool terminated command after exceeding timeout 120000 ms. If this command is expected to take longer and is not waiting for interactive input, retry with a larger timeout value in milliseconds.
+</shell_metadata>
+[0m
+[0m$ [0mgrep -rn "linear_num\|num_key_value\|partial_rotary\|hidden_act\|layer_types\|conv_kernel\|head_dim" /Users/islam/fun_fable_proj/bench /Users/islam/fun_fable_proj/results 2>/dev/null | head -40
+(no output)
+[0m
+[0m→ [0mRead candidates/review1/hf_reference_modeling_qwen3_5.py[90m [limit=110, offset=1222][0m
+[0m→ [0mRead candidates/review1/hf_reference_modeling_qwen3_5.py[90m [limit=40, offset=262][0m
+[0m◈ [0mExa Web Search "vLLM Qwen3_5 MTP speculative decoding positions draft tokens multiple tokens lookahead"
+[0m% [0mWebFetch https://raw.githubusercontent.com/vllm-project/vllm/main/vllm/v1/worker/gpu/spec_decode/autoregressive/speculator.py
+[0m
+[0m$ [0mfind /Users/islam/fun_fable_proj/.venv -path "*fla*" -name "*.py" 2>/dev/null | grep -i "gated_delta" | head; echo ---; python3 -c "import sys; print(sys.version)" 2>/dev/null
+---
+3.14.3 (main, Feb  3 2026, 15:32:20) [Clang 17.0.0 (clang-1700.6.3.2)]
+[0m
+[0m→ [0mRead candidates/review1/hf_reference_modeling_qwen3_5.py[90m [limit=70, offset=1683][0m
+[0m% [0mWebFetch https://raw.githubusercontent.com/fla-org/flash-linear-attention/main/fla/ops/gated_delta_rule/fused_recurrent.py
+[0m% [0mWebFetch https://huggingface.co/Qwen/Qwen3.5-2B/raw/main/config.json
+[0m
+[0m$ [0mgrep -n "\.item()\|int(\|\.tolist()\|\.cpu()\|bool(\|nonzero\|\.any()\|\.all()\|scalar\|topk\|sort" /Users/islam/fun_fable_proj/qwen35_fast/engine.py
+50:        self.rot = int(self.hd * c["rope_parameters"]["partial_rotary_factor"])
+134:        """x: [T,H]. pos: [T] positions (device). kv_len: device scalar (valid cache length before this call)."""
+241:        """Process prompt ids (list[int]); returns first generated token (device scalar in self.pending)."""
+323:        first_tok = first.item()  # sync: first token complete
+337:            acc = int(host[T]); new = host[: acc + 1].tolist()
+[0m
