@@ -5,3 +5,1377 @@ https://modal.com/apps/islamborghini/main/ap-qtLUPhHOaZwnhvvHsRjdcc
 ├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
 ├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
 └── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+>>> /work/bench/evaluate.py --engines custom_k0,custom_k3,vllm_mtp3 --stage full --tag final_full
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 904.26it/s]
+custom_k0 dev-prose-128 tps=389.7 ttft=41.7ms
+custom_k0 dev-prose-512 tps=389.8 ttft=40.2ms
+custom_k0 dev-prose-2048 tps=389.9 ttft=43.1ms
+custom_k0 dev-prose-8192 tps=388.7 ttft=105.4ms
+custom_k0 dev-code-128 tps=389.7 ttft=42.6ms
+custom_k0 dev-code-512 tps=389.8 ttft=39.7ms
+custom_k0 dev-code-2048 tps=389.8 ttft=40.1ms
+custom_k0 dev-code-8192 tps=388.2 ttft=106.1ms
+custom_k0 dev-structured-128 tps=389.4 ttft=39.6ms
+custom_k0 dev-structured-512 tps=389.9 ttft=39.8ms
+custom_k0 dev-structured-2048 tps=389.8 ttft=43.6ms
+custom_k0 dev-structured-8192 tps=388.3 ttft=105.4ms
+custom_k0 dev-structured-8192 tps=388.4 ttft=106.5ms
+custom_k0 dev-structured-2048 tps=389.9 ttft=40.2ms
+custom_k0 dev-structured-512 tps=389.6 ttft=39.9ms
+custom_k0 dev-structured-128 tps=389.6 ttft=39.5ms
+custom_k0 dev-code-8192 tps=387.8 ttft=105.6ms
+custom_k0 dev-code-2048 tps=389.8 ttft=40.6ms
+custom_k0 dev-code-512 tps=389.9 ttft=39.3ms
+custom_k0 dev-code-128 tps=389.8 ttft=39.4ms
+custom_k0 dev-prose-8192 tps=387.8 ttft=106.3ms
+custom_k0 dev-prose-2048 tps=389.7 ttft=41.4ms
+custom_k0 dev-prose-512 tps=389.7 ttft=39.8ms
+custom_k0 dev-prose-128 tps=389.6 ttft=40.4ms
+custom_k0 dev-prose-128 tps=389.6 ttft=39.7ms
+custom_k0 dev-prose-512 tps=389.6 ttft=40.1ms
+custom_k0 dev-prose-2048 tps=389.7 ttft=40.8ms
+custom_k0 dev-prose-8192 tps=388.6 ttft=105.5ms
+custom_k0 dev-code-128 tps=389.6 ttft=40.1ms
+custom_k0 dev-code-512 tps=389.7 ttft=40.2ms
+custom_k0 dev-code-2048 tps=389.8 ttft=40.9ms
+custom_k0 dev-code-8192 tps=388.4 ttft=106.2ms
+custom_k0 dev-structured-128 tps=389.7 ttft=39.1ms
+custom_k0 dev-structured-512 tps=389.7 ttft=39.7ms
+custom_k0 dev-structured-2048 tps=389.7 ttft=40.1ms
+custom_k0 dev-structured-8192 tps=388.4 ttft=105.3ms
+custom_k0 dev-structured-8192 tps=388.0 ttft=106.4ms
+custom_k0 dev-structured-2048 tps=389.6 ttft=41.1ms
+custom_k0 dev-structured-512 tps=389.7 ttft=40.4ms
+custom_k0 dev-structured-128 tps=389.3 ttft=39.2ms
+custom_k0 dev-code-8192 tps=388.3 ttft=105.7ms
+custom_k0 dev-code-2048 tps=389.7 ttft=40.8ms
+custom_k0 dev-code-512 tps=389.9 ttft=40.3ms
+custom_k0 dev-code-128 tps=389.6 ttft=39.9ms
+custom_k0 dev-prose-8192 tps=388.4 ttft=106.2ms
+custom_k0 dev-prose-2048 tps=389.8 ttft=40.7ms
+custom_k0 dev-prose-512 tps=389.6 ttft=39.1ms
+custom_k0 dev-prose-128 tps=389.4 ttft=39.8ms
+custom_k0 dev-prose-128 tps=389.7 ttft=38.8ms
+custom_k0 dev-prose-512 tps=389.4 ttft=40.0ms
+custom_k0 dev-prose-2048 tps=389.6 ttft=41.1ms
+custom_k0 dev-prose-8192 tps=388.8 ttft=105.2ms
+custom_k0 dev-code-128 tps=389.5 ttft=39.3ms
+custom_k0 dev-code-512 tps=389.5 ttft=41.4ms
+custom_k0 dev-code-2048 tps=389.8 ttft=41.8ms
+custom_k0 dev-code-8192 tps=388.2 ttft=106.1ms
+custom_k0 dev-structured-128 tps=389.7 ttft=39.4ms
+custom_k0 dev-structured-512 tps=389.6 ttft=40.3ms
+custom_k0 dev-structured-2048 tps=389.9 ttft=40.7ms
+custom_k0 dev-structured-8192 tps=388.7 ttft=105.2ms
+saved eval_final_full_dev.json
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 814.92it/s]
+custom_k3 dev-prose-128 tps=479.0 ttft=44.7ms
+custom_k3 dev-prose-512 tps=488.0 ttft=46.0ms
+custom_k3 dev-prose-2048 tps=479.3 ttft=46.8ms
+custom_k3 dev-prose-8192 tps=469.0 ttft=115.5ms
+custom_k3 dev-code-128 tps=609.9 ttft=44.3ms
+custom_k3 dev-code-512 tps=582.7 ttft=45.7ms
+custom_k3 dev-code-2048 tps=603.1 ttft=46.7ms
+custom_k3 dev-code-8192 tps=567.9 ttft=114.8ms
+custom_k3 dev-structured-128 tps=788.0 ttft=44.7ms
+custom_k3 dev-structured-512 tps=735.3 ttft=45.8ms
+custom_k3 dev-structured-2048 tps=766.4 ttft=45.9ms
+custom_k3 dev-structured-8192 tps=730.3 ttft=115.2ms
+custom_k3 dev-structured-8192 tps=731.2 ttft=115.0ms
+custom_k3 dev-structured-2048 tps=766.5 ttft=47.4ms
+custom_k3 dev-structured-512 tps=734.6 ttft=45.6ms
+custom_k3 dev-structured-128 tps=788.7 ttft=46.1ms
+custom_k3 dev-code-8192 tps=567.7 ttft=114.9ms
+custom_k3 dev-code-2048 tps=603.0 ttft=46.6ms
+custom_k3 dev-code-512 tps=583.1 ttft=45.4ms
+custom_k3 dev-code-128 tps=609.6 ttft=46.5ms
+custom_k3 dev-prose-8192 tps=468.4 ttft=114.9ms
+custom_k3 dev-prose-2048 tps=479.2 ttft=46.3ms
+custom_k3 dev-prose-512 tps=487.8 ttft=45.5ms
+custom_k3 dev-prose-128 tps=478.9 ttft=45.3ms
+custom_k3 dev-prose-128 tps=478.9 ttft=44.4ms
+custom_k3 dev-prose-512 tps=488.2 ttft=45.6ms
+custom_k3 dev-prose-2048 tps=479.4 ttft=46.2ms
+custom_k3 dev-prose-8192 tps=468.0 ttft=114.4ms
+custom_k3 dev-code-128 tps=609.9 ttft=44.7ms
+custom_k3 dev-code-512 tps=583.1 ttft=45.4ms
+custom_k3 dev-code-2048 tps=603.0 ttft=46.6ms
+custom_k3 dev-code-8192 tps=568.8 ttft=114.7ms
+custom_k3 dev-structured-128 tps=788.8 ttft=45.0ms
+custom_k3 dev-structured-512 tps=734.8 ttft=45.7ms
+custom_k3 dev-structured-2048 tps=766.6 ttft=45.4ms
+custom_k3 dev-structured-8192 tps=731.4 ttft=114.8ms
+custom_k3 dev-structured-8192 tps=730.7 ttft=116.0ms
+custom_k3 dev-structured-2048 tps=766.7 ttft=46.9ms
+custom_k3 dev-structured-512 tps=734.3 ttft=45.3ms
+custom_k3 dev-structured-128 tps=788.4 ttft=45.6ms
+custom_k3 dev-code-8192 tps=567.8 ttft=116.1ms
+custom_k3 dev-code-2048 tps=603.1 ttft=47.0ms
+custom_k3 dev-code-512 tps=583.0 ttft=46.2ms
+custom_k3 dev-code-128 tps=609.7 ttft=44.8ms
+custom_k3 dev-prose-8192 tps=468.7 ttft=115.8ms
+custom_k3 dev-prose-2048 tps=479.2 ttft=46.7ms
+custom_k3 dev-prose-512 tps=487.6 ttft=44.6ms
+custom_k3 dev-prose-128 tps=479.2 ttft=45.3ms
+custom_k3 dev-prose-128 tps=478.8 ttft=44.8ms
+custom_k3 dev-prose-512 tps=487.7 ttft=45.6ms
+custom_k3 dev-prose-2048 tps=479.3 ttft=45.6ms
+custom_k3 dev-prose-8192 tps=468.9 ttft=115.6ms
+custom_k3 dev-code-128 tps=609.4 ttft=44.4ms
+custom_k3 dev-code-512 tps=583.2 ttft=45.8ms
+custom_k3 dev-code-2048 tps=602.9 ttft=45.9ms
+custom_k3 dev-code-8192 tps=567.5 ttft=115.8ms
+custom_k3 dev-structured-128 tps=788.2 ttft=44.1ms
+custom_k3 dev-structured-512 tps=735.2 ttft=45.4ms
+custom_k3 dev-structured-2048 tps=766.4 ttft=47.0ms
+custom_k3 dev-structured-8192 tps=730.5 ttft=116.7ms
+saved eval_final_full_dev.json
+INFO 09-17 07:05:23 [model.py:684] Resolved architecture: Qwen3_5ForConditionalGeneration
+INFO 09-17 07:05:23 [model.py:2021] Using max model len 9216
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING 09-17 07:05:23 [model.py:981] Model does not support mm_device_do_normalize, forcing mm_device_do_normalize = False.
+INFO 09-17 07:05:27 [registry.py:141] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+INFO 09-17 07:05:27 [model.py:887] Disabled mm_prefix attention mode because multimodal inputs are configuration-disabled. Attention backends without mm_prefix support may now be selected.
+INFO 09-17 07:05:28 [model.py:684] Resolved architecture: Qwen3_5MTP
+INFO 09-17 07:05:28 [model.py:2021] Using max model len 262144
+WARNING 09-17 07:05:28 [speculative.py:1318] Enabling num_speculative_tokens > 1 will run multiple times of forward on same MTP layer,which may result in lower acceptance rate
+INFO 09-17 07:05:28 [speculative.py:1586] Overriding draft model max model len from 262144 to 9216
+INFO 09-17 07:05:28 [arg_utils.py:2404] Hybrid model with EAGLE speculative decoding: defaulting prefix_cache_retention_interval to dense checkpointing.
+INFO 09-17 07:05:28 [scheduler.py:277] Chunked prefill is enabled with max_num_batched_tokens=2048.
+
+[1AParse safetensors files:   0%|          | 0/1 [00:00<?, ?it/s]
+[1AParse safetensors files: 100%|██████████| 1/1 [00:01<00:00,  1.31s/it]Parse safetensors files: 100%|██████████| 1/1 [00:01<00:00,  1.31s/it]
+INFO 09-17 07:05:30 [kernel.py:369] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+WARNING 09-17 07:05:30 [vllm.py:1924] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+WARNING 09-17 07:05:36 [system_utils.py:157] We must use the `spawn` multiprocessing start method. Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'. See https://docs.vllm.ai/en/latest/usage/troubleshooting.html#python-multiprocessing for more information. Reasons: CUDA is initialized
+(EngineCore pid=370) INFO 09-17 07:05:51 [core.py:123] Initializing a V1 LLM engine (v0.29.0) with config: model='Qwen/Qwen3.5-2B', speculative_config=SpeculativeConfig(method='mtp', model='Qwen/Qwen3.5-2B', num_spec_tokens=3), tokenizer='Qwen/Qwen3.5-2B', skip_tokenizer_init=False, tokenizer_mode=auto, revision=15852e8c16360a2fea060d615a32b45270f8a8fc, tokenizer_revision=15852e8c16360a2fea060d615a32b45270f8a8fc, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=9216, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=Qwen/Qwen3.5-2B, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['none'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::qwen4_exp_compute_ple_ngram_ids', 'vllm::qwen4_exp_ple_short_conv', 'vllm::qwen4_exp_qsa_with_output', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::qwen_gdn_attention_core_fused_norm_packed', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 416, 432, 448, 464, 480, 496, 512], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 512, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=370) INFO 09-17 07:05:56 [registry.py:141] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+(EngineCore pid=370) INFO 09-17 07:05:56 [parallel_state.py:1775] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_58f53d019fcb4b89b85056a7fc9a68ba backend=nccl
+(EngineCore pid=370) INFO 09-17 07:05:56 [parallel_state.py:2119] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+(EngineCore pid=370) INFO 09-17 07:05:56 [gpu_worker.py:429] Using V2 Model Runner
+(EngineCore pid=370) INFO 09-17 07:05:57 [model_runner.py:382] Loading model from scratch...
+(EngineCore pid=370) INFO 09-17 07:05:57 [cuda.py:551] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention
+(EngineCore pid=370) INFO 09-17 07:05:57 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.
+(EngineCore pid=370) INFO 09-17 07:05:57 [qwen_gdn_linear_attn.py:167] Using FlashInfer GDN prefill kernel (requested=auto, head_k_dim=128).
+(EngineCore pid=370) WARNING 09-17 07:05:57 [qwen_gdn_linear_attn.py:174] FlashInfer GDN prefill is JIT-compiled; first run may take a while. Set --gdn-prefill-backend triton to skip JIT.
+(EngineCore pid=370) INFO 09-17 07:05:57 [qwen_gdn_linear_attn.py:519] GDN decode kernel: cuda
+(EngineCore pid=370) INFO 09-17 07:05:59 [cuda.py:492] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(EngineCore pid=370) INFO 09-17 07:05:59 [flash_attn.py:897] Using FlashAttention version 3
+(EngineCore pid=370) INFO 09-17 07:06:00 [weight_utils.py:863] Filesystem type for checkpoints: 9P. Checkpoint size: 4.24 GiB. Available RAM: 1016.10 GiB.
+(EngineCore pid=370) INFO 09-17 07:06:00 [weight_utils.py:886] Auto-prefetch is disabled because the filesystem (9P) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=370) Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+(EngineCore pid=370) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.00s/it]
+(EngineCore pid=370) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.00s/it]
+(EngineCore pid=370) 
+(EngineCore pid=370) INFO 09-17 07:06:01 [default_loader.py:430] Loading weights took 1.16 seconds
+(EngineCore pid=370) INFO 09-17 07:06:02 [weight_utils.py:863] Filesystem type for checkpoints: 9P. Checkpoint size: 4.24 GiB. Available RAM: 1016.10 GiB.
+(EngineCore pid=370) Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+(EngineCore pid=370) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  4.67it/s]
+(EngineCore pid=370) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  4.66it/s]
+(EngineCore pid=370) 
+(EngineCore pid=370) INFO 09-17 07:06:02 [default_loader.py:430] Loading weights took 0.29 seconds
+(EngineCore pid=370) INFO 09-17 07:06:03 [model_runner.py:404] Model loading took 3.74 GiB memory and 6.477060 seconds
+(EngineCore pid=370) INFO 09-17 07:06:03 [topk_topp_sampler.py:46] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0.
+(EngineCore pid=370) INFO 09-17 07:06:03 [interface.py:918] Setting attention block size to 560 tokens to ensure that attention page size is >= mamba page size.
+(EngineCore pid=370) INFO 09-17 07:06:03 [interface.py:942] Padding mamba page size by 2.19% to ensure that mamba page size and attention page size are exactly equal.
+(EngineCore pid=370) INFO 09-17 07:06:03 [utils.py:306] Using LBNHC KV cache layout.
+(EngineCore pid=370) [rank0]:W0917 07:06:06.277000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.1e4a3fd3-a08d-42ef-894d-c529abe82503 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.278000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.8901f823-4353-409a-99a8-832fe33b97e9 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.278000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.c35180b8-4215-4f47-bdb5-b467a5fbe15c is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.278000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.5e4eebf4-8968-45ef-be60-628e50b29eac is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.278000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.6f7477be-8d60-46da-9109-12e4b3369ea1 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.279000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.39c9e974-44da-431e-a2e5-6c880e4b31f9 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.293000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.d4cbda8c-ae0f-4ad9-aae2-eca20ed2d071 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.294000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.b681f04b-afe3-49d6-9f84-619c1577b8c6 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.295000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.b17bce04-7303-409a-af5d-5fe4fae201a0 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.296000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.ffedd41f-aac7-4c01-83bb-c194395b3d54 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.297000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.88e226ee-9170-492a-9c23-657096e770f6 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.297000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.bf8b0905-e65b-40e9-88e4-f5990920c7ee is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.309000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.a61d5991-2d80-4e82-825f-debfe70a600d is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.309000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.7fb87bd7-ed97-4fe3-b120-41e62d3e935a is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.310000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.14d58951-d9c0-4d58-aea4-de81713bef24 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.311000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.7f5cf944-26a9-4480-b0ee-3600d09d68d0 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.311000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.235ff793-6c3d-4aff-981e-f8c30da9c3c0 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.312000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.d52ade13-d521-427f-bc95-a05cb8d31cf9 is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:06.313000 370 site-packages/torch/_inductor/triton_bundler.py:418] Directory /tmp/torchinductor_root/triton/0/tmp.15d2a2b1-5d4f-4150-83ef-62959ac395fc is not empty - skipping!
+(EngineCore pid=370) [rank0]:W0917 07:06:08.606000 370 site-packages/torch/_inductor/triton_bundler.py:242] Failed to reload cubin file statically launchable autotuner triton_poi_fused_zeros_1
+(EngineCore pid=370) [rank0]:W0917 07:06:08.606000 370 site-packages/torch/_inductor/triton_bundler.py:242] Traceback (most recent call last):
+(EngineCore pid=370) [rank0]:W0917 07:06:08.606000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/triton_bundler.py", line 240, in load_autotuners
+(EngineCore pid=370) [rank0]:W0917 07:06:08.606000 370 site-packages/torch/_inductor/triton_bundler.py:242]     compile_result.reload_cubin_path()
+(EngineCore pid=370) [rank0]:W0917 07:06:08.606000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/runtime/triton_heuristics.py", line 2592, in reload_cubin_path
+(EngineCore pid=370) [rank0]:W0917 07:06:08.606000 370 site-packages/torch/_inductor/triton_bundler.py:242]     raise RuntimeError(
+(EngineCore pid=370) [rank0]:W0917 07:06:08.606000 370 site-packages/torch/_inductor/triton_bundler.py:242] RuntimeError: ('Cubin file saved by TritonBundler not found at %s', '/tmp/torchinductor_root/triton/0/NKZLAV7TYQRFGA7WZIT3X5XIGVXAFCDPWID2OXO6NJ5OSHXA2HQQ/triton_poi_fused_zeros_1.cubin')
+(EngineCore pid=370) [rank0]:W0917 07:06:08.610000 370 site-packages/torch/_inductor/triton_bundler.py:242] Failed to reload cubin file statically launchable autotuner triton_poi_fused_mul_silu_slice_1
+(EngineCore pid=370) [rank0]:W0917 07:06:08.610000 370 site-packages/torch/_inductor/triton_bundler.py:242] Traceback (most recent call last):
+(EngineCore pid=370) [rank0]:W0917 07:06:08.610000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/triton_bundler.py", line 240, in load_autotuners
+(EngineCore pid=370) [rank0]:W0917 07:06:08.610000 370 site-packages/torch/_inductor/triton_bundler.py:242]     compile_result.reload_cubin_path()
+(EngineCore pid=370) [rank0]:W0917 07:06:08.610000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/runtime/triton_heuristics.py", line 2592, in reload_cubin_path
+(EngineCore pid=370) [rank0]:W0917 07:06:08.610000 370 site-packages/torch/_inductor/triton_bundler.py:242]     raise RuntimeError(
+(EngineCore pid=370) [rank0]:W0917 07:06:08.610000 370 site-packages/torch/_inductor/triton_bundler.py:242] RuntimeError: ('Cubin file saved by TritonBundler not found at %s', '/tmp/torchinductor_root/triton/0/GT3KYMEMVCWEDGOIOI24376SGVOHO2SF2ZRH7L5NLYQ6YRHMEEBQ/triton_poi_fused_mul_silu_slice_1.cubin')
+(EngineCore pid=370) [rank0]:W0917 07:06:09.715000 370 site-packages/torch/_inductor/triton_bundler.py:242] Failed to reload cubin file statically launchable autotuner triton_poi_fused_zeros_3
+(EngineCore pid=370) [rank0]:W0917 07:06:09.715000 370 site-packages/torch/_inductor/triton_bundler.py:242] Traceback (most recent call last):
+(EngineCore pid=370) [rank0]:W0917 07:06:09.715000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/triton_bundler.py", line 240, in load_autotuners
+(EngineCore pid=370) [rank0]:W0917 07:06:09.715000 370 site-packages/torch/_inductor/triton_bundler.py:242]     compile_result.reload_cubin_path()
+(EngineCore pid=370) [rank0]:W0917 07:06:09.715000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/runtime/triton_heuristics.py", line 2592, in reload_cubin_path
+(EngineCore pid=370) [rank0]:W0917 07:06:09.715000 370 site-packages/torch/_inductor/triton_bundler.py:242]     raise RuntimeError(
+(EngineCore pid=370) [rank0]:W0917 07:06:09.715000 370 site-packages/torch/_inductor/triton_bundler.py:242] RuntimeError: ('Cubin file saved by TritonBundler not found at %s', '/tmp/torchinductor_root/triton/0/VH66IGP4J5OI7SP3RQT62KB5OQJI7MRP5VDDVYLO67K2ZN52FHAQ/triton_poi_fused_zeros_3.cubin')
+(EngineCore pid=370) [rank0]:W0917 07:06:10.516000 370 site-packages/torch/_inductor/triton_bundler.py:242] Failed to reload cubin file statically launchable autotuner triton_poi_fused_mul_sigmoid_view_0
+(EngineCore pid=370) [rank0]:W0917 07:06:10.516000 370 site-packages/torch/_inductor/triton_bundler.py:242] Traceback (most recent call last):
+(EngineCore pid=370) [rank0]:W0917 07:06:10.516000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/triton_bundler.py", line 240, in load_autotuners
+(EngineCore pid=370) [rank0]:W0917 07:06:10.516000 370 site-packages/torch/_inductor/triton_bundler.py:242]     compile_result.reload_cubin_path()
+(EngineCore pid=370) [rank0]:W0917 07:06:10.516000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/runtime/triton_heuristics.py", line 2592, in reload_cubin_path
+(EngineCore pid=370) [rank0]:W0917 07:06:10.516000 370 site-packages/torch/_inductor/triton_bundler.py:242]     raise RuntimeError(
+(EngineCore pid=370) [rank0]:W0917 07:06:10.516000 370 site-packages/torch/_inductor/triton_bundler.py:242] RuntimeError: ('Cubin file saved by TritonBundler not found at %s', '/tmp/torchinductor_root/triton/0/NNP6EWMUWED7ZV36RIXUBVUE6OPM7ORTI6GNXY7VPB4AQXLC6GYA/triton_poi_fused_mul_sigmoid_view_0.cubin')
+(EngineCore pid=370) [rank0]:W0917 07:06:10.537000 370 site-packages/torch/_inductor/triton_bundler.py:242] Failed to reload cubin file statically launchable autotuner triton_poi_fused_mul_silu_slice_2
+(EngineCore pid=370) [rank0]:W0917 07:06:10.537000 370 site-packages/torch/_inductor/triton_bundler.py:242] Traceback (most recent call last):
+(EngineCore pid=370) [rank0]:W0917 07:06:10.537000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/triton_bundler.py", line 240, in load_autotuners
+(EngineCore pid=370) [rank0]:W0917 07:06:10.537000 370 site-packages/torch/_inductor/triton_bundler.py:242]     compile_result.reload_cubin_path()
+(EngineCore pid=370) [rank0]:W0917 07:06:10.537000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/runtime/triton_heuristics.py", line 2592, in reload_cubin_path
+(EngineCore pid=370) [rank0]:W0917 07:06:10.537000 370 site-packages/torch/_inductor/triton_bundler.py:242]     raise RuntimeError(
+(EngineCore pid=370) [rank0]:W0917 07:06:10.537000 370 site-packages/torch/_inductor/triton_bundler.py:242] RuntimeError: ('Cubin file saved by TritonBundler not found at %s', '/tmp/torchinductor_root/triton/0/V22OFKDNH3P2CFZ2WZTHTWYLTEH64OIZSBHI5BFSR7NLKWIMXKMQ/triton_poi_fused_mul_silu_slice_2.cubin')
+(EngineCore pid=370) [rank0]:W0917 07:06:10.543000 370 site-packages/torch/_inductor/triton_bundler.py:242] Failed to reload cubin file statically launchable autotuner triton_poi_fused_zeros_4
+(EngineCore pid=370) [rank0]:W0917 07:06:10.543000 370 site-packages/torch/_inductor/triton_bundler.py:242] Traceback (most recent call last):
+(EngineCore pid=370) [rank0]:W0917 07:06:10.543000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/triton_bundler.py", line 240, in load_autotuners
+(EngineCore pid=370) [rank0]:W0917 07:06:10.543000 370 site-packages/torch/_inductor/triton_bundler.py:242]     compile_result.reload_cubin_path()
+(EngineCore pid=370) [rank0]:W0917 07:06:10.543000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/runtime/triton_heuristics.py", line 2592, in reload_cubin_path
+(EngineCore pid=370) [rank0]:W0917 07:06:10.543000 370 site-packages/torch/_inductor/triton_bundler.py:242]     raise RuntimeError(
+(EngineCore pid=370) [rank0]:W0917 07:06:10.543000 370 site-packages/torch/_inductor/triton_bundler.py:242] RuntimeError: ('Cubin file saved by TritonBundler not found at %s', '/tmp/torchinductor_root/triton/0/I2MSWCR2L2ELOJ22JP6WWWNPQ7XNGADPI3PG5PHSHIHSTAD77WEA/triton_poi_fused_zeros_4.cubin')
+(EngineCore pid=370) INFO 09-17 07:06:11 [caching.py:343] reconstructed serializable fn from standalone compile artifacts. num_artifacts=10 num_submods=25
+(EngineCore pid=370) INFO 09-17 07:06:11 [decorators.py:313] Directly load AOT compilation from path /hf/vllm_cache/torch_compile_cache/torch_aot_compile/97aa0df6fcf52a396ae7c62101dad71fc5229064813921fc664c989f23348c90/rank_0_0/model
+(EngineCore pid=370) INFO 09-17 07:06:11 [monitor.py:53] torch.compile took 6.36 s in total
+(EngineCore pid=370) INFO 09-17 07:06:21 [monitor.py:81] Initial profiling/warmup run took 9.62 s
+(EngineCore pid=370) [rank0]:W0917 07:06:22.300000 370 site-packages/torch/_inductor/triton_bundler.py:242] Failed to reload cubin file statically launchable autotuner triton_poi_fused_mul_sigmoid_view_0
+(EngineCore pid=370) [rank0]:W0917 07:06:22.300000 370 site-packages/torch/_inductor/triton_bundler.py:242] Traceback (most recent call last):
+(EngineCore pid=370) [rank0]:W0917 07:06:22.300000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/triton_bundler.py", line 240, in load_autotuners
+(EngineCore pid=370) [rank0]:W0917 07:06:22.300000 370 site-packages/torch/_inductor/triton_bundler.py:242]     compile_result.reload_cubin_path()
+(EngineCore pid=370) [rank0]:W0917 07:06:22.300000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/runtime/triton_heuristics.py", line 2592, in reload_cubin_path
+(EngineCore pid=370) [rank0]:W0917 07:06:22.300000 370 site-packages/torch/_inductor/triton_bundler.py:242]     raise RuntimeError(
+(EngineCore pid=370) [rank0]:W0917 07:06:22.300000 370 site-packages/torch/_inductor/triton_bundler.py:242] RuntimeError: ('Cubin file saved by TritonBundler not found at %s', '/tmp/torchinductor_root/triton/0/NNP6EWMUWED7ZV36RIXUBVUE6OPM7ORTI6GNXY7VPB4AQXLC6GYA/triton_poi_fused_mul_sigmoid_view_0.cubin')
+(EngineCore pid=370) [rank0]:W0917 07:06:22.301000 370 site-packages/torch/_inductor/triton_bundler.py:242] Failed to reload cubin file statically launchable autotuner triton_poi_fused_mul_silu_slice_2
+(EngineCore pid=370) [rank0]:W0917 07:06:22.301000 370 site-packages/torch/_inductor/triton_bundler.py:242] Traceback (most recent call last):
+(EngineCore pid=370) [rank0]:W0917 07:06:22.301000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/triton_bundler.py", line 240, in load_autotuners
+(EngineCore pid=370) [rank0]:W0917 07:06:22.301000 370 site-packages/torch/_inductor/triton_bundler.py:242]     compile_result.reload_cubin_path()
+(EngineCore pid=370) [rank0]:W0917 07:06:22.301000 370 site-packages/torch/_inductor/triton_bundler.py:242]   File "/usr/local/lib/python3.12/site-packages/torch/_inductor/runtime/triton_heuristics.py", line 2592, in reload_cubin_path
+(EngineCore pid=370) [rank0]:W0917 07:06:22.301000 370 site-packages/torch/_inductor/triton_bundler.py:242]     raise RuntimeError(
+(EngineCore pid=370) [rank0]:W0917 07:06:22.301000 370 site-packages/torch/_inductor/triton_bundler.py:242] RuntimeError: ('Cubin file saved by TritonBundler not found at %s', '/tmp/torchinductor_root/triton/0/V22OFKDNH3P2CFZ2WZTHTWYLTEH64OIZSBHI5BFSR7NLKWIMXKMQ/triton_poi_fused_mul_silu_slice_2.cubin')
+(EngineCore pid=370) INFO 09-17 07:06:23 [caching.py:343] reconstructed serializable fn from standalone compile artifacts. num_artifacts=2 num_submods=2
+(EngineCore pid=370) INFO 09-17 07:06:23 [decorators.py:313] Directly load AOT compilation from path /hf/vllm_cache/torch_compile_cache/torch_aot_compile/6bcade63c97c2b9ada632adee4586d6a907e882262257990a6e358a9ab91aca9/rank_0_0/model
+(EngineCore pid=370) INFO 09-17 07:06:23 [monitor.py:53] torch.compile took 1.92 s in total
+(EngineCore pid=370) INFO 09-17 07:06:23 [monitor.py:81] Initial profiling/warmup run took 0.00 s
+(EngineCore pid=370) WARNING 09-17 07:06:25 [kv_cache_utils.py:1326] Add 3 padding layers, may waste at most 16.67% KV cache memory
+(EngineCore pid=370) 
+[1ACapturing CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   2%|▏         | 1/51 [00:04<03:54,  4.69s/it]
+[1ACapturing CUDA graphs (PIECEWISE):   4%|▍         | 2/51 [00:04<01:38,  2.00s/it]
+[1ACapturing CUDA graphs (PIECEWISE):   6%|▌         | 3/51 [00:04<00:54,  1.14s/it]
+[1ACapturing CUDA graphs (PIECEWISE):   8%|▊         | 4/51 [00:05<00:34,  1.37it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  10%|▉         | 5/51 [00:05<00:23,  1.96it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  12%|█▏        | 6/51 [00:05<00:16,  2.65it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  14%|█▎        | 7/51 [00:05<00:12,  3.43it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  16%|█▌        | 8/51 [00:05<00:10,  4.24it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  18%|█▊        | 9/51 [00:05<00:08,  4.99it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  20%|█▉        | 10/51 [00:05<00:07,  5.79it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  22%|██▏       | 11/51 [00:05<00:06,  6.48it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  24%|██▎       | 12/51 [00:05<00:05,  6.93it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  25%|██▌       | 13/51 [00:06<00:05,  7.38it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  27%|██▋       | 14/51 [00:06<00:10,  3.70it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  29%|██▉       | 15/51 [00:06<00:08,  4.12it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  31%|███▏      | 16/51 [00:06<00:07,  4.83it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  33%|███▎      | 17/51 [00:07<00:06,  5.27it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  35%|███▌      | 18/51 [00:07<00:09,  3.55it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  37%|███▋      | 19/51 [00:07<00:09,  3.46it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  39%|███▉      | 20/51 [00:08<00:13,  2.35it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  41%|████      | 21/51 [00:08<00:10,  2.91it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  43%|████▎     | 22/51 [00:08<00:08,  3.53it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  45%|████▌     | 23/51 [00:09<00:06,  4.08it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  47%|████▋     | 24/51 [00:09<00:05,  4.59it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  49%|████▉     | 25/51 [00:09<00:05,  5.02it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  51%|█████     | 26/51 [00:09<00:04,  5.33it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  53%|█████▎    | 27/51 [00:09<00:04,  5.41it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  55%|█████▍    | 28/51 [00:09<00:04,  5.59it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  57%|█████▋    | 29/51 [00:10<00:03,  5.81it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  59%|█████▉    | 30/51 [00:10<00:06,  3.35it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  61%|██████    | 31/51 [00:10<00:05,  3.81it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  63%|██████▎   | 32/51 [00:11<00:04,  4.38it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  65%|██████▍   | 33/51 [00:11<00:07,  2.43it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  67%|██████▋   | 34/51 [00:12<00:06,  2.82it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  71%|███████   | 36/51 [00:12<00:04,  3.58it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  73%|███████▎  | 37/51 [00:12<00:03,  4.10it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  76%|███████▋  | 39/51 [00:12<00:02,  5.49it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  80%|████████  | 41/51 [00:12<00:01,  7.39it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  84%|████████▍ | 43/51 [00:13<00:00,  9.14it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  88%|████████▊ | 45/51 [00:13<00:00,  7.82it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  92%|█████████▏| 47/51 [00:13<00:00,  7.66it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  98%|█████████▊| 50/51 [00:13<00:00, 10.27it/s]
+[1ACapturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:14<00:00,  3.50it/s]
+(EngineCore pid=370) 
+[1ACapturing CUDA graphs (FULL):   0%|          | 0/2 [00:00<?, ?it/s]
+[1ACapturing CUDA graphs (FULL):  50%|█████     | 1/2 [00:00<00:00,  4.35it/s]
+[1ACapturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:00<00:00,  4.43it/s]
+[1ACapturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:00<00:00,  4.42it/s]
+(EngineCore pid=370) INFO 09-17 07:06:41 [speculator.py:151] Capturing model for speculator...
+(EngineCore pid=370) 
+[1ACapturing prefill CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  22%|██▏       | 11/51 [00:00<00:00, 104.93it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  43%|████▎     | 22/51 [00:00<00:00, 99.63it/s] 
+[1ACapturing prefill CUDA graphs (PIECEWISE):  63%|██████▎   | 32/51 [00:00<00:00, 97.55it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  82%|████████▏ | 42/51 [00:00<00:00, 96.99it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:00<00:00, 100.79it/s]
+(EngineCore pid=370) 
+[1ACapturing prefill CUDA graphs (FULL):   0%|          | 0/49 [00:00<?, ?it/s]
+[1ACapturing prefill CUDA graphs (FULL):  10%|█         | 5/49 [00:00<00:00, 49.64it/s]
+[1ACapturing prefill CUDA graphs (FULL):  29%|██▊       | 14/49 [00:00<00:00, 70.44it/s]
+[1ACapturing prefill CUDA graphs (FULL):  45%|████▍     | 22/49 [00:00<00:00, 74.22it/s]
+[1ACapturing prefill CUDA graphs (FULL):  65%|██████▌   | 32/49 [00:00<00:00, 83.50it/s]
+[1ACapturing prefill CUDA graphs (FULL):  88%|████████▊ | 43/49 [00:00<00:00, 92.59it/s]
+[1ACapturing prefill CUDA graphs (FULL): 100%|██████████| 49/49 [00:00<00:00, 83.56it/s]
+(EngineCore pid=370) 
+[1ACapturing decode CUDA graphs (FULL):   0%|          | 0/19 [00:00<?, ?it/s]
+[1ACapturing decode CUDA graphs (FULL):   5%|▌         | 1/19 [00:00<00:06,  2.80it/s]
+[1ACapturing decode CUDA graphs (FULL):  16%|█▌        | 3/19 [00:00<00:02,  7.55it/s]
+[1ACapturing decode CUDA graphs (FULL):  58%|█████▊    | 11/19 [00:00<00:00, 24.83it/s]
+[1ACapturing decode CUDA graphs (FULL): 100%|██████████| 19/19 [00:00<00:00, 27.19it/s]
+(EngineCore pid=370) INFO 09-17 07:06:43 [model_runner.py:960] Graph capturing finished in 17 secs, took 0.76 GiB
+(EngineCore pid=370) INFO 09-17 07:06:43 [gpu_worker.py:625] Available KV cache memory: 7.42 GiB
+(EngineCore pid=370) INFO 09-17 07:06:43 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.1600 is equivalent to --gpu-memory-utilization=0.1481 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.1719. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=370) WARNING 09-17 07:06:43 [kv_cache_utils.py:1326] Add 3 padding layers, may waste at most 16.67% KV cache memory
+(EngineCore pid=370) INFO 09-17 07:06:43 [kv_cache_utils.py:2032] GPU KV cache size: 314,932 tokens, Maximum concurrency for 9,216 tokens per request: 34.17x
+(EngineCore pid=370) INFO 09-17 07:06:43 [kernel_warmup.py:124] JIT kernel warmup starting.
+(EngineCore pid=370) INFO 09-17 07:06:43 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(EngineCore pid=370) INFO 09-17 07:06:43 [qwen_triton_warmup.py:270] Warming up Qwen Triton kernels for model_type=qwen3_5_text.
+(EngineCore pid=370) INFO 09-17 07:06:46 [kernel_warmup.py:309] Using FlashInfer autotune cache file: /hf/vllm_cache/flashinfer_autotune_cache/0.6.18/90a/6bac9a39097d823f173ba66e1441efb87bac4b95e001289cef015e7abb53c3dc/autotune_configs.json
+(EngineCore pid=370) 2026-09-17 07:06:46,455 - INFO - autotuner.py:2789 - flashinfer.jit: [Autotuner]: Loaded 0 configs from /hf/vllm_cache/flashinfer_autotune_cache/0.6.18/90a/6bac9a39097d823f173ba66e1441efb87bac4b95e001289cef015e7abb53c3dc/autotune_configs.json
+(EngineCore pid=370) 2026-09-17 07:06:46,456 - INFO - autotuner.py:972 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore pid=370) INFO 09-17 07:06:46 [kernel_warmup.py:266] Running FlashInfer autotune with 2048 tokens.
+(EngineCore pid=370) 2026-09-17 07:06:46,660 - INFO - autotuner.py:995 - flashinfer.jit: [Autotuner]: Autotuning process ends
+(EngineCore pid=370) 2026-09-17 07:06:46,696 - INFO - autotuner.py:2652 - flashinfer.jit: [Autotuner]: Saved 0 configs to /hf/vllm_cache/flashinfer_autotune_cache/0.6.18/90a/6bac9a39097d823f173ba66e1441efb87bac4b95e001289cef015e7abb53c3dc/autotune_configs.json (0 new, 0 from previous config)
+(EngineCore pid=370) 
+[1ACapturing CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   2%|▏         | 1/51 [00:00<00:21,  2.33it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   4%|▍         | 2/51 [00:00<00:21,  2.24it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   6%|▌         | 3/51 [00:01<00:25,  1.86it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   8%|▊         | 4/51 [00:01<00:18,  2.49it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  10%|▉         | 5/51 [00:01<00:15,  3.02it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  12%|█▏        | 6/51 [00:02<00:12,  3.51it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  14%|█▎        | 7/51 [00:02<00:11,  3.79it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  16%|█▌        | 8/51 [00:02<00:10,  4.05it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  18%|█▊        | 9/51 [00:02<00:09,  4.43it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  20%|█▉        | 10/51 [00:02<00:08,  4.82it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  22%|██▏       | 11/51 [00:03<00:10,  3.65it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  24%|██▎       | 12/51 [00:03<00:10,  3.77it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  25%|██▌       | 13/51 [00:03<00:09,  4.14it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  27%|██▋       | 14/51 [00:03<00:08,  4.49it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  29%|██▉       | 15/51 [00:04<00:07,  4.82it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  31%|███▏      | 16/51 [00:04<00:06,  5.25it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  33%|███▎      | 17/51 [00:04<00:06,  5.01it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  35%|███▌      | 18/51 [00:04<00:07,  4.71it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  37%|███▋      | 19/51 [00:04<00:06,  4.84it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  39%|███▉      | 20/51 [00:05<00:10,  2.85it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  41%|████      | 21/51 [00:05<00:09,  3.19it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  43%|████▎     | 22/51 [00:06<00:08,  3.59it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  45%|████▌     | 23/51 [00:06<00:06,  4.03it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  47%|████▋     | 24/51 [00:06<00:06,  4.07it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  49%|████▉     | 25/51 [00:06<00:06,  4.23it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  51%|█████     | 26/51 [00:06<00:05,  4.37it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  53%|█████▎    | 27/51 [00:07<00:07,  3.21it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  55%|█████▍    | 28/51 [00:07<00:06,  3.32it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  57%|█████▋    | 29/51 [00:07<00:05,  3.76it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  59%|█████▉    | 30/51 [00:08<00:04,  4.21it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  61%|██████    | 31/51 [00:08<00:04,  4.62it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  63%|██████▎   | 32/51 [00:08<00:04,  4.74it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  67%|██████▋   | 34/51 [00:08<00:02,  7.00it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  71%|███████   | 36/51 [00:08<00:01,  9.18it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  75%|███████▍  | 38/51 [00:08<00:01, 10.96it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  78%|███████▊  | 40/51 [00:08<00:00, 12.58it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  82%|████████▏ | 42/51 [00:08<00:00, 13.68it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  86%|████████▋ | 44/51 [00:09<00:00,  7.98it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  90%|█████████ | 46/51 [00:09<00:00,  8.50it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  94%|█████████▍| 48/51 [00:09<00:00,  9.70it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  98%|█████████▊| 50/51 [00:09<00:00, 11.18it/s]Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:09<00:00,  5.12it/s]
+(EngineCore pid=370) 
+[1ACapturing CUDA graphs (FULL):   0%|          | 0/49 [00:00<?, ?it/s]
+[1ACapturing CUDA graphs (FULL):   8%|▊         | 4/49 [00:00<00:01, 32.36it/s]
+[1ACapturing CUDA graphs (FULL):  16%|█▋        | 8/49 [00:00<00:01, 31.66it/s]
+[1ACapturing CUDA graphs (FULL):  24%|██▍       | 12/49 [00:00<00:01, 29.68it/s]
+[1ACapturing CUDA graphs (FULL):  31%|███       | 15/49 [00:00<00:01, 25.61it/s]
+[1ACapturing CUDA graphs (FULL):  37%|███▋      | 18/49 [00:00<00:01, 26.09it/s]
+[1ACapturing CUDA graphs (FULL):  43%|████▎     | 21/49 [00:00<00:01, 23.98it/s]
+[1ACapturing CUDA graphs (FULL):  49%|████▉     | 24/49 [00:00<00:00, 25.07it/s]
+[1ACapturing CUDA graphs (FULL):  55%|█████▌    | 27/49 [00:01<00:00, 26.10it/s]
+[1ACapturing CUDA graphs (FULL):  61%|██████    | 30/49 [00:01<00:01, 18.98it/s]
+[1ACapturing CUDA graphs (FULL):  67%|██████▋   | 33/49 [00:01<00:00, 16.20it/s]
+[1ACapturing CUDA graphs (FULL):  73%|███████▎  | 36/49 [00:01<00:00, 18.55it/s]
+[1ACapturing CUDA graphs (FULL):  82%|████████▏ | 40/49 [00:01<00:00, 21.45it/s]
+[1ACapturing CUDA graphs (FULL):  88%|████████▊ | 43/49 [00:01<00:00, 22.96it/s]
+[1ACapturing CUDA graphs (FULL):  96%|█████████▌| 47/49 [00:01<00:00, 26.23it/s]
+[1ACapturing CUDA graphs (FULL): 100%|██████████| 49/49 [00:02<00:00, 21.92it/s]
+(EngineCore pid=370) INFO 09-17 07:06:59 [speculator.py:151] Capturing model for speculator...
+(EngineCore pid=370) 
+[1ACapturing prefill CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  20%|█▉        | 10/51 [00:00<00:00, 72.95it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  37%|███▋      | 19/51 [00:00<00:00, 79.53it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  55%|█████▍    | 28/51 [00:00<00:00, 71.23it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  80%|████████  | 41/51 [00:00<00:00, 90.69it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:00<00:00, 93.17it/s]
+(EngineCore pid=370) 
+[1ACapturing prefill CUDA graphs (FULL):   0%|          | 0/49 [00:00<?, ?it/s]
+[1ACapturing prefill CUDA graphs (FULL):  18%|█▊        | 9/49 [00:00<00:00, 88.11it/s]
+[1ACapturing prefill CUDA graphs (FULL):  39%|███▉      | 19/49 [00:00<00:00, 89.68it/s]
+[1ACapturing prefill CUDA graphs (FULL):  57%|█████▋    | 28/49 [00:00<00:00, 43.50it/s]
+[1ACapturing prefill CUDA graphs (FULL):  71%|███████▏  | 35/49 [00:00<00:00, 36.78it/s]
+[1ACapturing prefill CUDA graphs (FULL):  94%|█████████▍| 46/49 [00:00<00:00, 50.87it/s]
+[1ACapturing prefill CUDA graphs (FULL): 100%|██████████| 49/49 [00:00<00:00, 52.52it/s]
+(EngineCore pid=370) 
+[1ACapturing decode CUDA graphs (FULL):   0%|          | 0/19 [00:00<?, ?it/s]
+[1ACapturing decode CUDA graphs (FULL):  42%|████▏     | 8/19 [00:00<00:00, 79.52it/s]
+[1ACapturing decode CUDA graphs (FULL): 100%|██████████| 19/19 [00:00<00:00, 94.92it/s]
+(EngineCore pid=370) INFO 09-17 07:07:01 [model_runner.py:960] Graph capturing finished in 14 secs, took 0.60 GiB
+(EngineCore pid=370) INFO 09-17 07:07:01 [gpu_worker.py:797] CUDA graph pool memory: 0.6 GiB (actual), 0.94 GiB (estimated), difference: 0.34 GiB (56.3%).
+(EngineCore pid=370) INFO 09-17 07:07:01 [gpu_worker.py:860] Free memory on device (77.82/79.18 GiB) on startup. Desired GPU memory utilization is (0.16, 12.67 GiB). Actual usage is 4.2 GiB for consumed memory (weights + non-torch), 1.05 GiB for peak activation, and 0.6 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=7158265693` (6.67 GiB) to fit into requested memory, or `--kv-cache-memory=77117188096` (71.82 GiB) to fully utilize gpu memory. Current kv cache memory in use is 7.42 GiB.
+(EngineCore pid=370) INFO 09-17 07:07:15 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(EngineCore pid=370) WARNING 09-17 07:07:16 [torch_utils.py:265] OMP_NUM_THREADS=4 is set; leaving Torch threads at 4 for serving. Multi-threaded torch CPU ops during serving can degrade performance through spin-wait contention and cgroup CPU-quota throttling.
+(EngineCore pid=370) INFO 09-17 07:07:16 [core.py:361] init engine (profile, create kv cache, warmup model) took 72.44 s (compilation: 8.28 s)
+(EngineCore pid=370) Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+(EngineCore pid=370) 
+[1AParse safetensors files:   0%|          | 0/1 [00:00<?, ?it/s]
+[1AParse safetensors files: 100%|██████████| 1/1 [00:00<00:00,  1.00it/s]Parse safetensors files: 100%|██████████| 1/1 [00:00<00:00,  1.00it/s]
+(EngineCore pid=370) INFO 09-17 07:07:17 [kernel.py:369] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(EngineCore pid=370) WARNING 09-17 07:07:17 [vllm.py:1924] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+WARNING 09-17 07:07:17 [input_processor.py:315] Passing raw prompts to InputProcessor is deprecated and will be removed in the future. You should instead pass the outputs of Renderer.render_cmpl() or Renderer.render_chat().
+(EngineCore pid=370) WARNING 09-17 07:07:18 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _compute_local_logits_stats_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=370) WARNING 09-17 07:07:18 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _rejection_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=370) WARNING 09-17 07:07:18 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _resample_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+vllm_mtp3 dev-prose-128 tps=523.3 ttft=31.3ms
+vllm_mtp3 dev-prose-512 tps=534.1 ttft=29.6ms
+vllm_mtp3 dev-prose-2048 tps=555.6 ttft=41.4ms
+vllm_mtp3 dev-prose-8192 tps=576.6 ttft=139.1ms
+vllm_mtp3 dev-code-128 tps=717.5 ttft=30.1ms
+vllm_mtp3 dev-code-512 tps=630.7 ttft=29.9ms
+vllm_mtp3 dev-code-2048 tps=682.3 ttft=39.9ms
+vllm_mtp3 dev-code-8192 tps=641.5 ttft=138.9ms
+vllm_mtp3 dev-structured-128 tps=852.6 ttft=32.7ms
+vllm_mtp3 dev-structured-512 tps=842.4 ttft=30.2ms
+vllm_mtp3 dev-structured-2048 tps=808.1 ttft=40.0ms
+vllm_mtp3 dev-structured-8192 tps=760.0 ttft=150.4ms
+vllm_mtp3 dev-structured-8192 tps=778.3 ttft=142.2ms
+vllm_mtp3 dev-structured-2048 tps=839.7 ttft=38.5ms
+vllm_mtp3 dev-structured-512 tps=850.2 ttft=29.7ms
+vllm_mtp3 dev-structured-128 tps=888.3 ttft=29.2ms
+vllm_mtp3 dev-code-8192 tps=706.1 ttft=133.9ms
+vllm_mtp3 dev-code-2048 tps=695.0 ttft=39.7ms
+vllm_mtp3 dev-code-512 tps=630.3 ttft=30.6ms
+vllm_mtp3 dev-code-128 tps=731.2 ttft=29.1ms
+vllm_mtp3 dev-prose-8192 tps=579.0 ttft=132.6ms
+vllm_mtp3 dev-prose-2048 tps=566.0 ttft=39.1ms
+vllm_mtp3 dev-prose-512 tps=538.6 ttft=29.6ms
+vllm_mtp3 dev-prose-128 tps=519.7 ttft=30.4ms
+vllm_mtp3 dev-prose-128 tps=514.4 ttft=28.6ms
+vllm_mtp3 dev-prose-512 tps=524.5 ttft=31.0ms
+vllm_mtp3 dev-prose-2048 tps=557.7 ttft=40.4ms
+vllm_mtp3 dev-prose-8192 tps=575.7 ttft=135.0ms
+vllm_mtp3 dev-code-128 tps=711.9 ttft=30.3ms
+vllm_mtp3 dev-code-512 tps=616.3 ttft=30.6ms
+vllm_mtp3 dev-code-2048 tps=682.1 ttft=40.8ms
+vllm_mtp3 dev-code-8192 tps=704.1 ttft=138.5ms
+vllm_mtp3 dev-structured-128 tps=791.3 ttft=31.2ms
+vllm_mtp3 dev-structured-512 tps=631.1 ttft=33.0ms
+vllm_mtp3 dev-structured-2048 tps=625.5 ttft=46.6ms
+vllm_mtp3 dev-structured-8192 tps=730.2 ttft=145.2ms
+vllm_mtp3 dev-structured-8192 tps=750.0 ttft=145.1ms
+vllm_mtp3 dev-structured-2048 tps=820.6 ttft=41.8ms
+vllm_mtp3 dev-structured-512 tps=846.0 ttft=30.1ms
+vllm_mtp3 dev-structured-128 tps=877.2 ttft=29.4ms
+vllm_mtp3 dev-code-8192 tps=691.4 ttft=134.6ms
+vllm_mtp3 dev-code-2048 tps=686.5 ttft=39.2ms
+vllm_mtp3 dev-code-512 tps=636.0 ttft=29.5ms
+vllm_mtp3 dev-code-128 tps=736.1 ttft=31.0ms
+vllm_mtp3 dev-prose-8192 tps=578.2 ttft=131.2ms
+vllm_mtp3 dev-prose-2048 tps=569.7 ttft=38.2ms
+vllm_mtp3 dev-prose-512 tps=538.1 ttft=29.4ms
+vllm_mtp3 dev-prose-128 tps=523.1 ttft=31.6ms
+vllm_mtp3 dev-prose-128 tps=525.7 ttft=28.8ms
+vllm_mtp3 dev-prose-512 tps=530.8 ttft=29.6ms
+vllm_mtp3 dev-prose-2048 tps=559.0 ttft=39.2ms
+vllm_mtp3 dev-prose-8192 tps=577.3 ttft=142.4ms
+vllm_mtp3 dev-code-128 tps=724.9 ttft=31.7ms
+vllm_mtp3 dev-code-512 tps=636.8 ttft=29.2ms
+vllm_mtp3 dev-code-2048 tps=681.2 ttft=42.1ms
+vllm_mtp3 dev-code-8192 tps=650.2 ttft=145.8ms
+vllm_mtp3 dev-structured-128 tps=870.7 ttft=32.0ms
+vllm_mtp3 dev-structured-512 tps=830.4 ttft=29.4ms
+vllm_mtp3 dev-structured-2048 tps=816.1 ttft=40.0ms
+vllm_mtp3 dev-structured-8192 tps=763.0 ttft=141.7ms
+INFO 09-17 07:07:51 [core_client.py:689] [shutdown] MPClient: start timeout=default
+INFO 09-17 07:07:51 [core_client.py:691] [shutdown] MPClient: stopping engine manager
+INFO 09-17 07:07:51 [utils.py:620] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=370) INFO 09-17 07:07:51 [core.py:1350] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=370) INFO 09-17 07:07:51 [core.py:1501] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=370) INFO 09-17 07:07:51 [core.py:1532] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=370) INFO 09-17 07:07:51 [core.py:1363] [shutdown] EngineCore: exiting busy loop
+INFO 09-17 07:07:55 [core_client.py:693] [shutdown] MPClient: engine manager stopped
+INFO 09-17 07:07:55 [core_client.py:694] [shutdown] MPClient: cleaning up background resources
+INFO 09-17 07:07:55 [core_client.py:696] [shutdown] MPClient: complete
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1091.04it/s]
+saved eval_final_full_dev.json
+saved eval_final_full_dev.json
+Task was destroyed but it is pending!
+task: <Task pending name='EngineCoreOutputQueueTask' coro=<AsyncMPClient._ensure_output_queue_task.<locals>.process_outputs_socket() running at /usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py:1044> wait_for=<Future cancelled>>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-3' coro=<AsyncLLM._run_output_handler.<locals>.output_handler() running at /usr/local/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py:765> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+ERROR 09-17 07:08:02 [async_llm.py:819] AsyncLLM output_handler failed.
+ERROR 09-17 07:08:02 [async_llm.py:819] Traceback (most recent call last):
+ERROR 09-17 07:08:02 [async_llm.py:819]   File "/usr/local/lib/python3.12/asyncio/queues.py", line 158, in get
+ERROR 09-17 07:08:02 [async_llm.py:819]     await getter
+ERROR 09-17 07:08:02 [async_llm.py:819] GeneratorExit
+ERROR 09-17 07:08:02 [async_llm.py:819] 
+ERROR 09-17 07:08:02 [async_llm.py:819] During handling of the above exception, another exception occurred:
+ERROR 09-17 07:08:02 [async_llm.py:819] 
+ERROR 09-17 07:08:02 [async_llm.py:819] Traceback (most recent call last):
+ERROR 09-17 07:08:02 [async_llm.py:819]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py", line 765, in output_handler
+ERROR 09-17 07:08:02 [async_llm.py:819]     outputs = await engine_core.get_output_async()
+ERROR 09-17 07:08:02 [async_llm.py:819]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 09-17 07:08:02 [async_llm.py:819]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 1103, in get_output_async
+ERROR 09-17 07:08:02 [async_llm.py:819]     outputs = await self.outputs_queue.get()
+ERROR 09-17 07:08:02 [async_llm.py:819]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 09-17 07:08:02 [async_llm.py:819]   File "/usr/local/lib/python3.12/asyncio/queues.py", line 160, in get
+ERROR 09-17 07:08:02 [async_llm.py:819]     getter.cancel()  # Just in case getter is not done yet.
+ERROR 09-17 07:08:02 [async_llm.py:819]     ^^^^^^^^^^^^^^^
+ERROR 09-17 07:08:02 [async_llm.py:819]   File "/usr/local/lib/python3.12/asyncio/base_events.py", line 792, in call_soon
+ERROR 09-17 07:08:02 [async_llm.py:819]     self._check_closed()
+ERROR 09-17 07:08:02 [async_llm.py:819]   File "/usr/local/lib/python3.12/asyncio/base_events.py", line 539, in _check_closed
+ERROR 09-17 07:08:02 [async_llm.py:819]     raise RuntimeError('Event loop is closed')
+ERROR 09-17 07:08:02 [async_llm.py:819] RuntimeError: Event loop is closed
+>>> /work/bench/evaluate.py --engines custom_k0,custom_k3,vllm_mtp3 --stage heldout --split heldout --tag final_heldout
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 863.79it/s]
+custom_k0 heldout-prose-128 tps=391.8 ttft=43.4ms
+custom_k0 heldout-prose-512 tps=389.9 ttft=44.7ms
+custom_k0 heldout-prose-2048 tps=391.0 ttft=64.4ms
+custom_k0 heldout-prose-8192 tps=390.3 ttft=106.6ms
+custom_k0 heldout-code-128 tps=391.7 ttft=44.9ms
+custom_k0 heldout-code-512 tps=391.8 ttft=45.2ms
+custom_k0 heldout-code-2048 tps=391.9 ttft=47.8ms
+custom_k0 heldout-code-8192 tps=390.2 ttft=108.5ms
+custom_k0 heldout-structured-128 tps=386.4 ttft=43.2ms
+custom_k0 heldout-structured-512 tps=391.8 ttft=44.1ms
+custom_k0 heldout-structured-2048 tps=392.2 ttft=49.4ms
+custom_k0 heldout-structured-8192 tps=389.9 ttft=106.9ms
+custom_k0 heldout-structured-8192 tps=388.5 ttft=106.4ms
+custom_k0 heldout-structured-2048 tps=392.1 ttft=44.7ms
+custom_k0 heldout-structured-512 tps=391.2 ttft=44.5ms
+custom_k0 heldout-structured-128 tps=390.3 ttft=76.9ms
+custom_k0 heldout-code-8192 tps=390.6 ttft=106.3ms
+custom_k0 heldout-code-2048 tps=392.1 ttft=45.6ms
+custom_k0 heldout-code-512 tps=392.1 ttft=43.9ms
+custom_k0 heldout-code-128 tps=392.0 ttft=42.3ms
+custom_k0 heldout-prose-8192 tps=390.7 ttft=106.8ms
+custom_k0 heldout-prose-2048 tps=392.2 ttft=40.7ms
+custom_k0 heldout-prose-512 tps=392.1 ttft=40.1ms
+custom_k0 heldout-prose-128 tps=391.9 ttft=39.2ms
+custom_k0 heldout-prose-128 tps=392.0 ttft=39.1ms
+custom_k0 heldout-prose-512 tps=392.1 ttft=39.3ms
+custom_k0 heldout-prose-2048 tps=392.1 ttft=40.3ms
+custom_k0 heldout-prose-8192 tps=390.7 ttft=105.4ms
+custom_k0 heldout-code-128 tps=391.9 ttft=38.4ms
+custom_k0 heldout-code-512 tps=392.0 ttft=38.6ms
+custom_k0 heldout-code-2048 tps=392.1 ttft=40.5ms
+custom_k0 heldout-code-8192 tps=390.4 ttft=105.7ms
+custom_k0 heldout-structured-128 tps=392.1 ttft=39.0ms
+custom_k0 heldout-structured-512 tps=392.0 ttft=39.7ms
+custom_k0 heldout-structured-2048 tps=392.1 ttft=40.9ms
+custom_k0 heldout-structured-8192 tps=390.5 ttft=106.4ms
+custom_k0 heldout-structured-8192 tps=391.1 ttft=105.7ms
+custom_k0 heldout-structured-2048 tps=392.1 ttft=40.8ms
+custom_k0 heldout-structured-512 tps=391.6 ttft=42.9ms
+custom_k0 heldout-structured-128 tps=392.0 ttft=39.5ms
+custom_k0 heldout-code-8192 tps=390.6 ttft=106.1ms
+custom_k0 heldout-code-2048 tps=391.9 ttft=40.4ms
+custom_k0 heldout-code-512 tps=392.1 ttft=39.3ms
+custom_k0 heldout-code-128 tps=391.9 ttft=38.7ms
+custom_k0 heldout-prose-8192 tps=390.9 ttft=106.8ms
+custom_k0 heldout-prose-2048 tps=392.1 ttft=40.9ms
+custom_k0 heldout-prose-512 tps=392.0 ttft=40.8ms
+custom_k0 heldout-prose-128 tps=392.1 ttft=39.3ms
+custom_k0 heldout-prose-128 tps=392.0 ttft=39.8ms
+custom_k0 heldout-prose-512 tps=392.1 ttft=39.8ms
+custom_k0 heldout-prose-2048 tps=392.1 ttft=41.8ms
+custom_k0 heldout-prose-8192 tps=390.6 ttft=107.0ms
+custom_k0 heldout-code-128 tps=391.9 ttft=39.5ms
+custom_k0 heldout-code-512 tps=392.0 ttft=39.5ms
+custom_k0 heldout-code-2048 tps=392.1 ttft=40.4ms
+custom_k0 heldout-code-8192 tps=390.6 ttft=105.5ms
+custom_k0 heldout-structured-128 tps=391.5 ttft=38.4ms
+custom_k0 heldout-structured-512 tps=391.6 ttft=39.2ms
+custom_k0 heldout-structured-2048 tps=390.7 ttft=39.8ms
+custom_k0 heldout-structured-8192 tps=390.4 ttft=106.4ms
+saved eval_final_heldout_heldout.json
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1066.60it/s]
+custom_k3 heldout-prose-128 tps=436.0 ttft=43.4ms
+custom_k3 heldout-prose-512 tps=409.4 ttft=45.3ms
+custom_k3 heldout-prose-2048 tps=409.3 ttft=45.4ms
+custom_k3 heldout-prose-8192 tps=392.9 ttft=114.9ms
+custom_k3 heldout-code-128 tps=558.3 ttft=44.6ms
+custom_k3 heldout-code-512 tps=589.3 ttft=45.4ms
+custom_k3 heldout-code-2048 tps=589.1 ttft=45.5ms
+custom_k3 heldout-code-8192 tps=586.7 ttft=115.7ms
+custom_k3 heldout-structured-128 tps=724.3 ttft=45.2ms
+custom_k3 heldout-structured-512 tps=800.0 ttft=45.3ms
+custom_k3 heldout-structured-2048 tps=788.4 ttft=45.3ms
+custom_k3 heldout-structured-8192 tps=783.2 ttft=115.6ms
+custom_k3 heldout-structured-8192 tps=784.0 ttft=115.8ms
+custom_k3 heldout-structured-2048 tps=788.4 ttft=46.1ms
+custom_k3 heldout-structured-512 tps=800.1 ttft=45.2ms
+custom_k3 heldout-structured-128 tps=724.5 ttft=43.8ms
+custom_k3 heldout-code-8192 tps=586.1 ttft=115.1ms
+custom_k3 heldout-code-2048 tps=587.2 ttft=45.9ms
+custom_k3 heldout-code-512 tps=589.1 ttft=45.6ms
+custom_k3 heldout-code-128 tps=558.4 ttft=44.6ms
+custom_k3 heldout-prose-8192 tps=393.0 ttft=115.7ms
+custom_k3 heldout-prose-2048 tps=409.4 ttft=45.9ms
+custom_k3 heldout-prose-512 tps=409.4 ttft=45.8ms
+custom_k3 heldout-prose-128 tps=435.8 ttft=44.0ms
+custom_k3 heldout-prose-128 tps=436.0 ttft=44.5ms
+custom_k3 heldout-prose-512 tps=409.4 ttft=46.3ms
+custom_k3 heldout-prose-2048 tps=408.2 ttft=46.8ms
+custom_k3 heldout-prose-8192 tps=393.0 ttft=116.1ms
+custom_k3 heldout-code-128 tps=558.2 ttft=44.5ms
+custom_k3 heldout-code-512 tps=589.1 ttft=45.2ms
+custom_k3 heldout-code-2048 tps=589.1 ttft=46.4ms
+custom_k3 heldout-code-8192 tps=587.1 ttft=114.8ms
+custom_k3 heldout-structured-128 tps=724.3 ttft=44.3ms
+custom_k3 heldout-structured-512 tps=800.1 ttft=44.5ms
+custom_k3 heldout-structured-2048 tps=784.5 ttft=45.9ms
+custom_k3 heldout-structured-8192 tps=784.1 ttft=115.9ms
+custom_k3 heldout-structured-8192 tps=785.2 ttft=114.7ms
+custom_k3 heldout-structured-2048 tps=784.5 ttft=45.6ms
+custom_k3 heldout-structured-512 tps=799.9 ttft=45.1ms
+custom_k3 heldout-structured-128 tps=724.2 ttft=44.1ms
+custom_k3 heldout-code-8192 tps=586.9 ttft=115.0ms
+custom_k3 heldout-code-2048 tps=587.0 ttft=45.7ms
+custom_k3 heldout-code-512 tps=589.0 ttft=44.7ms
+custom_k3 heldout-code-128 tps=558.4 ttft=44.7ms
+custom_k3 heldout-prose-8192 tps=393.3 ttft=115.0ms
+custom_k3 heldout-prose-2048 tps=408.2 ttft=45.5ms
+custom_k3 heldout-prose-512 tps=409.2 ttft=44.7ms
+custom_k3 heldout-prose-128 tps=435.7 ttft=48.3ms
+custom_k3 heldout-prose-128 tps=435.8 ttft=45.2ms
+custom_k3 heldout-prose-512 tps=409.2 ttft=48.6ms
+custom_k3 heldout-prose-2048 tps=408.1 ttft=45.6ms
+custom_k3 heldout-prose-8192 tps=392.5 ttft=114.7ms
+custom_k3 heldout-code-128 tps=558.2 ttft=43.9ms
+custom_k3 heldout-code-512 tps=588.7 ttft=47.6ms
+custom_k3 heldout-code-2048 tps=589.1 ttft=45.3ms
+custom_k3 heldout-code-8192 tps=586.2 ttft=115.4ms
+custom_k3 heldout-structured-128 tps=724.0 ttft=43.9ms
+custom_k3 heldout-structured-512 tps=799.8 ttft=44.1ms
+custom_k3 heldout-structured-2048 tps=788.1 ttft=49.4ms
+custom_k3 heldout-structured-8192 tps=783.2 ttft=116.0ms
+saved eval_final_heldout_heldout.json
+INFO 09-17 07:10:08 [model.py:684] Resolved architecture: Qwen3_5ForConditionalGeneration
+INFO 09-17 07:10:08 [model.py:2021] Using max model len 9216
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING 09-17 07:10:08 [model.py:981] Model does not support mm_device_do_normalize, forcing mm_device_do_normalize = False.
+INFO 09-17 07:10:11 [registry.py:141] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+INFO 09-17 07:10:11 [model.py:887] Disabled mm_prefix attention mode because multimodal inputs are configuration-disabled. Attention backends without mm_prefix support may now be selected.
+INFO 09-17 07:10:11 [model.py:684] Resolved architecture: Qwen3_5MTP
+INFO 09-17 07:10:11 [model.py:2021] Using max model len 262144
+WARNING 09-17 07:10:12 [speculative.py:1318] Enabling num_speculative_tokens > 1 will run multiple times of forward on same MTP layer,which may result in lower acceptance rate
+INFO 09-17 07:10:12 [speculative.py:1586] Overriding draft model max model len from 262144 to 9216
+INFO 09-17 07:10:12 [arg_utils.py:2404] Hybrid model with EAGLE speculative decoding: defaulting prefix_cache_retention_interval to dense checkpointing.
+INFO 09-17 07:10:12 [scheduler.py:277] Chunked prefill is enabled with max_num_batched_tokens=2048.
+
+[1AParse safetensors files:   0%|          | 0/1 [00:00<?, ?it/s]
+[1AParse safetensors files: 100%|██████████| 1/1 [00:01<00:00,  1.03s/it]Parse safetensors files: 100%|██████████| 1/1 [00:01<00:00,  1.03s/it]
+INFO 09-17 07:10:13 [kernel.py:369] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+WARNING 09-17 07:10:13 [vllm.py:1924] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+WARNING 09-17 07:10:18 [system_utils.py:157] We must use the `spawn` multiprocessing start method. Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'. See https://docs.vllm.ai/en/latest/usage/troubleshooting.html#python-multiprocessing for more information. Reasons: CUDA is initialized
+(EngineCore pid=697) INFO 09-17 07:10:31 [core.py:123] Initializing a V1 LLM engine (v0.29.0) with config: model='Qwen/Qwen3.5-2B', speculative_config=SpeculativeConfig(method='mtp', model='Qwen/Qwen3.5-2B', num_spec_tokens=3), tokenizer='Qwen/Qwen3.5-2B', skip_tokenizer_init=False, tokenizer_mode=auto, revision=15852e8c16360a2fea060d615a32b45270f8a8fc, tokenizer_revision=15852e8c16360a2fea060d615a32b45270f8a8fc, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=9216, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=Qwen/Qwen3.5-2B, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['none'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::qwen4_exp_compute_ple_ngram_ids', 'vllm::qwen4_exp_ple_short_conv', 'vllm::qwen4_exp_qsa_with_output', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::qwen_gdn_attention_core_fused_norm_packed', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 416, 432, 448, 464, 480, 496, 512], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 512, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=697) INFO 09-17 07:10:35 [registry.py:141] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+(EngineCore pid=697) INFO 09-17 07:10:35 [parallel_state.py:1775] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_29685f448a3e4b33a61f0a326e1e2547 backend=nccl
+(EngineCore pid=697) INFO 09-17 07:10:35 [parallel_state.py:2119] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+(EngineCore pid=697) INFO 09-17 07:10:35 [gpu_worker.py:429] Using V2 Model Runner
+(EngineCore pid=697) INFO 09-17 07:10:36 [model_runner.py:382] Loading model from scratch...
+(EngineCore pid=697) INFO 09-17 07:10:36 [cuda.py:551] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention
+(EngineCore pid=697) INFO 09-17 07:10:36 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.
+(EngineCore pid=697) INFO 09-17 07:10:36 [qwen_gdn_linear_attn.py:167] Using FlashInfer GDN prefill kernel (requested=auto, head_k_dim=128).
+(EngineCore pid=697) WARNING 09-17 07:10:36 [qwen_gdn_linear_attn.py:174] FlashInfer GDN prefill is JIT-compiled; first run may take a while. Set --gdn-prefill-backend triton to skip JIT.
+(EngineCore pid=697) INFO 09-17 07:10:36 [qwen_gdn_linear_attn.py:519] GDN decode kernel: cuda
+(EngineCore pid=697) INFO 09-17 07:10:37 [cuda.py:492] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(EngineCore pid=697) INFO 09-17 07:10:37 [flash_attn.py:897] Using FlashAttention version 3
+(EngineCore pid=697) INFO 09-17 07:10:38 [weight_utils.py:863] Filesystem type for checkpoints: 9P. Checkpoint size: 4.24 GiB. Available RAM: 1016.21 GiB.
+(EngineCore pid=697) INFO 09-17 07:10:38 [weight_utils.py:886] Auto-prefetch is disabled because the filesystem (9P) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=697) Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+(EngineCore pid=697) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  1.25it/s]
+(EngineCore pid=697) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  1.25it/s]
+(EngineCore pid=697) 
+(EngineCore pid=697) INFO 09-17 07:10:39 [default_loader.py:430] Loading weights took 0.95 seconds
+(EngineCore pid=697) INFO 09-17 07:10:40 [weight_utils.py:863] Filesystem type for checkpoints: 9P. Checkpoint size: 4.24 GiB. Available RAM: 1016.21 GiB.
+(EngineCore pid=697) Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+(EngineCore pid=697) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  4.52it/s]
+(EngineCore pid=697) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  4.51it/s]
+(EngineCore pid=697) 
+(EngineCore pid=697) INFO 09-17 07:10:41 [default_loader.py:430] Loading weights took 0.27 seconds
+(EngineCore pid=697) INFO 09-17 07:10:41 [model_runner.py:404] Model loading took 3.74 GiB memory and 5.848446 seconds
+(EngineCore pid=697) INFO 09-17 07:10:41 [topk_topp_sampler.py:46] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0.
+(EngineCore pid=697) INFO 09-17 07:10:41 [interface.py:918] Setting attention block size to 560 tokens to ensure that attention page size is >= mamba page size.
+(EngineCore pid=697) INFO 09-17 07:10:41 [interface.py:942] Padding mamba page size by 2.19% to ensure that mamba page size and attention page size are exactly equal.
+(EngineCore pid=697) INFO 09-17 07:10:41 [utils.py:306] Using LBNHC KV cache layout.
+(EngineCore pid=697) INFO 09-17 07:10:56 [caching.py:343] reconstructed serializable fn from standalone compile artifacts. num_artifacts=10 num_submods=25
+(EngineCore pid=697) INFO 09-17 07:10:56 [decorators.py:313] Directly load AOT compilation from path /hf/vllm_cache/torch_compile_cache/torch_aot_compile/97aa0df6fcf52a396ae7c62101dad71fc5229064813921fc664c989f23348c90/rank_0_0/model
+(EngineCore pid=697) INFO 09-17 07:10:56 [monitor.py:53] torch.compile took 12.61 s in total
+(EngineCore pid=697) INFO 09-17 07:11:07 [monitor.py:81] Initial profiling/warmup run took 11.48 s
+(EngineCore pid=697) INFO 09-17 07:11:11 [caching.py:343] reconstructed serializable fn from standalone compile artifacts. num_artifacts=2 num_submods=2
+(EngineCore pid=697) INFO 09-17 07:11:11 [decorators.py:313] Directly load AOT compilation from path /hf/vllm_cache/torch_compile_cache/torch_aot_compile/6bcade63c97c2b9ada632adee4586d6a907e882262257990a6e358a9ab91aca9/rank_0_0/model
+(EngineCore pid=697) INFO 09-17 07:11:11 [monitor.py:53] torch.compile took 3.65 s in total
+(EngineCore pid=697) INFO 09-17 07:11:11 [monitor.py:81] Initial profiling/warmup run took 0.00 s
+(EngineCore pid=697) WARNING 09-17 07:11:20 [kv_cache_utils.py:1326] Add 3 padding layers, may waste at most 16.67% KV cache memory
+(EngineCore pid=697) 
+[1ACapturing CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   2%|▏         | 1/51 [00:07<06:21,  7.63s/it]
+[1ACapturing CUDA graphs (PIECEWISE):   4%|▍         | 2/51 [00:07<02:37,  3.21s/it]
+[1ACapturing CUDA graphs (PIECEWISE):   6%|▌         | 3/51 [00:07<01:26,  1.80s/it]
+[1ACapturing CUDA graphs (PIECEWISE):   8%|▊         | 4/51 [00:07<00:53,  1.14s/it]
+[1ACapturing CUDA graphs (PIECEWISE):  10%|▉         | 5/51 [00:08<00:35,  1.30it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  12%|█▏        | 6/51 [00:08<00:24,  1.82it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  14%|█▎        | 7/51 [00:08<00:18,  2.44it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  16%|█▌        | 8/51 [00:08<00:13,  3.14it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  18%|█▊        | 9/51 [00:08<00:11,  3.76it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  20%|█▉        | 10/51 [00:08<00:08,  4.65it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  22%|██▏       | 11/51 [00:08<00:07,  5.55it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  24%|██▎       | 12/51 [00:08<00:06,  6.32it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  25%|██▌       | 13/51 [00:09<00:08,  4.31it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  27%|██▋       | 14/51 [00:09<00:09,  3.82it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  29%|██▉       | 15/51 [00:09<00:07,  4.58it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  31%|███▏      | 16/51 [00:09<00:06,  5.36it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  33%|███▎      | 17/51 [00:10<00:05,  5.81it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  35%|███▌      | 18/51 [00:13<00:36,  1.11s/it]
+[1ACapturing CUDA graphs (PIECEWISE):  37%|███▋      | 19/51 [00:13<00:27,  1.16it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  39%|███▉      | 20/51 [00:13<00:19,  1.56it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  41%|████      | 21/51 [00:13<00:14,  2.04it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  43%|████▎     | 22/51 [00:14<00:11,  2.60it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  45%|████▌     | 23/51 [00:14<00:08,  3.18it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  47%|████▋     | 24/51 [00:14<00:07,  3.81it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  49%|████▉     | 25/51 [00:14<00:05,  4.39it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  51%|█████     | 26/51 [00:14<00:05,  4.66it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  53%|█████▎    | 27/51 [00:14<00:04,  5.01it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  55%|█████▍    | 28/51 [00:14<00:04,  5.29it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  57%|█████▋    | 29/51 [00:15<00:07,  3.13it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  59%|█████▉    | 30/51 [00:15<00:05,  3.70it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  61%|██████    | 31/51 [00:15<00:04,  4.27it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  63%|██████▎   | 32/51 [00:16<00:03,  4.89it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  65%|██████▍   | 33/51 [00:22<00:36,  2.04s/it]
+[1ACapturing CUDA graphs (PIECEWISE):  67%|██████▋   | 34/51 [00:24<00:33,  1.99s/it]
+[1ACapturing CUDA graphs (PIECEWISE):  71%|███████   | 36/51 [00:24<00:16,  1.10s/it]
+[1ACapturing CUDA graphs (PIECEWISE):  75%|███████▍  | 38/51 [00:24<00:08,  1.46it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  78%|███████▊  | 40/51 [00:24<00:05,  2.17it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  82%|████████▏ | 42/51 [00:24<00:02,  3.10it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  86%|████████▋ | 44/51 [00:24<00:01,  4.24it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  90%|█████████ | 46/51 [00:25<00:01,  3.13it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  94%|█████████▍| 48/51 [00:26<00:01,  2.70it/s]
+[1ACapturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:30<00:00,  1.37it/s]Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:30<00:00,  1.67it/s]
+(EngineCore pid=697) 
+[1ACapturing CUDA graphs (FULL):   0%|          | 0/2 [00:00<?, ?it/s]
+[1ACapturing CUDA graphs (FULL):  50%|█████     | 1/2 [00:02<00:02,  2.93s/it]
+[1ACapturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:04<00:00,  2.28s/it]Capturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:04<00:00,  2.37s/it]
+(EngineCore pid=697) INFO 09-17 07:11:56 [speculator.py:151] Capturing model for speculator...
+(EngineCore pid=697) 
+[1ACapturing prefill CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):   6%|▌         | 3/51 [00:00<00:02, 22.84it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  18%|█▊        | 9/51 [00:00<00:01, 38.70it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  37%|███▋      | 19/51 [00:00<00:00, 59.61it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  57%|█████▋    | 29/51 [00:00<00:00, 72.28it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  78%|███████▊  | 40/51 [00:00<00:00, 83.23it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:00<00:00, 75.75it/s]
+(EngineCore pid=697) 
+[1ACapturing prefill CUDA graphs (FULL):   0%|          | 0/49 [00:00<?, ?it/s]
+[1ACapturing prefill CUDA graphs (FULL):  20%|██        | 10/49 [00:00<00:00, 93.77it/s]
+[1ACapturing prefill CUDA graphs (FULL):  41%|████      | 20/49 [00:00<00:00, 89.00it/s]
+[1ACapturing prefill CUDA graphs (FULL):  59%|█████▉    | 29/49 [00:00<00:00, 83.28it/s]
+[1ACapturing prefill CUDA graphs (FULL):  78%|███████▊  | 38/49 [00:00<00:00, 82.11it/s]
+[1ACapturing prefill CUDA graphs (FULL): 100%|██████████| 49/49 [00:00<00:00, 89.14it/s]
+[1ACapturing prefill CUDA graphs (FULL): 100%|██████████| 49/49 [00:00<00:00, 87.47it/s]
+(EngineCore pid=697) 
+[1ACapturing decode CUDA graphs (FULL):   0%|          | 0/19 [00:00<?, ?it/s]
+[1ACapturing decode CUDA graphs (FULL):   5%|▌         | 1/19 [00:02<00:53,  2.96s/it]
+[1ACapturing decode CUDA graphs (FULL):  47%|████▋     | 9/19 [00:03<00:02,  4.00it/s]
+[1ACapturing decode CUDA graphs (FULL): 100%|██████████| 19/19 [00:03<00:00,  6.01it/s]
+(EngineCore pid=697) INFO 09-17 07:12:01 [model_runner.py:960] Graph capturing finished in 40 secs, took 0.76 GiB
+(EngineCore pid=697) INFO 09-17 07:12:01 [gpu_worker.py:625] Available KV cache memory: 7.42 GiB
+(EngineCore pid=697) INFO 09-17 07:12:01 [gpu_worker.py:640] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.1600 is equivalent to --gpu-memory-utilization=0.1481 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.1719. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=697) WARNING 09-17 07:12:01 [kv_cache_utils.py:1326] Add 3 padding layers, may waste at most 16.67% KV cache memory
+(EngineCore pid=697) INFO 09-17 07:12:01 [kv_cache_utils.py:2032] GPU KV cache size: 314,932 tokens, Maximum concurrency for 9,216 tokens per request: 34.17x
+(EngineCore pid=697) INFO 09-17 07:12:01 [kernel_warmup.py:124] JIT kernel warmup starting.
+(EngineCore pid=697) INFO 09-17 07:12:01 [kernel_warmup.py:134] JIT kernel warmup finished in 0.00s.
+(EngineCore pid=697) INFO 09-17 07:12:01 [qwen_triton_warmup.py:270] Warming up Qwen Triton kernels for model_type=qwen3_5_text.
+(EngineCore pid=697) INFO 09-17 07:12:11 [kernel_warmup.py:309] Using FlashInfer autotune cache file: /hf/vllm_cache/flashinfer_autotune_cache/0.6.18/90a/6bac9a39097d823f173ba66e1441efb87bac4b95e001289cef015e7abb53c3dc/autotune_configs.json
+(EngineCore pid=697) 2026-09-17 07:12:11,563 - INFO - autotuner.py:2789 - flashinfer.jit: [Autotuner]: Loaded 0 configs from /hf/vllm_cache/flashinfer_autotune_cache/0.6.18/90a/6bac9a39097d823f173ba66e1441efb87bac4b95e001289cef015e7abb53c3dc/autotune_configs.json
+(EngineCore pid=697) 2026-09-17 07:12:11,563 - INFO - autotuner.py:972 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore pid=697) INFO 09-17 07:12:11 [kernel_warmup.py:266] Running FlashInfer autotune with 2048 tokens.
+(EngineCore pid=697) 2026-09-17 07:12:11,581 - INFO - autotuner.py:995 - flashinfer.jit: [Autotuner]: Autotuning process ends
+(EngineCore pid=697) 2026-09-17 07:12:11,595 - INFO - autotuner.py:2652 - flashinfer.jit: [Autotuner]: Saved 0 configs to /hf/vllm_cache/flashinfer_autotune_cache/0.6.18/90a/6bac9a39097d823f173ba66e1441efb87bac4b95e001289cef015e7abb53c3dc/autotune_configs.json (0 new, 0 from previous config)
+(EngineCore pid=697) 
+[1ACapturing CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   2%|▏         | 1/51 [00:00<00:08,  6.03it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   4%|▍         | 2/51 [00:00<00:11,  4.19it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   6%|▌         | 3/51 [00:00<00:16,  3.00it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   8%|▊         | 4/51 [00:01<00:13,  3.55it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  10%|▉         | 5/51 [00:01<00:11,  4.13it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  12%|█▏        | 6/51 [00:01<00:09,  4.74it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  14%|█▎        | 7/51 [00:01<00:08,  5.22it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  16%|█▌        | 8/51 [00:01<00:07,  5.58it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  18%|█▊        | 9/51 [00:01<00:07,  5.84it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  20%|█▉        | 10/51 [00:02<00:06,  6.07it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  22%|██▏       | 11/51 [00:02<00:06,  6.37it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  24%|██▎       | 12/51 [00:02<00:05,  6.58it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  25%|██▌       | 13/51 [00:02<00:10,  3.51it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  27%|██▋       | 14/51 [00:03<00:09,  4.09it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  29%|██▉       | 15/51 [00:03<00:07,  4.60it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  31%|███▏      | 16/51 [00:03<00:06,  5.07it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  33%|███▎      | 17/51 [00:03<00:06,  5.33it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  35%|███▌      | 18/51 [00:03<00:06,  5.36it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  37%|███▋      | 19/51 [00:03<00:05,  5.34it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  39%|███▉      | 20/51 [00:04<00:05,  5.32it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  41%|████      | 21/51 [00:04<00:05,  5.47it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  43%|████▎     | 22/51 [00:04<00:09,  3.11it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  45%|████▌     | 23/51 [00:05<00:07,  3.52it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  47%|████▋     | 24/51 [00:05<00:07,  3.82it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  49%|████▉     | 25/51 [00:05<00:06,  4.24it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  51%|█████     | 26/51 [00:05<00:05,  4.54it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  53%|█████▎    | 27/51 [00:05<00:05,  4.57it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  55%|█████▍    | 28/51 [00:06<00:04,  4.60it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  57%|█████▋    | 29/51 [00:06<00:04,  4.77it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  59%|█████▉    | 30/51 [00:06<00:06,  3.24it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  61%|██████    | 31/51 [00:07<00:05,  3.72it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  63%|██████▎   | 32/51 [00:07<00:04,  4.23it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  67%|██████▋   | 34/51 [00:07<00:02,  6.48it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  71%|███████   | 36/51 [00:07<00:01,  8.62it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  75%|███████▍  | 38/51 [00:07<00:01, 10.52it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  78%|███████▊  | 40/51 [00:07<00:00, 12.12it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  82%|████████▏ | 42/51 [00:07<00:00, 12.88it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  86%|████████▋ | 44/51 [00:07<00:00, 13.67it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  90%|█████████ | 46/51 [00:08<00:00, 14.63it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  94%|█████████▍| 48/51 [00:08<00:00, 15.35it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  98%|█████████▊| 50/51 [00:08<00:00, 16.17it/s]Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:08<00:00,  6.16it/s]
+(EngineCore pid=697) 
+[1ACapturing CUDA graphs (FULL):   0%|          | 0/49 [00:00<?, ?it/s]
+[1ACapturing CUDA graphs (FULL):   4%|▍         | 2/49 [00:00<00:03, 11.87it/s]
+[1ACapturing CUDA graphs (FULL):   8%|▊         | 4/49 [00:00<00:03, 11.62it/s]
+[1ACapturing CUDA graphs (FULL):  14%|█▍        | 7/49 [00:00<00:03, 13.26it/s]
+[1ACapturing CUDA graphs (FULL):  22%|██▏       | 11/49 [00:00<00:01, 19.42it/s]
+[1ACapturing CUDA graphs (FULL):  31%|███       | 15/49 [00:00<00:01, 23.86it/s]
+[1ACapturing CUDA graphs (FULL):  39%|███▉      | 19/49 [00:00<00:01, 26.67it/s]
+[1ACapturing CUDA graphs (FULL):  47%|████▋     | 23/49 [00:01<00:00, 28.54it/s]
+[1ACapturing CUDA graphs (FULL):  55%|█████▌    | 27/49 [00:01<00:00, 29.62it/s]
+[1ACapturing CUDA graphs (FULL):  63%|██████▎   | 31/49 [00:01<00:00, 30.95it/s]
+[1ACapturing CUDA graphs (FULL):  71%|███████▏  | 35/49 [00:01<00:00, 32.06it/s]
+[1ACapturing CUDA graphs (FULL):  80%|███████▉  | 39/49 [00:01<00:00, 32.69it/s]
+[1ACapturing CUDA graphs (FULL):  88%|████████▊ | 43/49 [00:01<00:00, 32.71it/s]
+[1ACapturing CUDA graphs (FULL):  96%|█████████▌| 47/49 [00:01<00:00, 34.21it/s]
+[1ACapturing CUDA graphs (FULL): 100%|██████████| 49/49 [00:02<00:00, 19.46it/s]
+(EngineCore pid=697) INFO 09-17 07:12:22 [speculator.py:151] Capturing model for speculator...
+(EngineCore pid=697) 
+[1ACapturing prefill CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  18%|█▊        | 9/51 [00:00<00:00, 68.51it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  37%|███▋      | 19/51 [00:00<00:00, 81.39it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  57%|█████▋    | 29/51 [00:00<00:00, 86.63it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE):  82%|████████▏ | 42/51 [00:00<00:00, 100.90it/s]
+[1ACapturing prefill CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:00<00:00, 101.64it/s]
+(EngineCore pid=697) 
+[1ACapturing prefill CUDA graphs (FULL):   0%|          | 0/49 [00:00<?, ?it/s]
+[1ACapturing prefill CUDA graphs (FULL):  18%|█▊        | 9/49 [00:00<00:00, 88.81it/s]
+[1ACapturing prefill CUDA graphs (FULL):  39%|███▉      | 19/49 [00:00<00:00, 90.50it/s]
+[1ACapturing prefill CUDA graphs (FULL):  59%|█████▉    | 29/49 [00:00<00:00, 91.18it/s]
+[1ACapturing prefill CUDA graphs (FULL):  84%|████████▎ | 41/49 [00:00<00:00, 98.78it/s]
+[1ACapturing prefill CUDA graphs (FULL): 100%|██████████| 49/49 [00:00<00:00, 92.92it/s]
+(EngineCore pid=697) 
+[1ACapturing decode CUDA graphs (FULL):   0%|          | 0/19 [00:00<?, ?it/s]
+[1ACapturing decode CUDA graphs (FULL):  47%|████▋     | 9/19 [00:00<00:00, 86.42it/s]
+[1ACapturing decode CUDA graphs (FULL):  95%|█████████▍| 18/19 [00:00<00:00, 88.27it/s]
+[1ACapturing decode CUDA graphs (FULL): 100%|██████████| 19/19 [00:00<00:00, 89.26it/s]
+(EngineCore pid=697) INFO 09-17 07:12:24 [model_runner.py:960] Graph capturing finished in 12 secs, took 0.60 GiB
+(EngineCore pid=697) INFO 09-17 07:12:24 [gpu_worker.py:797] CUDA graph pool memory: 0.6 GiB (actual), 0.94 GiB (estimated), difference: 0.34 GiB (56.3%).
+(EngineCore pid=697) INFO 09-17 07:12:24 [gpu_worker.py:860] Free memory on device (77.82/79.18 GiB) on startup. Desired GPU memory utilization is (0.16, 12.67 GiB). Actual usage is 4.2 GiB for consumed memory (weights + non-torch), 1.05 GiB for peak activation, and 0.6 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=7158265693` (6.67 GiB) to fit into requested memory, or `--kv-cache-memory=77119285248` (71.82 GiB) to fully utilize gpu memory. Current kv cache memory in use is 7.42 GiB.
+(EngineCore pid=697) INFO 09-17 07:13:06 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(EngineCore pid=697) WARNING 09-17 07:13:06 [torch_utils.py:265] OMP_NUM_THREADS=4 is set; leaving Torch threads at 4 for serving. Multi-threaded torch CPU ops during serving can degrade performance through spin-wait contention and cgroup CPU-quota throttling.
+(EngineCore pid=697) INFO 09-17 07:13:06 [core.py:361] init engine (profile, create kv cache, warmup model) took 144.71 s (compilation: 16.26 s)
+(EngineCore pid=697) Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+(EngineCore pid=697) 
+[1AParse safetensors files:   0%|          | 0/1 [00:00<?, ?it/s]
+[1AParse safetensors files: 100%|██████████| 1/1 [00:01<00:00,  1.16s/it]
+[1AParse safetensors files: 100%|██████████| 1/1 [00:01<00:00,  1.16s/it]
+(EngineCore pid=697) INFO 09-17 07:13:08 [kernel.py:369] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(EngineCore pid=697) WARNING 09-17 07:13:08 [vllm.py:1924] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+WARNING 09-17 07:13:08 [input_processor.py:315] Passing raw prompts to InputProcessor is deprecated and will be removed in the future. You should instead pass the outputs of Renderer.render_cmpl() or Renderer.render_chat().
+(EngineCore pid=697) WARNING 09-17 07:13:12 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _compute_local_logits_stats_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=697) WARNING 09-17 07:13:13 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _rejection_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=697) WARNING 09-17 07:13:14 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _resample_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+vllm_mtp3 heldout-prose-128 tps=514.1 ttft=28.5ms
+vllm_mtp3 heldout-prose-512 tps=487.1 ttft=28.9ms
+vllm_mtp3 heldout-prose-2048 tps=550.5 ttft=38.8ms
+vllm_mtp3 heldout-prose-8192 tps=483.6 ttft=131.9ms
+vllm_mtp3 heldout-code-128 tps=737.4 ttft=28.6ms
+vllm_mtp3 heldout-code-512 tps=700.9 ttft=31.2ms
+vllm_mtp3 heldout-code-2048 tps=709.0 ttft=40.4ms
+vllm_mtp3 heldout-code-8192 tps=679.6 ttft=135.4ms
+vllm_mtp3 heldout-structured-128 tps=880.9 ttft=30.9ms
+vllm_mtp3 heldout-structured-512 tps=953.8 ttft=31.7ms
+vllm_mtp3 heldout-structured-2048 tps=925.6 ttft=39.8ms
+vllm_mtp3 heldout-structured-8192 tps=937.5 ttft=131.4ms
+vllm_mtp3 heldout-structured-8192 tps=939.2 ttft=133.2ms
+vllm_mtp3 heldout-structured-2048 tps=923.2 ttft=39.7ms
+vllm_mtp3 heldout-structured-512 tps=939.8 ttft=29.5ms
+vllm_mtp3 heldout-structured-128 tps=861.8 ttft=31.7ms
+vllm_mtp3 heldout-code-8192 tps=683.2 ttft=133.2ms
+vllm_mtp3 heldout-code-2048 tps=707.6 ttft=41.9ms
+vllm_mtp3 heldout-code-512 tps=700.8 ttft=29.8ms
+vllm_mtp3 heldout-code-128 tps=722.5 ttft=31.5ms
+vllm_mtp3 heldout-prose-8192 tps=468.8 ttft=142.2ms
+vllm_mtp3 heldout-prose-2048 tps=542.4 ttft=39.2ms
+vllm_mtp3 heldout-prose-512 tps=478.9 ttft=30.4ms
+vllm_mtp3 heldout-prose-128 tps=514.4 ttft=28.7ms
+vllm_mtp3 heldout-prose-128 tps=513.4 ttft=28.6ms
+vllm_mtp3 heldout-prose-512 tps=482.9 ttft=29.8ms
+vllm_mtp3 heldout-prose-2048 tps=547.9 ttft=37.4ms
+vllm_mtp3 heldout-prose-8192 tps=483.8 ttft=131.7ms
+vllm_mtp3 heldout-code-128 tps=730.7 ttft=29.3ms
+vllm_mtp3 heldout-code-512 tps=692.6 ttft=29.2ms
+vllm_mtp3 heldout-code-2048 tps=700.7 ttft=37.7ms
+vllm_mtp3 heldout-code-8192 tps=683.4 ttft=130.4ms
+vllm_mtp3 heldout-structured-128 tps=870.8 ttft=30.6ms
+vllm_mtp3 heldout-structured-512 tps=946.5 ttft=29.3ms
+vllm_mtp3 heldout-structured-2048 tps=918.8 ttft=39.0ms
+vllm_mtp3 heldout-structured-8192 tps=932.2 ttft=136.4ms
+vllm_mtp3 heldout-structured-8192 tps=938.2 ttft=136.1ms
+vllm_mtp3 heldout-structured-2048 tps=923.3 ttft=41.1ms
+vllm_mtp3 heldout-structured-512 tps=953.6 ttft=29.0ms
+vllm_mtp3 heldout-structured-128 tps=877.2 ttft=31.3ms
+vllm_mtp3 heldout-code-8192 tps=675.7 ttft=137.3ms
+vllm_mtp3 heldout-code-2048 tps=630.7 ttft=41.3ms
+vllm_mtp3 heldout-code-512 tps=677.9 ttft=31.8ms
+vllm_mtp3 heldout-code-128 tps=710.8 ttft=28.7ms
+vllm_mtp3 heldout-prose-8192 tps=482.1 ttft=136.5ms
+vllm_mtp3 heldout-prose-2048 tps=550.9 ttft=38.4ms
+vllm_mtp3 heldout-prose-512 tps=482.3 ttft=29.4ms
+vllm_mtp3 heldout-prose-128 tps=516.4 ttft=28.6ms
+vllm_mtp3 heldout-prose-128 tps=520.0 ttft=29.3ms
+vllm_mtp3 heldout-prose-512 tps=489.8 ttft=28.6ms
+vllm_mtp3 heldout-prose-2048 tps=553.9 ttft=41.5ms
+vllm_mtp3 heldout-prose-8192 tps=483.1 ttft=133.1ms
+vllm_mtp3 heldout-code-128 tps=733.0 ttft=28.6ms
+vllm_mtp3 heldout-code-512 tps=700.1 ttft=30.5ms
+vllm_mtp3 heldout-code-2048 tps=707.5 ttft=39.7ms
+vllm_mtp3 heldout-code-8192 tps=674.2 ttft=135.0ms
+vllm_mtp3 heldout-structured-128 tps=863.0 ttft=30.2ms
+vllm_mtp3 heldout-structured-512 tps=939.6 ttft=30.2ms
+vllm_mtp3 heldout-structured-2048 tps=920.8 ttft=39.0ms
+vllm_mtp3 heldout-structured-8192 tps=936.7 ttft=130.6ms
+INFO 09-17 07:13:45 [core_client.py:689] [shutdown] MPClient: start timeout=default
+INFO 09-17 07:13:45 [core_client.py:691] [shutdown] MPClient: stopping engine manager
+INFO 09-17 07:13:45 [utils.py:620] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=697) INFO 09-17 07:13:45 [core.py:1350] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=697) INFO 09-17 07:13:45 [core.py:1501] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=697) INFO 09-17 07:13:45 [core.py:1532] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=697) INFO 09-17 07:13:45 [core.py:1363] [shutdown] EngineCore: exiting busy loop
+INFO 09-17 07:13:50 [core_client.py:693] [shutdown] MPClient: engine manager stopped
+INFO 09-17 07:13:50 [core_client.py:694] [shutdown] MPClient: cleaning up background resources
+INFO 09-17 07:13:50 [core_client.py:696] [shutdown] MPClient: complete
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 831.18it/s]
+saved eval_final_heldout_heldout.json
+saved eval_final_heldout_heldout.json
+Task was destroyed but it is pending!
+task: <Task pending name='EngineCoreOutputQueueTask' coro=<AsyncMPClient._ensure_output_queue_task.<locals>.process_outputs_socket() running at /usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py:1044> wait_for=<Future cancelled>>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-3' coro=<AsyncLLM._run_output_handler.<locals>.output_handler() running at /usr/local/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py:765> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+ERROR 09-17 07:13:56 [async_llm.py:819] AsyncLLM output_handler failed.
+ERROR 09-17 07:13:56 [async_llm.py:819] Traceback (most recent call last):
+ERROR 09-17 07:13:56 [async_llm.py:819]   File "/usr/local/lib/python3.12/asyncio/queues.py", line 158, in get
+ERROR 09-17 07:13:56 [async_llm.py:819]     await getter
+ERROR 09-17 07:13:56 [async_llm.py:819] GeneratorExit
+ERROR 09-17 07:13:56 [async_llm.py:819] 
+ERROR 09-17 07:13:56 [async_llm.py:819] During handling of the above exception, another exception occurred:
+ERROR 09-17 07:13:56 [async_llm.py:819] 
+ERROR 09-17 07:13:56 [async_llm.py:819] Traceback (most recent call last):
+ERROR 09-17 07:13:56 [async_llm.py:819]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py", line 765, in output_handler
+ERROR 09-17 07:13:56 [async_llm.py:819]     outputs = await engine_core.get_output_async()
+ERROR 09-17 07:13:56 [async_llm.py:819]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 09-17 07:13:56 [async_llm.py:819]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 1103, in get_output_async
+ERROR 09-17 07:13:56 [async_llm.py:819]     outputs = await self.outputs_queue.get()
+ERROR 09-17 07:13:56 [async_llm.py:819]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 09-17 07:13:56 [async_llm.py:819]   File "/usr/local/lib/python3.12/asyncio/queues.py", line 160, in get
+ERROR 09-17 07:13:56 [async_llm.py:819]     getter.cancel()  # Just in case getter is not done yet.
+ERROR 09-17 07:13:56 [async_llm.py:819]     ^^^^^^^^^^^^^^^
+ERROR 09-17 07:13:56 [async_llm.py:819]   File "/usr/local/lib/python3.12/asyncio/base_events.py", line 792, in call_soon
+ERROR 09-17 07:13:56 [async_llm.py:819]     self._check_closed()
+ERROR 09-17 07:13:56 [async_llm.py:819]   File "/usr/local/lib/python3.12/asyncio/base_events.py", line 539, in _check_closed
+ERROR 09-17 07:13:56 [async_llm.py:819]     raise RuntimeError('Event loop is closed')
+ERROR 09-17 07:13:56 [async_llm.py:819] RuntimeError: Event loop is closed
+>>> /work/bench/ifeval.py --engine custom_k0 --limit 100
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 915.53it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1144.76it/s]
+generation_kwargs: {'max_gen_toks': 1280, 'do_sample': False} specified through cli, these settings will update set parameters in yaml tasks. Ensure 'do_sample=True' for non-greedy decoding!
+[nltk_data] Downloading package punkt_tab to /root/nltk_data...
+[nltk_data]   Unzipping tokenizers/punkt_tab.zip.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Downloaded punkt_tab on rank 0
+
+[1AGenerating train split:   0%|          | 0/541 [00:00<?, ? examples/s]
+[1AGenerating train split: 100%|██████████| 541/541 [00:00<00:00, 28640.72 examples/s]
+
+[1A  0%|          | 0/100 [00:00<?, ?it/s]
+[1A100%|██████████| 100/100 [00:00<00:00, 2799.92it/s]
+[1/100] 396 toks
+[2/100] 15 toks
+[3/100] 629 toks
+[4/100] 236 toks
+[5/100] 10 toks
+[6/100] 92 toks
+[7/100] 224 toks
+[8/100] 359 toks
+[9/100] 94 toks
+[10/100] 585 toks
+[11/100] 609 toks
+[12/100] 358 toks
+[13/100] 291 toks
+[14/100] 258 toks
+[15/100] 430 toks
+[16/100] 331 toks
+[17/100] 58 toks
+[18/100] 39 toks
+[19/100] 106 toks
+[20/100] 11 toks
+[21/100] 263 toks
+[22/100] 107 toks
+[23/100] 177 toks
+[24/100] 6 toks
+[25/100] 686 toks
+[26/100] 210 toks
+[27/100] 105 toks
+[28/100] 97 toks
+[29/100] 52 toks
+[30/100] 150 toks
+[31/100] 86 toks
+[32/100] 1280 toks
+[33/100] 1280 toks
+[34/100] 91 toks
+[35/100] 199 toks
+[36/100] 10 toks
+[37/100] 1280 toks
+[38/100] 1217 toks
+[39/100] 180 toks
+[40/100] 183 toks
+[41/100] 435 toks
+[42/100] 121 toks
+[43/100] 264 toks
+[44/100] 360 toks
+[45/100] 366 toks
+[46/100] 12 toks
+[47/100] 152 toks
+[48/100] 74 toks
+[49/100] 731 toks
+[50/100] 819 toks
+[51/100] 25 toks
+[52/100] 79 toks
+[53/100] 743 toks
+[54/100] 86 toks
+[55/100] 509 toks
+[56/100] 1280 toks
+[57/100] 101 toks
+[58/100] 53 toks
+[59/100] 516 toks
+[60/100] 553 toks
+[61/100] 72 toks
+[62/100] 1086 toks
+[63/100] 392 toks
+[64/100] 1007 toks
+[65/100] 86 toks
+[66/100] 678 toks
+[67/100] 155 toks
+[68/100] 52 toks
+[69/100] 99 toks
+[70/100] 218 toks
+[71/100] 1280 toks
+[72/100] 413 toks
+[73/100] 802 toks
+[74/100] 713 toks
+[75/100] 104 toks
+[76/100] 141 toks
+[77/100] 1280 toks
+[78/100] 153 toks
+[79/100] 318 toks
+[80/100] 102 toks
+[81/100] 1280 toks
+[82/100] 47 toks
+[83/100] 345 toks
+[84/100] 351 toks
+[85/100] 339 toks
+[86/100] 147 toks
+[87/100] 77 toks
+[88/100] 1280 toks
+[89/100] 428 toks
+[90/100] 366 toks
+[91/100] 485 toks
+[92/100] 16 toks
+[93/100] 1280 toks
+[94/100] 47 toks
+[95/100] 887 toks
+[96/100] 959 toks
+[97/100] 1280 toks
+[98/100] 57 toks
+[99/100] 116 toks
+[100/100] 325 toks
+saved ifeval_custom_k0.json
+{
+ "name": "ifeval",
+ "alias": "ifeval",
+ "sample_len": 100,
+ "prompt_level_strict_acc,none": 0.64,
+ "prompt_level_strict_acc_stderr,none": 0.048241815132442176,
+ "inst_level_strict_acc,none": 0.754601226993865,
+ "inst_level_strict_acc_stderr,none": "N/A",
+ "prompt_level_loose_acc,none": 0.69,
+ "prompt_level_loose_acc_stderr,none": 0.046482319871173176,
+ "inst_level_loose_acc,none": 0.7914110429447853,
+ "inst_level_loose_acc_stderr,none": "N/A"
+}
+>>> /work/bench/ifeval.py --engine custom_k3 --limit 100
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 814.93it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1191.56it/s]
+generation_kwargs: {'max_gen_toks': 1280, 'do_sample': False} specified through cli, these settings will update set parameters in yaml tasks. Ensure 'do_sample=True' for non-greedy decoding!
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+
+[1A  0%|          | 0/100 [00:00<?, ?it/s]
+[1A100%|██████████| 100/100 [00:00<00:00, 2677.79it/s]
+[1/100] 396 toks
+[2/100] 15 toks
+[3/100] 607 toks
+[4/100] 235 toks
+[5/100] 10 toks
+[6/100] 92 toks
+[7/100] 220 toks
+[8/100] 359 toks
+[9/100] 94 toks
+[10/100] 646 toks
+[11/100] 554 toks
+[12/100] 368 toks
+[13/100] 325 toks
+[14/100] 233 toks
+[15/100] 409 toks
+[16/100] 310 toks
+[17/100] 47 toks
+[18/100] 39 toks
+[19/100] 104 toks
+[20/100] 11 toks
+[21/100] 317 toks
+[22/100] 77 toks
+[23/100] 157 toks
+[24/100] 6 toks
+[25/100] 640 toks
+[26/100] 161 toks
+[27/100] 116 toks
+[28/100] 97 toks
+[29/100] 52 toks
+[30/100] 150 toks
+[31/100] 92 toks
+[32/100] 1280 toks
+[33/100] 1280 toks
+[34/100] 91 toks
+[35/100] 154 toks
+[36/100] 10 toks
+[37/100] 1280 toks
+[38/100] 1280 toks
+[39/100] 181 toks
+[40/100] 157 toks
+[41/100] 436 toks
+[42/100] 197 toks
+[43/100] 281 toks
+[44/100] 300 toks
+[45/100] 400 toks
+[46/100] 12 toks
+[47/100] 152 toks
+[48/100] 318 toks
+[49/100] 812 toks
+[50/100] 842 toks
+[51/100] 25 toks
+[52/100] 79 toks
+[53/100] 682 toks
+[54/100] 86 toks
+[55/100] 509 toks
+[56/100] 1280 toks
+[57/100] 103 toks
+[58/100] 53 toks
+[59/100] 564 toks
+[60/100] 352 toks
+[61/100] 72 toks
+[62/100] 1129 toks
+[63/100] 206 toks
+[64/100] 871 toks
+[65/100] 86 toks
+[66/100] 649 toks
+[67/100] 155 toks
+[68/100] 72 toks
+[69/100] 99 toks
+[70/100] 227 toks
+[71/100] 1280 toks
+[72/100] 403 toks
+[73/100] 387 toks
+[74/100] 645 toks
+[75/100] 112 toks
+[76/100] 157 toks
+[77/100] 81 toks
+[78/100] 261 toks
+[79/100] 334 toks
+[80/100] 102 toks
+[81/100] 1280 toks
+[82/100] 47 toks
+[83/100] 344 toks
+[84/100] 264 toks
+[85/100] 392 toks
+[86/100] 130 toks
+[87/100] 77 toks
+[88/100] 1280 toks
+[89/100] 432 toks
+[90/100] 342 toks
+[91/100] 395 toks
+[92/100] 16 toks
+[93/100] 1280 toks
+[94/100] 43 toks
+[95/100] 1280 toks
+[96/100] 1060 toks
+[97/100] 1206 toks
+[98/100] 57 toks
+[99/100] 116 toks
+[100/100] 377 toks
+saved ifeval_custom_k3.json
+{
+ "name": "ifeval",
+ "alias": "ifeval",
+ "sample_len": 100,
+ "prompt_level_strict_acc,none": 0.62,
+ "prompt_level_strict_acc_stderr,none": 0.04878317312145634,
+ "inst_level_strict_acc,none": 0.7361963190184049,
+ "inst_level_strict_acc_stderr,none": "N/A",
+ "prompt_level_loose_acc,none": 0.69,
+ "prompt_level_loose_acc_stderr,none": 0.046482319871173176,
+ "inst_level_loose_acc,none": 0.7914110429447853,
+ "inst_level_loose_acc_stderr,none": "N/A"
+}
+>>> /work/bench/ifeval.py --engine hf --limit 100
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 955.77it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1058.61it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<01:11,  8.63it/s]
+[1ALoading weights:  10%|█         | 62/617 [00:00<00:01, 339.90it/s]
+[1ALoading weights:  19%|█▉        | 119/617 [00:00<00:01, 436.23it/s]
+[1ALoading weights:  30%|██▉       | 185/617 [00:00<00:00, 515.35it/s]
+[1ALoading weights:  41%|████      | 250/617 [00:00<00:00, 562.40it/s]
+[1ALoading weights:  50%|████▉     | 307/617 [00:00<00:00, 558.05it/s]
+[1ALoading weights:  76%|███████▋  | 472/617 [00:00<00:00, 907.14it/s]Loading weights: 100%|██████████| 617/617 [00:00<00:00, 761.85it/s]
+generation_kwargs: {'max_gen_toks': 1280, 'do_sample': False} specified through cli, these settings will update set parameters in yaml tasks. Ensure 'do_sample=True' for non-greedy decoding!
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+
+[1A  0%|          | 0/100 [00:00<?, ?it/s]
+[1A100%|██████████| 100/100 [00:00<00:00, 2637.25it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[1/100] 360 toks
+[2/100] 45 toks
+[3/100] 677 toks
+[4/100] 233 toks
+[5/100] 10 toks
+[6/100] 92 toks
+[7/100] 220 toks
+[8/100] 360 toks
+[9/100] 94 toks
+[10/100] 529 toks
+[11/100] 637 toks
+[12/100] 340 toks
+[13/100] 300 toks
+[14/100] 297 toks
+[15/100] 399 toks
+[16/100] 347 toks
+[17/100] 47 toks
+[18/100] 39 toks
+[19/100] 1280 toks
+[20/100] 11 toks
+[21/100] 267 toks
+[22/100] 77 toks
+[23/100] 177 toks
+[24/100] 6 toks
+[25/100] 689 toks
+[26/100] 161 toks
+[27/100] 105 toks
+[28/100] 97 toks
+[29/100] 52 toks
+[30/100] 150 toks
+[31/100] 78 toks
+[32/100] 1280 toks
+[33/100] 59 toks
+[34/100] 67 toks
+[35/100] 204 toks
+[36/100] 10 toks
+[37/100] 1280 toks
+[38/100] 1280 toks
+[39/100] 177 toks
+[40/100] 190 toks
+[41/100] 445 toks
+[42/100] 156 toks
+[43/100] 1280 toks
+[44/100] 297 toks
+[45/100] 342 toks
+[46/100] 12 toks
+[47/100] 156 toks
+[48/100] 471 toks
+[49/100] 737 toks
+[50/100] 936 toks
+[51/100] 25 toks
+[52/100] 80 toks
+[53/100] 895 toks
+[54/100] 86 toks
+[55/100] 515 toks
+[56/100] 1280 toks
+[57/100] 133 toks
+[58/100] 53 toks
+[59/100] 817 toks
+[60/100] 1280 toks
+[61/100] 73 toks
+[62/100] 898 toks
+[63/100] 407 toks
+[64/100] 936 toks
+[65/100] 86 toks
+[66/100] 1280 toks
+[67/100] 156 toks
+[68/100] 55 toks
+[69/100] 99 toks
+[70/100] 209 toks
+[71/100] 1229 toks
+[72/100] 456 toks
+[73/100] 381 toks

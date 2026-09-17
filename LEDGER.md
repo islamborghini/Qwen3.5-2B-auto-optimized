@@ -35,3 +35,4 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | final #2 crashed on logit-slice shape bug (HF load only) | ~/bin/zsh.3 | fixed; final #3 launched |
 | 2026-09-17 | Modal H100 | final #3: new gate results — HF noise floor 0.27-1.97; k0_compile ok (1.27); k2/k3 rejected: 2.50 > 2.47 (=2x floor 1.23) on structured-2048. Killed after gate to re-plan | ~$0.5 | results/final3_optimize_gate.log |
 | 2026-09-17 | Modal H100 | final #4 (lean): custom_k0 (official) + custom_k3 (reported) + vllm_mtp3, dev full + heldout, IFEval x3 | est ~$1.9 (over the $10 budget; see README costs) | launched |
+| 2026-09-17 | Modal H100 | opt2: optimize loop with layer-level compile candidates (k0/k2/k3/k4 x layer/layer_at) | est ~.0 | launched (user authorized continued spend) |

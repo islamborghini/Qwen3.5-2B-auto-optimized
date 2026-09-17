@@ -18,6 +18,12 @@ CANDIDATES = {  # name -> Engine kwargs (order = priority). gemv variants droppe
     "k0_compile": dict(spec_k=0, compile_blocks=True),   # except on lm_head (+7%), see LEDGER.md
     "k2_compile": dict(spec_k=2, compile_blocks=True),
     "k3_compile": dict(spec_k=3, compile_blocks=True),
+    "k0_layer": dict(spec_k=0, compile_mode="layer"),
+    "k0_layer_at": dict(spec_k=0, compile_mode="layer_at"),
+    "k3_layer_at": dict(spec_k=3, compile_mode="layer_at"),
+    "k3_layer": dict(spec_k=3, compile_mode="layer"),
+    "k2_layer_at": dict(spec_k=2, compile_mode="layer_at"),
+    "k4_layer_at": dict(spec_k=4, compile_mode="layer_at"),
 }
 LEDGER = os.path.join(OUT, "opt_ledger.json")
 

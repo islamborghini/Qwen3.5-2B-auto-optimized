@@ -1,0 +1,152 @@
+[0m
+> build · deepseek-v4.1-flash
+[0m
+[0m→ [0mRead candidates/gemv2/TASK.md
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj && echo "---" && ls -la /Users/islam/fun_fable_proj/qwen35_fast
+total 56
+drwxr-xr-x@  13 islam  staff    416 Sep 16 23:47 .
+drwxr-x---+ 264 islam  staff   8448 Sep 17 00:31 ..
+drwxr-xr-x@   7 islam  staff    224 Sep 16 23:45 .cache
+drwxr-xr-x@  13 islam  staff    416 Sep 17 00:02 .git
+-rw-r--r--@   1 islam  staff     90 Sep 16 23:26 .gitignore
+drwxr-xr-x@   8 islam  staff    256 Sep 16 22:33 .venv
+drwxr-xr-x@  19 islam  staff    608 Sep 17 00:02 bench
+drwxr-xr-x@   6 islam  staff    192 Sep 17 00:33 candidates
+-rw-r--r--@   1 islam  staff   4988 Sep 17 00:02 LEDGER.md
+drwxr-xr-x@   6 islam  staff    192 Sep 16 23:24 qwen35_fast
+-rw-r--r--@   1 islam  staff  10422 Sep 17 00:28 README.md
+-rw-r--r--@   1 islam  staff    468 Sep 16 23:45 requirements.txt
+drwxr-xr-x@  19 islam  staff    608 Sep 17 00:06 results
+---
+total 80
+drwxr-xr-x@  3 islam  staff     96 Sep 16 23:27 __pycache__
+drwxr-xr-x@  6 islam  staff    192 Sep 16 23:24 .
+drwxr-xr-x@ 13 islam  staff    416 Sep 16 23:47 ..
+-rw-r--r--@  1 islam  staff  26340 Sep 17 00:33 engine.py
+-rw-r--r--@  1 islam  staff   8083 Sep 16 23:33 gemv.py
+-rw-r--r--@  1 islam  staff    700 Sep 16 23:01 hf_wrapper.py
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py
+[0m→ [0mRead LEDGER.md
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj/candidates /Users/islam/fun_fable_proj/candidates/gemv2 2>/dev/null; echo "---git---"; git -C /Users/islam/fun_fable_proj status --short; git -C /Users/islam/fun_fable_proj log --oneline -5
+/Users/islam/fun_fable_proj/candidates:
+total 48
+drwxr-xr-x@  6 islam  staff    192 Sep 17 00:33 .
+drwxr-xr-x@ 13 islam  staff    416 Sep 16 23:47 ..
+-rw-r--r--@  1 islam  staff  24357 Sep 17 00:33 engine_v1_backup.py
+drwxr-xr-x@  4 islam  staff    128 Sep 16 23:20 gemv
+drwxr-xr-x@  4 islam  staff    128 Sep 17 00:33 gemv2
+drwxr-xr-x@  6 islam  staff    192 Sep 16 23:17 review1
+
+/Users/islam/fun_fable_proj/candidates/gemv2:
+total 16
+drwxr-xr-x@ 4 islam  staff   128 Sep 17 00:33 .
+drwxr-xr-x@ 6 islam  staff   192 Sep 17 00:33 ..
+-rw-r--r--@ 1 islam  staff  1343 Sep 17 00:33 opencode.log
+-rw-r--r--@ 1 islam  staff  1551 Sep 17 00:33 TASK.md
+---git---
+ M README.md
+ M bench/optimize.py
+ M qwen35_fast/engine.py
+ M results/eval_baselines.log
+ M results/run_final2.log
+?? candidates/engine_v1_backup.py
+?? candidates/gemv2/
+?? results/eval_baselines_full_dev.json
+?? results/eval_hfcompile_full_dev.json
+273471c Lean final runner: both custom configs vs vLLM+MTP, IFEval x3; gate log
+1333be2 Fix HF reference logit slicing in optimize gate
+7ffdc94 Teacher-forced decode-logit correctness gate; trimmed final runner; results renderer
+f2dacf0 Final session runner trimmed to strongest baseline
+aba6aad README draft, pinned requirements, IFEval wrapper API fix
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj/candidates/gemv; echo "---log---"; cat /Users/islam/fun_fable_proj/candidates/gemv2/opencode.log
+total 48
+drwxr-xr-x@ 4 islam  staff    128 Sep 16 23:20 .
+drwxr-xr-x@ 6 islam  staff    192 Sep 17 00:33 ..
+-rw-r--r--@ 1 islam  staff  16493 Sep 16 23:28 opencode.log
+-rw-r--r--@ 1 islam  staff   1683 Sep 16 23:20 TASK.md
+---log---
+[0m
+> build · deepseek-v4.1-flash
+[0m
+[0m→ [0mRead candidates/gemv2/TASK.md
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj && echo "---" && ls -la /Users/islam/fun_fable_proj/qwen35_fast
+total 56
+drwxr-xr-x@  13 islam  staff    416 Sep 16 23:47 .
+drwxr-x---+ 264 islam  staff   8448 Sep 17 00:31 ..
+drwxr-xr-x@   7 islam  staff    224 Sep 16 23:45 .cache
+drwxr-xr-x@  13 islam  staff    416 Sep 17 00:02 .git
+-rw-r--r--@   1 islam  staff     90 Sep 16 23:26 .gitignore
+drwxr-xr-x@   8 islam  staff    256 Sep 16 22:33 .venv
+drwxr-xr-x@  19 islam  staff    608 Sep 17 00:02 bench
+drwxr-xr-x@   6 islam  staff    192 Sep 17 00:33 candidates
+-rw-r--r--@   1 islam  staff   4988 Sep 17 00:02 LEDGER.md
+drwxr-xr-x@   6 islam  staff    192 Sep 16 23:24 qwen35_fast
+-rw-r--r--@   1 islam  staff  10422 Sep 17 00:28 README.md
+-rw-r--r--@   1 islam  staff    468 Sep 16 23:45 requirements.txt
+drwxr-xr-x@  19 islam  staff    608 Sep 17 00:06 results
+---
+total 80
+drwxr-xr-x@  3 islam  staff     96 Sep 16 23:27 __pycache__
+drwxr-xr-x@  6 islam  staff    192 Sep 16 23:24 .
+drwxr-xr-x@ 13 islam  staff    416 Sep 16 23:47 ..
+-rw-r--r--@  1 islam  staff  26340 Sep 17 00:33 engine.py
+-rw-r--r--@  1 islam  staff   8083 Sep 16 23:33 gemv.py
+-rw-r--r--@  1 islam  staff    700 Sep 16 23:01 hf_wrapper.py
+[0m
+[0m→ [0mRead qwen35_fast/gemv.py
+[0m→ [0mRead LEDGER.md
+[0m
+[0m$ [0mls -la /Users/islam/fun_fable_proj/candidates /Users/islam/fun_fable_proj/candidates/gemv2 2>/dev/null; echo "---git---"; git -C /Users/islam/fun_fable_proj status --short; git -C /Users/islam/fun_fable_proj log --oneline -5
+/Users/islam/fun_fable_proj/candidates:
+total 48
+drwxr-xr-x@  6 islam  staff    192 Sep 17 00:33 .
+drwxr-xr-x@ 13 islam  staff    416 Sep 16 23:47 ..
+-rw-r--r--@  1 islam  staff  24357 Sep 17 00:33 engine_v1_backup.py
+drwxr-xr-x@  4 islam  staff    128 Sep 16 23:20 gemv
+drwxr-xr-x@  4 islam  staff    128 Sep 17 00:33 gemv2
+drwxr-xr-x@  6 islam  staff    192 Sep 16 23:17 review1
+
+/Users/islam/fun_fable_proj/candidates/gemv2:
+total 16
+drwxr-xr-x@ 4 islam  staff   128 Sep 17 00:33 .
+drwxr-xr-x@ 6 islam  staff   192 Sep 17 00:33 ..
+-rw-r--r--@ 1 islam  staff  1343 Sep 17 00:33 opencode.log
+-rw-r--r--@ 1 islam  staff  1551 Sep 17 00:33 TASK.md
+---git---
+ M README.md
+ M bench/optimize.py
+ M qwen35_fast/engine.py
+ M results/eval_baselines.log
+ M results/run_final2.log
+?? candidates/engine_v1_backup.py
+?? candidates/gemv2/
+?? results/eval_baselines_full_dev.json
+?? results/eval_hfcompile_full_dev.json
+273471c Lean final runner: both custom configs vs vLLM+MTP, IFEval x3; gate log
+1333be2 Fix HF reference logit slicing in optimize gate
+7ffdc94 Teacher-forced decode-logit correctness gate; trimmed final runner; results renderer
+f2dacf0 Final session runner trimmed to strongest baseline
+aba6aad README draft, pinned requirements, IFEval wrapper API fix
+[0m
+[0m
+[0m$ [0mgrep -rn "gemv" /Users/islam/fun_fable_proj --include=*.py -l 2>/dev/null
+zsh:1: no matches found: --include=*.py
+[0m
+[0m→ [0mRead candidates/gemv/TASK.md
+[0m
+[0m$ [0mgrep -rln "gemv" /Users/islam/fun_fable_proj --include="*.py" 2>/dev/null
+/Users/islam/fun_fable_proj/candidates/engine_v1_backup.py
+/Users/islam/fun_fable_proj/bench/optimize.py
+/Users/islam/fun_fable_proj/bench/run_opt.py
+/Users/islam/fun_fable_proj/qwen35_fast/engine.py
+/Users/islam/fun_fable_proj/qwen35_fast/gemv.py
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/numpy/_core/tests/test_multiarray.py
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/utils/quantization_config.py
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/integrations/gguf/utils.py
+/Users/islam/fun_fable_proj/.venv/lib/python3.12/site-packages/transformers/integrations/gguf/kernels.py
+[0m

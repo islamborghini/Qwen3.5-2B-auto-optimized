@@ -1226,3 +1226,79 @@ group baselines_full exit 0
 [1ALoading weights:  47%|████▋     | 292/617 [00:00<00:00, 629.14it/s]
 [1ALoading weights:  73%|███████▎  | 448/617 [00:00<00:00, 936.93it/s]
 [1ALoading weights: 100%|██████████| 617/617 [00:00<00:00, 859.06it/s]
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8] torch._dynamo hit config.recompile_limit (8)
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]    function: 'forward' (/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py:549)
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]    last reason: 10/7: cache_params.layers[9].device is None                    # if self.device is None:  # transformers/cache_utils.py:1026 in lazy_initialization
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8] User stack trace:
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]   File "/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 586, in forward
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]     mixed_qkv = cache_params.update_conv_state(
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]   File "/usr/local/lib/python3.12/site-packages/transformers/cache_utils.py", line 1423, in update_conv_state
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]     conv_states = self.layers[layer_idx].update_conv_state(conv_states, state_idx, **kwargs)
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]   File "/usr/local/lib/python3.12/site-packages/transformers/cache_utils.py", line 1065, in update_conv_state
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]     self.lazy_initialization(conv_states=conv_states, state_idx=state_idx, conv_kernel_size=conv_kernel_size)
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]   File "/usr/local/lib/python3.12/site-packages/transformers/cache_utils.py", line 1026, in lazy_initialization
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8]     if self.device is None:
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W0917 07:02:48.178000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [10/8] To diagnose recompilation issues, see https://docs.pytorch.org/docs/main/user_guide/torch_compiler/compile/programming_model.recompilation.html
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+W0917 07:03:24.813000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [8/8] torch._dynamo hit config.recompile_limit (8)
+W0917 07:03:24.813000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [8/8]    function: 'forward' (/usr/local/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py:874)
+W0917 07:03:24.813000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [8/8]    last reason: 8/7: KeyError on self._modules['linear_attn']
+W0917 07:03:24.813000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [8/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W0917 07:03:24.813000 666 site-packages/torch/_dynamo/convert_frame.py:1994] [8/8] To diagnose recompilation issues, see https://docs.pytorch.org/docs/main/user_guide/torch_compiler/compile/programming_model.recompilation.html
+hf_compile dev-prose-512 tps=165.4 ttft=47.7ms
+hf_compile dev-prose-2048 tps=170.2 ttft=42.9ms
+hf_compile dev-code-512 tps=169.4 ttft=46.2ms
+hf_compile dev-code-2048 tps=170.0 ttft=42.0ms
+hf_compile dev-structured-512 tps=170.0 ttft=47.3ms
+hf_compile dev-structured-2048 tps=169.3 ttft=43.0ms
+hf_compile dev-structured-2048 tps=163.7 ttft=42.5ms
+hf_compile dev-structured-512 tps=171.4 ttft=46.8ms
+hf_compile dev-code-2048 tps=171.5 ttft=42.2ms
+hf_compile dev-code-512 tps=171.9 ttft=46.1ms
+hf_compile dev-prose-2048 tps=171.6 ttft=42.4ms
+hf_compile dev-prose-512 tps=168.6 ttft=47.9ms
+saved eval_hfcompile_full_dev.json
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1195.26it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<01:04,  9.53it/s]
+[1ALoading weights:  12%|█▏        | 76/617 [00:00<00:01, 435.27it/s]
+[1ALoading weights:  24%|██▎       | 146/617 [00:00<00:00, 547.38it/s]
+[1ALoading weights:  36%|███▌      | 220/617 [00:00<00:00, 615.05it/s]
+[1ALoading weights:  47%|████▋     | 288/617 [00:00<00:00, 635.66it/s]
+[1ALoading weights:  71%|███████   | 437/617 [00:00<00:00, 921.58it/s]
+[1ALoading weights: 100%|██████████| 617/617 [00:00<00:00, 887.57it/s]
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+hf_eager dev-prose-512 tps=49.9 ttft=38.3ms
+hf_eager dev-prose-2048 tps=50.8 ttft=40.1ms
+hf_eager dev-code-512 tps=50.7 ttft=38.7ms
+hf_eager dev-code-2048 tps=50.8 ttft=38.3ms
+hf_eager dev-structured-512 tps=50.5 ttft=40.1ms
+hf_eager dev-structured-2048 tps=50.8 ttft=39.3ms
+hf_eager dev-structured-2048 tps=50.9 ttft=38.9ms
+hf_eager dev-structured-512 tps=50.5 ttft=38.7ms
+hf_eager dev-code-2048 tps=50.7 ttft=38.7ms
+hf_eager dev-code-512 tps=50.8 ttft=38.9ms
+hf_eager dev-prose-2048 tps=50.9 ttft=38.8ms
+hf_eager dev-prose-512 tps=50.9 ttft=37.9ms
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1253.23it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:  19%|█▉        | 118/617 [00:00<00:00, 1170.49it/s]
+[1ALoading weights:  38%|███▊      | 236/617 [00:00<00:00, 834.22it/s] 
+[1ALoading weights:  53%|█████▎    | 326/617 [00:00<00:00, 772.94it/s]
+[1ALoading weights:  92%|█████████▏| 567/617 [00:00<00:00, 1301.38it/s]
+[1ALoading weights: 100%|██████████| 617/617 [00:00<00:00, 1173.17it/s]
+saved eval_hfcompile_full_dev.json
+saved eval_hfcompile_full_dev.json
+group hfcompile_full exit 0
+saved results/eval_baselines_full_dev.json
+saved results/eval_hfcompile_full_dev.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-4B2Evb3DxqM0Ktbpx8KHYZ

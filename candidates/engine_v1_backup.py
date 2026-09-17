@@ -10,7 +10,6 @@ import torch._dynamo
 import torch.nn.functional as F
 from safetensors import safe_open
 from fla.ops.gated_delta_rule import chunk_gated_delta_rule, fused_recurrent_gated_delta_rule
-fla_recurrent = torch._dynamo.disable(fused_recurrent_gated_delta_rule)
 
 MODEL = "Qwen/Qwen3.5-2B"
 REV = "15852e8c16360a2fea060d615a32b45270f8a8fc"
@@ -67,12 +66,8 @@ def apply_rope(q, k, cos, sin):  # q,k: [B,H,T,D]; cos/sin: [T, rot]
 
 class Engine:
     def __init__(self, model_path, device="cuda", max_len=8704, spec_k=0, mtp_hidden="post_norm", fuse_proj=True,
-                 compile_blocks=False, use_gemv=False, compile_mode=None):
-        """compile_mode: None | "blocks" (fused elementwise helpers) | "layer" (whole decode layer compiled, graph
-        break at the fla kernel) | "layer_at" (same, inductor max-autotune for the GEMMs). compile_blocks=True == "blocks"."""
+                 compile_blocks=False, use_gemv=False):
         self.dev = torch.device(device)
-        self.compile_mode = compile_mode or ("blocks" if compile_blocks else None)
-        compile_blocks = self.compile_mode == "blocks"
         self.compile_blocks = compile_blocks
         self.use_gemv = use_gemv
         self.mm = lambda x, W: x @ W.T
@@ -98,11 +93,6 @@ class Engine:
         self.graphs = {}
         if use_gemv:
             self._select_gemv()
-        self._layer_c = self._layer_dec
-        if self.compile_mode in ("layer", "layer_at"):
-            torch._dynamo.config.cache_size_limit = 64
-            mode = "max-autotune-no-cudagraphs" if self.compile_mode == "layer_at" else "default"
-            self._layer_c = torch.compile(self._layer_dec, dynamic=False, mode=mode)
 
     def _select_gemv(self):
         """Per weight shape, keep whichever is faster for M=1..spec_k+1: Triton gemv or cuBLAS (both exact-bf16 GEMV)."""
@@ -203,7 +193,7 @@ class Engine:
         self.kc.zero_(); self.vc.zero_()
 
     # ---------------------------------------------------------------- blocks
-    def _attn(self, w, x, cos, sin, kc, vc, pos, prefill):
+    def _attn(self, w, x, cos, sin, kv_idx, pos, kv_len, prefill):
         """x: [T,H]. pos: [T] positions (device). kv_len: device scalar (valid cache length before this call)."""
         T = x.shape[0]
         mm = (lambda a, W: a @ W.T) if prefill else self.mm
@@ -219,6 +209,7 @@ class Engine:
         k = norm(k.view(T, self.nkv, self.hd), w["kn"], self.eps).transpose(0, 1)[None]
         v = v.view(T, self.nkv, self.hd).transpose(0, 1)[None]
         q, k = rope(q, k, cos, sin)
+        kc, vc = self.kc[kv_idx], self.vc[kv_idx]
         if prefill:
             kc[:, :, :T] = k; vc[:, :, :T] = v
             o = F.scaled_dot_product_attention(q, k, v, is_causal=True, enable_gqa=True)
@@ -229,7 +220,7 @@ class Engine:
         o = attn_post(o, gate) if prefill else self.f["attn_post"](o, gate)
         return mm(o, w["o"])
 
-    def _gdn(self, w, x, conv_state, rec_state, prefill, save):
+    def _gdn(self, w, x, li, prefill, save):
         T = x.shape[0]
         mm = (lambda a_, W: a_ @ W.T) if prefill else self.mm
         if self.fuse_proj:
@@ -240,23 +231,23 @@ class Engine:
         xc = qkv.T[None]                                                       # [1,conv_dim,T]
         cw = w["conv_w"]                                                       # [conv_dim,1,k]
         if prefill:
-            xc_all = torch.cat([torch.zeros_like(conv_state), xc], -1)
+            xc_all = torch.cat([torch.zeros_like(self.conv_state[li]), xc], -1)
         else:
-            xc_all = torch.cat([conv_state, xc], -1)
+            xc_all = torch.cat([self.conv_state[li], xc], -1)
         pre = gdn_pre if prefill else self.f["gdn_pre"]
         y, beta, g = pre(xc_all, cw, b, a, w["neg_expA"], w["dt_bias"], self.conv_dim)   # y [T,conv_dim]; beta/g [1,T,gh]
         q, k, v = y.split([self.gh * self.gk, self.gh * self.gk, self.gh * self.gv], -1)
         q = q.reshape(1, T, self.gh, self.gk); k = k.reshape(1, T, self.gh, self.gk); v = v.reshape(1, T, self.gh, self.gv)
         if prefill:
             o, st = chunk_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=None, output_final_state=True, use_qk_l2norm_in_kernel=True)
-            rec_state.copy_(st); conv_state.copy_(xc_all[:, :, -(self.conv_k - 1):])
+            self.rec_state[li].copy_(st); self.conv_state[li].copy_(xc_all[:, :, -(self.conv_k - 1):])
         else:
-            o, st = fla_recurrent(q, k, v, g=g, beta=beta, initial_state=rec_state,
+            o, st = fused_recurrent_gated_delta_rule(q, k, v, g=g, beta=beta, initial_state=self.rec_state[li],
                                                      output_final_state=True, use_qk_l2norm_in_kernel=True)
             if T == 1:
-                rec_state.copy_(st); conv_state.copy_(xc_all[:, :, 1:])
+                self.rec_state[li].copy_(st); self.conv_state[li].copy_(xc_all[:, :, 1:])
             else:
-                save.append((conv_state, rec_state, q, k, v, g, beta, xc_all))
+                save.append((li, q, k, v, g, beta, xc_all))
         gn = rms_norm_gated if prefill else self.f["gnorm"]
         o = gn(o.reshape(T * self.gh, self.gv), z.reshape(T * self.gh, self.gv), w["gnorm"], self.eps)
         return mm(o.reshape(T, -1), w["out"])
@@ -277,56 +268,31 @@ class Engine:
         li = ai = 0
         norm = rms_norm_zc if prefill else self.f["norm"]
         for i, w in enumerate(self.layers):
+            h = norm(x, w["ln1"], self.eps)
             if self.layer_types[i] == "linear_attention":
-                if prefill:
-                    x = x + self._gdn(w, norm(x, w["ln1"], self.eps), self.conv_state[li], self.rec_state[li], True, None)
-                    x = x + self._mlp(w, norm(x, w["ln2"], self.eps), True)
-                else:
-                    x, sv = self._layer_c(w, x, cos, sin, pos, self.conv_state[li], self.rec_state[li], None, None, "gdn")
-                    if sv is not None:
-                        save.append(sv)
-                li += 1
+                h = self._gdn(w, h, li, prefill, save); li += 1
             else:
-                if prefill:
-                    x = x + self._attn(w, norm(x, w["ln1"], self.eps), cos, sin, self.kc[ai], self.vc[ai], pos, True)
-                    x = x + self._mlp(w, norm(x, w["ln2"], self.eps), True)
-                else:
-                    x, _ = self._layer_c(w, x, cos, sin, pos, None, None, self.kc[ai], self.vc[ai], "attn")
-                ai += 1
+                h = self._attn(w, h, cos, sin, ai, pos, self.n, prefill); ai += 1
+            x = x + h
+            x = x + self._mlp(w, norm(x, w["ln2"], self.eps), prefill)
         return norm(x, self.final_norm, self.eps), x
-
-    def _layer_dec(self, w, x, cos, sin, pos, conv_state, rec_state, kc, vc, ltype):
-        """One decoder layer, decode path (T small). Compiled as a whole in compile_mode='layer*'."""
-        norm = self.f["norm"]
-        h = norm(x, w["ln1"], self.eps)
-        sv = None
-        if ltype == "gdn":
-            save = []
-            h = self._gdn(w, h, conv_state, rec_state, False, save)
-            sv = save[0] if save else None
-        else:
-            h = self._attn(w, h, cos, sin, kc, vc, pos, False)
-        x = x + h
-        x = x + self._mlp(w, norm(x, w["ln2"], self.eps), False)
-        return x, sv
 
     def _commit(self, save, n_acc):
         """Commit GDN/conv states for the first n_acc tokens of the last multi-token step (device-side, exact)."""
         keep = (self.arangeT < n_acc).to(torch.float32)[None, :, None]        # [1,T,1]
-        for conv_state, rec_state, q, k, v, g, beta, xc_all in save:
+        for li, q, k, v, g, beta, xc_all in save:
             _, st = fused_recurrent_gated_delta_rule(q, k, v, g=g * keep, beta=beta * keep.to(beta.dtype),
-                                                     initial_state=rec_state, output_final_state=True, use_qk_l2norm_in_kernel=True)
-            rec_state.copy_(st)
-            conv_state.copy_(xc_all.index_select(2, n_acc + self.arangeC))
+                                                     initial_state=self.rec_state[li], output_final_state=True, use_qk_l2norm_in_kernel=True)
+            self.rec_state[li].copy_(st)
+            self.conv_state[li].copy_(xc_all.index_select(2, n_acc + self.arangeC))
 
     def _mtp_layer(self, x, cos, sin, pos, prefill=False):
         m = self.mtp
         norm = rms_norm_zc if prefill else self.f["norm"]
-        if prefill:
-            x = x + self._attn(m, norm(x, m["ln1"], self.eps), cos, sin, self.kc[-1], self.vc[-1], pos, True)
-            x = x + self._mlp(m, norm(x, m["ln2"], self.eps), True)
-        else:
-            x, _ = self._layer_c(m, x, cos, sin, pos, None, None, self.kc[-1], self.vc[-1], "attn")
+        h = norm(x, m["ln1"], self.eps)
+        h = self._attn(m, h, cos, sin, self.kc.shape[0] - 1, pos, self.n, prefill)
+        x = x + h
+        x = x + self._mlp(m, norm(x, m["ln2"], self.eps), prefill)
         return norm(x, m["norm"], self.eps)
 
     def _mtp_in(self, hidden, tokens, prefill=False):

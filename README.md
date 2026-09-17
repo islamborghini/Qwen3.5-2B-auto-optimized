@@ -5,12 +5,26 @@ DeepSeek V4.1 Flash via an existing OpenCode subscription) on a concrete target:
 tokens/s** for `Qwen/Qwen3.5-2B` (revision `15852e8c`) on one Modal **H100**, keeping the original **BF16 weights**,
 text-only, non-thinking mode, and byte-identical semantics (greedy outputs preserved up to bf16 kernel-order noise).
 
-**Result summary** (numbers filled from `results/`; see "Results"): a ~370-line custom engine (`qwen35_fast/engine.py`)
-with one CUDA graph per decode step, fused decode blocks via `torch.compile`, and *exact* speculative decoding with the
-checkpoint's own MTP head, reaches __TBD__ TPS (geomean over the 12-workload suite) versus __TBD__ for the strongest
-original engine (vLLM 0.29 + MTP) and 55 TPS for HF transformers eager. The 2,000 TPS stretch hypothesis was **not**
-reached and is not reachable at BF16 on this GPU: streaming the ~3.8 GB of weights per verification step bounds
-non-speculative decode near ~880 TPS and MTP speculation near ~1,100 TPS at 100% of HBM bandwidth (see "Roofline").
+**Result summary.** A ~400-line custom engine (`qwen35_fast/engine.py`: one CUDA graph per decode step, fused decode
+blocks via `torch.compile`, and *exact* speculative decoding with the checkpoint's own MTP head) reaches **389 TPS**
+without speculation and **469-788 TPS** with 3 MTP drafts on the 12-workload dev suite (H100, batch 1, BF16).
+That is 7.7x-15x HF transformers eager (50 TPS), 2.3-4.6x HF + torch.compile (170 TPS), but **it does not beat the
+strongest existing engine**: vLLM 0.29 with its built-in MTP speculative decoding reaches 527-914 TPS on the same
+workloads (custom/vLLM+MTP geomean ratio ~0.85-0.9). This is therefore a reproducible negative result against the
+strongest original baseline and a positive one against the eager/compiled originals. The 2,000 TPS stretch hypothesis
+was **not** reached and is not reachable at BF16 on this GPU: streaming the ~3.8 GB of weights per verification step
+bounds non-speculative decode near ~880 TPS and MTP speculation near ~1,100-1,300 TPS even at 100% of HBM bandwidth
+(see "Roofline"). Gains attributed separately (H100, dev suite medians):
+
+| Source of gain | Decode TPS | Notes |
+|---|---|---|
+| Hardware (L4 -> H100) | not measured on L4 | plan changed to H100 before any L4 run; L4 (300 GB/s) roofline is ~75 TPS, i.e. ~11x lower than H100's |
+| Original model, HF transformers eager (+fla kernels) | 50 | Python-overhead bound (24 layers x ~60 kernels, no graphs) |
+| Enabling existing feature: HF `torch.compile` (default mode) | 166-171 | `reduce-overhead` mode segfaults on the hybrid cache |
+| Enabling existing engine: vLLM 0.29 (CUDA graphs, compiled) | 429-437 | |
+| Enabling existing feature: vLLM + MTP speculative decoding k=1/2/3 | 527-914 | strongest original baseline per workload (k=2 or k=3) |
+| Generated code: custom engine, no speculation (`custom_k0`, official frozen config) | 388-390 | 0.9x vLLM plain; 7.7x HF eager |
+| Generated code: custom engine + exact MTP speculation k=3 (`custom_k3`) | 469-788 | 1.1-1.8x vLLM plain; 0.8-0.9x vLLM+MTP; rejected by the pre-registered numerical gate by 1.3% on one prompt (see "Correctness gate outcome") |
 
 ## Attribution
 * **Claude Fable 5.1** (coordinator): all design, the engine, evaluator, workloads, benchmarks, most bug fixes, this README.
