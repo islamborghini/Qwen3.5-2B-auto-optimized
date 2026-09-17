@@ -1,1 +1,1 @@
-{"incumbent": "k2_compile", "kwargs": {"spec_k": 2, "compile_blocks": true}}
+{"incumbent": "k2_compile_fused", "kwargs": {"spec_k": 2, "compile_blocks": true, "fused_gdn": true}}

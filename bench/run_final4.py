@@ -4,9 +4,10 @@ import json, os, subprocess, sys
 here = os.path.dirname(os.path.abspath(__file__))
 fz = json.load(open(os.path.join(here, "frozen_config.json")))
 kw = dict(fz["kwargs"]); k = kw.pop("spec_k"); os.environ["QWEN35_FROZEN"] = json.dumps(kw)
-eng = f"custom_k{k}"; other = f"custom_k{3 if k != 3 else 2}"
+eng = f"custom_k{k}"
 def run(args):
     print(">>>", " ".join(args), flush=True); return subprocess.run([sys.executable] + args).returncode
-run([os.path.join(here, "evaluate.py"), "--engines", f"{eng},{other},vllm_mtp3", "--stage", "full", "--tag", "final_full"])
-run([os.path.join(here, "evaluate.py"), "--engines", f"{eng},{other},vllm_mtp3", "--stage", "heldout", "--split", "heldout", "--tag", "final_heldout"])
+# vLLM first, frozen custom engine last (results are checkpointed per engine, so a teardown fault cannot lose the comparator)
+run([os.path.join(here, "evaluate.py"), "--engines", f"vllm_mtp3,{eng}", "--stage", "full", "--tag", "final_full"])
+run([os.path.join(here, "evaluate.py"), "--engines", f"vllm_mtp3,{eng}", "--stage", "heldout", "--split", "heldout", "--tag", "final_heldout"])
 run([os.path.join(here, "ifeval.py"), "--engine", eng, "--limit", "100"])

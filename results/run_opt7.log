@@ -1,0 +1,61 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-EpGGpAEJ5N5aPmdwUFuye6
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 481.80it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 826.84it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<04:57,  2.07it/s]
+[1ALoading weights:   4%|▍         | 24/617 [00:00<00:11, 52.96it/s]
+[1ALoading weights:   7%|▋         | 43/617 [00:00<00:06, 84.33it/s]
+[1ALoading weights:  11%|█         | 67/617 [00:00<00:04, 123.21it/s]
+[1ALoading weights:  14%|█▍        | 89/617 [00:00<00:03, 146.00it/s]
+[1ALoading weights:  18%|█▊        | 114/617 [00:01<00:02, 168.94it/s]
+[1ALoading weights:  22%|██▏       | 135/617 [00:01<00:02, 178.89it/s]
+[1ALoading weights:  27%|██▋       | 166/617 [00:01<00:02, 212.13it/s]
+[1ALoading weights:  31%|███       | 190/617 [00:01<00:01, 213.73it/s]
+[1ALoading weights:  35%|███▍      | 213/617 [00:01<00:01, 211.31it/s]
+[1ALoading weights:  38%|███▊      | 236/617 [00:01<00:01, 215.16it/s]
+[1ALoading weights:  43%|████▎     | 264/617 [00:01<00:01, 230.99it/s]
+[1ALoading weights:  48%|████▊     | 297/617 [00:01<00:01, 258.22it/s]
+[1ALoading weights:  55%|█████▌    | 341/617 [00:01<00:00, 300.56it/s]
+[1ALoading weights:  66%|██████▌   | 408/617 [00:01<00:00, 404.22it/s]
+[1ALoading weights:  81%|████████▏ | 502/617 [00:02<00:00, 550.46it/s]Loading weights: 100%|██████████| 617/617 [00:02<00:00, 283.69it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+HF noise floor dev-prose-512 {'max_abs_diff': 0.375, 'top1_disagree': 2}
+HF noise floor dev-prose-2048 {'max_abs_diff': 0.3125, 'top1_disagree': 2}
+HF noise floor dev-code-512 {'max_abs_diff': 0.4375, 'top1_disagree': 3}
+HF noise floor dev-code-2048 {'max_abs_diff': 0.40625, 'top1_disagree': 1}
+HF noise floor dev-structured-512 {'max_abs_diff': 1.96875, 'top1_disagree': 1}
+HF noise floor dev-structured-2048 {'max_abs_diff': 1.4375, 'top1_disagree': 0}
+k0_compile {'correct': False, 'why': 'dev-structured-512: decode logits max|diff| 4.363 > tol 3.938 (HF floor 1.969)'}
+k2_compile {'correct': True, 'why': 'ok (max|diff| 2.562, tol 2.875)', 'geomean': 594.2032828365719, 'spread': (593.5561478493194, 594.3965263796042), 'accepted': True}
+k2_compile_fused {'correct': True, 'why': 'ok (max|diff| 2.406, tol 2.875)', 'geomean': 665.4090447033485, 'spread': (664.0288437525786, 665.917193013255), 'accepted': True}
+incumbent: k2_compile_fused
+saved results/opt_ledger.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-EpGGpAEJ5N5aPmdwUFuye6
