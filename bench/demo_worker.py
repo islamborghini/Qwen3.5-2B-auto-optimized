@@ -32,11 +32,18 @@ def _run(prompt: str, n_out: int, mode: str, start_at: float, ignore_eos: bool):
 
     # ---- decoded-text streaming that is safe with byte-pair tokens: print the newly completed text only ----
     class Stream:
-        def __init__(s): s.toks = []; s.shown = ""
+        """Incremental detokenization (decodes only the pending tail) with flushes at most every ~30 ms:
+        thousands of tiny writes per second into the log pipe would throttle the fast engine."""
+        def __init__(s): s.toks = []; s.done = 0; s.last = 0.0
         def push(s, t):
-            s.toks.append(t); full = tok.decode(s.toks)
-            if full.endswith("�"): return
-            W(full[len(s.shown):]); s.shown = full
+            s.toks.append(t)
+            now = time.perf_counter()
+            if now - s.last < 0.03: return
+            text = tok.decode(s.toks[s.done:])
+            if text.endswith("\N{REPLACEMENT CHARACTER}"): return   # incomplete multi-byte character, wait
+            W(text); s.done = len(s.toks); s.last = now
+        def finish(s):
+            if s.done < len(s.toks): W(tok.decode(s.toks[s.done:])); s.done = len(s.toks)
 
     if mode == "base":
         m = load_hf()
