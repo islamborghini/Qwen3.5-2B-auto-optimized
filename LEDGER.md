@@ -25,3 +25,6 @@ Budgets: Fable $100 (reserve $20) · Modal $10 (reserve $2). Modal H100 assumed 
 | 2026-09-17 | Modal H100 | baselines #1 segfault in hf_compile(reduce-overhead) before any measurement | ~/bin/zsh.3 | documented; relaunched with subprocess isolation, compile mode=default |
 | 2026-09-17 | DeepSeek | gemv.py Triton skinny-GEMV kernel (reviewed by Fable: tile configs reduced to fit SMEM) | /bin/zsh (subscription) | candidates/gemv |
 | 2026-09-17 | Modal H100 | run_opt: gemv test/bench + compiled-step profile + k0/2/3 gemv on/off | est ~/bin/zsh.5 | launched (parallel to baselines, separate GPU) |
+| 2026-09-17 | Modal H100 | baselines #2 killed: co-resident vLLM engines starved HF/others of CPU (HF 36 vs 55 TPS); protocol -> sequential, cpu=4 | ~/bin/zsh.9 | contaminated numbers discarded |
+| 2026-09-17 | Modal H100 | run_opt: compiled k0 2.53ms/step, 505 kernels (mm 1.62ms); gemv test failed (mask bug, fixed) | ~/bin/zsh.4 | results/run_opt.json |
+| 2026-09-17 | Modal H100 | baselines #3 (sequential, cpu=4) | est ~.0 | launched |

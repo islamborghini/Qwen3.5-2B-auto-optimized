@@ -75,6 +75,7 @@ class CustomEngine:
     name = "custom"
     def __init__(self, spec_k=3, **kw):
         from qwen35_fast.engine import Engine
+        kw = {**json.loads(os.environ.get("QWEN35_FROZEN", "{}")), **kw}; kw.pop("spec_k", None)
         t = time.perf_counter(); self.e = Engine(model_path(), spec_k=spec_k, **kw)
         self.e.generate(workloads("dev", [128])[0]["ids"], 8, ignore_eos=True)   # graph capture
         self.startup_s = time.perf_counter() - t
@@ -101,31 +102,34 @@ def make(name):
 
 # ---------------------------------------------------------------- protocol
 def evaluate(engine_names, stage, split="dev", tag=None):
+    """Sequential protocol: one engine resident at a time (multi-process engines such as vLLM busy-poll the CPU and
+    would slow down co-resident engines). Within an engine, workload order alternates per repetition. A drift check
+    re-measures the first engine's first workload at the end of the session."""
     st = STAGES[stage]; wl = workloads(split, st["lengths"])
-    engines = {}
-    res = {"stage": stage, "split": split, "gpu": torch.cuda.get_device_name(0), "engines": {}}
+    res = {"stage": stage, "split": split, "gpu": torch.cuda.get_device_name(0), "engines": {}, "drift": {}}
+    first = None
     for n in list(engine_names):
         try:
-            e = make(n); engines[n] = e
-            res["engines"][n] = {"startup_s": e.startup_s, "runs": {w["id"]: [] for w in wl}}
+            e = make(n)
+            d = {"startup_s": e.startup_s, "runs": {w["id"]: [] for w in wl}}
             for w in wl:  # warmup each configuration
                 e.run(w["ids"])
+            for rep in range(st["reps"]):
+                for w in (wl if rep % 2 == 0 else wl[::-1]):
+                    r = e.run(w["ids"])
+                    d["runs"][w["id"]].append(r)
+                    print(n, w["id"], f"tps={r['decode_tps']:.1f} ttft={r['ttft_s']*1000:.1f}ms", flush=True)
+            res["engines"][n] = d; first = first or n
+            if n == engine_names[-1] and first != n:   # drift check: re-measure first engine's first workload
+                e.close(); e = make(first); e.run(wl[0]["ids"])
+                res["drift"] = {"engine": first, "workload": wl[0]["id"], "tps_end": [e.run(wl[0]["ids"])["decode_tps"] for _ in range(3)],
+                                "tps_start": [r["decode_tps"] for r in res["engines"][first]["runs"][wl[0]["id"]]]}
+            e.close(); torch.cuda.empty_cache()
+            res["summary"] = summarize(res); save(f"eval_{tag or stage}_{split}.json", res)   # checkpoint after each engine
         except Exception:
             import traceback
             res.setdefault("failed", {})[n] = traceback.format_exc()[-3000:]
-            print("ENGINE FAILED", n, res["failed"][n][-800:], flush=True)
-            engine_names = [x for x in engine_names if x != n]
-            res["engines"].pop(n, None); engines.pop(n, None); torch.cuda.empty_cache()
-    # alternate engine order per repetition to reduce drift effects; engines are all resident (serial execution)
-    for rep in range(st["reps"]):
-        order = engine_names if rep % 2 == 0 else engine_names[::-1]
-        for w in wl:
-            for n in order:
-                r = engines[n].run(w["ids"])
-                res["engines"][n]["runs"][w["id"]].append({k: v for k, v in r.items() if k != "tokens"} | {"tokens": r["tokens"]})
-                print(n, w["id"], f"tps={r['decode_tps']:.1f} ttft={r['ttft_s']*1000:.1f}ms", flush=True)
-    for e in engines.values():
-        e.close()
+            print("ENGINE FAILED", n, res["failed"][n][-800:], flush=True); torch.cuda.empty_cache()
     res["summary"] = summarize(res)
     save(f"eval_{tag or stage}_{split}.json", res)
     return res

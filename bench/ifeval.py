@@ -4,7 +4,6 @@ harness actually executes the optimized implementation. Saves prompt-level stric
 Usage: python bench/ifeval.py --engine hf|custom_k3 [--limit 100]
 """
 import argparse, json, os, sys, time
-import torch
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bench.common import *
 from lm_eval.api.model import LM
@@ -55,7 +54,8 @@ if __name__ == "__main__":
         eng = HFGen(load_hf())
     else:
         from qwen35_fast.engine import Engine
-        eng = Engine(model_path(), spec_k=int(a.engine.split("_k")[1]), max_len=4096)
+        kw = json.loads(os.environ.get("QWEN35_FROZEN", "{}")); kw.pop("spec_k", None)
+        eng = Engine(model_path(), spec_k=int(a.engine.split("_k")[1]), max_len=4096, **kw)
     lm = CustomLM(eng, tok)
     r = lm_eval.simple_evaluate(model=lm, tasks=["ifeval"], limit=a.limit, apply_chat_template=True, log_samples=True,
                                 gen_kwargs="max_gen_toks=1280,do_sample=False", random_seed=0)

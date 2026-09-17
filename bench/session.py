@@ -17,7 +17,7 @@ image = (
 )
 
 
-@app.function(gpu="H100", image=image, volumes={"/hf": vol}, timeout=3600)
+@app.function(gpu="H100", cpu=4.0, memory=32768, image=image, volumes={"/hf": vol}, timeout=5400)
 def run(script: str, args: str):
     os.makedirs("/out", exist_ok=True)
     env = dict(os.environ, PYTHONPATH="/work", OUT_DIR="/out")

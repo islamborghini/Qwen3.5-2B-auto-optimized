@@ -1,0 +1,93 @@
+✓ Initialized. View run at 
+https://modal.com/apps/islamborghini/main/ap-HSI3eD2oTwrj4KlLpeCtPz
+✓ Created objects.
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench/session.py
+├── 🔨 Created mount /Users/islam/fun_fable_proj/qwen35_fast
+├── 🔨 Created mount /Users/islam/fun_fable_proj/bench
+└── 🔨 Created function run.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+[1AFetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 818.35it/s]
+Traceback (most recent call last):
+  File "/work/bench/run_opt.py", line 13, in <module>
+    G.test(); res["gemv_test"] = "pass"
+    ^^^^^^^^
+  File "/work/qwen35_fast/gemv.py", line 141, in test
+    diff = (gemv(x, W).float() - ref).abs()
+            ^^^^^^^^^^
+  File "/work/qwen35_fast/gemv.py", line 120, in gemv
+    return _run(x, W, _config(M, K, W.shape[0]))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/qwen35_fast/gemv.py", line 104, in _run
+    _gemv_kernel[(-(-N // bn), split)](
+  File "/usr/local/lib/python3.12/site-packages/triton/runtime/jit.py", line 370, in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/triton/runtime/jit.py", line 739, in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/triton/runtime/jit.py", line 884, in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/triton/compiler/compiler.py", line 307, in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/triton/compiler/compiler.py", line 80, in make_ir
+    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+triton.compiler.errors.CompilationError: at 27:27:
+    acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)
+    for k0 in range(0, k_per_split, BLOCK_K):
+        kmask = (k0 + offs_k) < k_per_split
+        x = tl.load(x_ptrs + k0, mask=m_mask & kmask[None, :], other=0.0)
+        w = tl.load(w_ptrs + k0, mask=n_mask & kmask[None, :], other=0.0)
+        acc += tl.dot(x, tl.trans(w))
+    if SPLIT_K == 1:
+        tl.store(y_ptr + offs_m[:, None] * stride_ym + offs_n[None, :],
+                 acc.to(tl.bfloat16), mask=m_mask & n_mask)
+    else:
+        tl.store(part_ptr + offs_m[:, None] * (SPLIT_K * N) + pid_k * N + offs_n[None, :],
+                 acc, mask=m_mask & n_mask)
+                           ^
+ValueError('Cannot make_shape_compatible: incompatible dimensions at index 0: 16 and 64')
+
+USDT:2026-09-17 06:33:36 26:26 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-17 06:33:36 26:26 SyncActivityProfilerHandler.cpp:59] profiler_stop
+k0_gemv0 {"step_ms": 2.528480919999936, "runs": {"dev-prose-512": 391, "dev-prose-2048": 391, "dev-code-512": 391, "dev-code-2048": 391, "dev-structured-512": 391, "dev-structured-2048": 391}, "mm_choice": {}, "kernels_per_step": 505.0}
+    {'name': 'aten::mm', 'us': 1618.0500000000316, 'n': 97.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_4x1_v_bz_TNT', 'us': 703.698400000023, 'n': 54.0}
+    {'name': 'nvjet_sm90_tst_512x8_64x3_2x1_v_bz_TNT', 'us': 351.6958000000057, 'n': 1.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_2x1_v_bz_splitK_TNT', 'us': 267.9626000000011, 'n': 24.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_2x1_v_bz_TNT', 'us': 253.07599999998064, 'n': 18.0}
+    {'name': 'aten::bmm', 'us': 118.32420000000494, 'n': 12.0}
+    {'name': 'nvjet_sm90_tst_64x8_64x16_4x1_v_bz_NNT', 'us': 83.22860000000765, 'n': 6.0}
+    {'name': 'triton_red_fused__to_copy_add_mean_mul_pow_rsqrt_0', 'us': 82.92360000000845, 'n': 49.0}
+    {'name': 'triton_red_fused__to_copy_add_mean_mul_pow_rsqrt_0', 'us': 82.92360000000845, 'n': 49.0}
+    {'name': 'aten::copy_', 'us': 82.80559999998368, 'n': 44.0}
+    {'name': 'aten::add', 'us': 66.74960000001984, 'n': 49.0}
+    {'name': 'void at::native::vectorized_elementwise_kernel<8, at::native', 'us': 65.27780000002367, 'n': 48.0}
+    {'name': 'void at::native::elementwise_kernel<128, 4, at::native::gpu_', 'us': 56.34259999998831, 'n': 24.0}
+    {'name': 'FusedRecurrentFunction', 'us': 55.73499999998721, 'n': 18.0}
+k2_gemv0 {"step_ms": 4.180348400000042, "runs": {"dev-prose-512": 459, "dev-prose-2048": 486, "dev-code-512": 530, "dev-code-2048": 572, "dev-structured-512": 639, "dev-structured-2048": 648}, "mm_choice": {}}
+k3_gemv0 {"step_ms": 4.735481539999995, "runs": {"dev-prose-512": 432, "dev-prose-2048": 463, "dev-code-512": 538, "dev-code-2048": 593, "dev-structured-512": 724, "dev-structured-2048": 741}, "mm_choice": {}}
+saved run_opt.json
+saved results/run_opt.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-HSI3eD2oTwrj4KlLpeCtPz

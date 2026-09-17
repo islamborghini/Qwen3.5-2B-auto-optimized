@@ -37,12 +37,13 @@ def _gemv_kernel(
         x = tl.load(x_ptrs + k0, mask=m_mask & kmask[None, :], other=0.0)
         w = tl.load(w_ptrs + k0, mask=n_mask & kmask[None, :], other=0.0)
         acc += tl.dot(x, tl.trans(w))
+    out_mask = m_mask & (offs_n[None, :] < N)
     if SPLIT_K == 1:
         tl.store(y_ptr + offs_m[:, None] * stride_ym + offs_n[None, :],
-                 acc.to(tl.bfloat16), mask=m_mask & n_mask)
+                 acc.to(tl.bfloat16), mask=out_mask)
     else:
         tl.store(part_ptr + offs_m[:, None] * (SPLIT_K * N) + pid_k * N + offs_n[None, :],
-                 acc, mask=m_mask & n_mask)
+                 acc, mask=out_mask)
 
 
 @triton.jit

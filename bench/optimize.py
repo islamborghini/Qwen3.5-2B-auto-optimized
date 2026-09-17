@@ -1,0 +1,118 @@
+"""Bounded, resumable optimization loop over engine configurations (run inside the Modal session).
+
+  python bench/optimize.py --max_candidates 6 --max_minutes 20
+
+Each candidate = a set of Engine kwargs. For each candidate not yet in results/opt_ledger.json:
+  correctness gate (prefill logits top-1 == HF on identical prefix, decode greedy agrees with HF until a near-tie)
+  -> quick screen (dev 512 + 2048, 2 reps) -> accept if geomean TPS > incumbent by more than the run-to-run spread
+  and no workload regresses > 5% (TTFT and peak memory checked too). The ledger persists across runs (resumable),
+  and the loop stops at --max_candidates / --max_minutes. Candidate workers may add entries to CANDIDATES only.
+"""
+import argparse, json, math, os, statistics, sys, time
+import torch
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bench.common import *
+from qwen35_fast.engine import Engine
+
+CANDIDATES = {  # name -> Engine kwargs (order = priority)
+    "k0_eager": dict(spec_k=0),
+    "k0_compile": dict(spec_k=0, compile_blocks=True),
+    "k2_compile": dict(spec_k=2, compile_blocks=True),
+    "k3_compile": dict(spec_k=3, compile_blocks=True),
+    "k2_compile_gemv": dict(spec_k=2, compile_blocks=True, use_gemv=True),
+    "k3_compile_gemv": dict(spec_k=3, compile_blocks=True, use_gemv=True),
+    "k4_compile_gemv": dict(spec_k=4, compile_blocks=True, use_gemv=True),
+}
+LEDGER = os.path.join(OUT, "opt_ledger.json")
+
+
+def screen(eng, wl, reps):
+    out = {}
+    for w in wl:
+        eng.generate(w["ids"], 8, ignore_eos=True)
+        runs = [eng.generate(w["ids"], 256, ignore_eos=True) for _ in range(reps)]
+        torch.cuda.reset_peak_memory_stats(); eng.generate(w["ids"], 256, ignore_eos=True)
+        out[w["id"]] = {"tps": [255 / r["decode_s"] for r in runs], "ttft": [r["ttft_s"] for r in runs],
+                        "mem_gb": torch.cuda.max_memory_allocated() / 1e9, "tokens": runs[-1]["tokens"]}
+    return out
+
+
+def correctness(eng, wl, ref):
+    for w in wl:
+        hgen = ref[w["id"]]["gen"]; ids = w["ids"] + hgen[:64]
+        eng.reset(); tok = torch.tensor(ids, device="cuda"); pos = torch.arange(len(ids), device="cuda")
+        with torch.no_grad():
+            hn, _ = eng._body(tok, pos, prefill=True); lg = (hn[-65:] @ eng.embed.T).float().cpu()
+        if (lg.argmax(-1) != ref[w["id"]]["logits_tail"].argmax(-1)).any():
+            return False, f"{w['id']}: prefill top-1 mismatch"
+        gen = eng.generate(w["ids"], 256, ignore_eos=True)["tokens"]
+        mm = next((i for i in range(256) if hgen[i] != gen[i]), None)
+        if mm is not None:
+            # divergence allowed only at a near-tie of the reference (bf16 kernel-order noise); check HF margin there
+            hf_l = ref[w["id"]]["dec_logits"]
+            if mm < len(hf_l):
+                top2 = hf_l[mm].topk(2).values; margin = (top2[0] - top2[1]).item()
+                if margin > 0.5:
+                    return False, f"{w['id']}: greedy diverges at {mm} with reference margin {margin:.3f}"
+    return True, "ok"
+
+
+def geo(d):
+    return math.exp(sum(math.log(statistics.median(v["tps"])) for v in d.values()) / len(d))
+
+
+def spread(d):  # geomean of per-rep tps, min..max
+    n = min(len(v["tps"]) for v in d.values())
+    g = [math.exp(sum(math.log(v["tps"][i]) for v in d.values()) / len(d)) for i in range(n)]
+    return min(g), max(g)
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(); ap.add_argument("--max_candidates", type=int, default=4)
+    ap.add_argument("--max_minutes", type=float, default=20); ap.add_argument("--reps", type=int, default=2)
+    a = ap.parse_args(); t0 = time.time()
+    led = json.load(open(LEDGER)) if os.path.exists(LEDGER) else {"candidates": {}, "incumbent": None}
+    path = model_path(); wl = workloads("dev", [512, 2048])
+    hf = load_hf(); ref = {}
+    for w in wl:
+        gen, *_ = hf_greedy(hf, w["ids"], 256)
+        lg = hf_logits(hf, w["ids"] + gen)
+        ref[w["id"]] = {"gen": gen, "logits_tail": lg[len(w["ids"]) - 1: len(w["ids"]) + 64].cpu(), "dec_logits": lg[len(w["ids"]) - 1:].cpu()}
+    del hf; torch.cuda.empty_cache()
+    if any(kw.get("use_gemv") for kw in CANDIDATES.values()):
+        from qwen35_fast import gemv as G
+        try:
+            G.test(); G.bench(); led["gemv_test"] = "pass"
+        except Exception:
+            import traceback; led["gemv_test"] = traceback.format_exc()[-1500:]; print(led["gemv_test"], flush=True)
+            for k_ in list(CANDIDATES):
+                if CANDIDATES[k_].get("use_gemv"): CANDIDATES.pop(k_)
+    n = 0
+    for name, kw in CANDIDATES.items():
+        if name in led["candidates"] or n >= a.max_candidates or (time.time() - t0) / 60 > a.max_minutes:
+            continue
+        n += 1; rec = {"kwargs": kw, "t": time.time()}
+        try:
+            eng = Engine(path, **kw)
+            ok, why = correctness(eng, wl, ref); rec["correct"] = ok; rec["why"] = why
+            if ok:
+                rec["screen"] = screen(eng, wl, a.reps); rec["geomean"] = geo(rec["screen"]); rec["spread"] = spread(rec["screen"])
+                inc = led["incumbent"]; checks = {}
+                if inc:
+                    I = led["candidates"][inc]["screen"]
+                    checks["exceeds_noise"] = rec["spread"][0] > led["candidates"][inc]["spread"][1]
+                    for wid in I:
+                        C = rec["screen"][wid]
+                        checks[f"{wid}:tps"] = statistics.median(C["tps"]) >= 0.95 * statistics.median(I[wid]["tps"])
+                        checks[f"{wid}:ttft"] = statistics.median(C["ttft"]) <= 1.05 * statistics.median(I[wid]["ttft"])
+                        checks[f"{wid}:mem"] = C["mem_gb"] <= 1.05 * I[wid]["mem_gb"]
+                rec["checks"] = checks; rec["accepted"] = all(checks.values()) if inc else True
+                if rec["accepted"]:
+                    led["incumbent"] = name
+            del eng; torch.cuda.empty_cache()
+        except Exception:
+            import traceback; rec["error"] = traceback.format_exc()[-2000:]; rec["accepted"] = False
+        led["candidates"][name] = rec
+        json.dump(led, open(LEDGER, "w"), indent=1, default=str)
+        print(name, {k: v for k, v in rec.items() if k in ("correct", "why", "geomean", "spread", "accepted", "error")}, flush=True)
+    print("incumbent:", led["incumbent"])
