@@ -24,16 +24,15 @@ CANDIDATES = {  # name -> Engine kwargs (order = priority). Earlier rounds (resu
 LEDGER = os.path.join(OUT, "opt_ledger.json")
 
 
-def screen(eng, wl, reps, base_mem=0):
-    """base_mem: bytes allocated before this engine was built; peak is reported relative to it (compile caches may keep
-    earlier candidates alive in the same process, so absolute peaks are not comparable)."""
+def screen(eng, wl, reps, static_mem=0):
+    """mem = this engine's static footprint (allocated delta at construction) + transient peak during a generate."""
     out = {}
     for w in wl:
         eng.generate(w["ids"], 8, ignore_eos=True)
         runs = [eng.generate(w["ids"], 256, ignore_eos=True) for _ in range(reps)]
         torch.cuda.reset_peak_memory_stats(); eng.generate(w["ids"], 256, ignore_eos=True)
         out[w["id"]] = {"tps": [255 / r["decode_s"] for r in runs], "ttft": [r["ttft_s"] for r in runs],
-                        "mem_gb": (torch.cuda.max_memory_allocated() - base_mem) / 1e9, "tokens": runs[-1]["tokens"]}
+                        "mem_gb": (static_mem + torch.cuda.max_memory_allocated() - torch.cuda.memory_allocated()) / 1e9, "tokens": runs[-1]["tokens"]}
     return out
 
 
@@ -107,13 +106,14 @@ if __name__ == "__main__":
             continue
         n += 1; rec = {"kwargs": kw, "t": time.time()}
         try:
-            torch._dynamo.reset(); torch.cuda.empty_cache(); base_mem = torch.cuda.memory_allocated()
-            eng = Engine(path, **kw)
+            import gc; torch._dynamo.reset(); gc.collect(); torch.cuda.empty_cache(); base_mem = torch.cuda.memory_allocated()
+            eng = Engine(path, **kw); torch.cuda.synchronize()
+            static_mem = torch.cuda.memory_allocated() - base_mem
             ok, why = correctness(eng, wl, ref); rec["correct"] = ok; rec["why"] = why
             if not ok:   # for the record only (never promoted): 1-rep speed screen of the rejected candidate
-                rec["screen_rejected"] = {k_: statistics.median(v["tps"]) for k_, v in screen(eng, wl, 1, base_mem).items()}
+                rec["screen_rejected"] = {k_: statistics.median(v["tps"]) for k_, v in screen(eng, wl, 1, static_mem).items()}
             if ok:
-                rec["screen"] = screen(eng, wl, a.reps, base_mem); rec["geomean"] = geo(rec["screen"]); rec["spread"] = spread(rec["screen"])
+                rec["screen"] = screen(eng, wl, a.reps, static_mem); rec["geomean"] = geo(rec["screen"]); rec["spread"] = spread(rec["screen"])
                 inc = led["incumbent"]; checks = {}
                 if inc:
                     I = led["candidates"][inc]["screen"]

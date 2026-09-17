@@ -20,3 +20,44 @@ https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
 
 A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
 
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 839.23it/s]
+
+[1AFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 1126.29it/s]
+
+[1ALoading weights:   0%|          | 0/617 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/617 [00:00<03:27,  2.96it/s]
+[1ALoading weights:   4%|▍         | 24/617 [00:00<00:08, 68.68it/s]
+[1ALoading weights:   6%|▋         | 40/617 [00:00<00:06, 89.40it/s]
+[1ALoading weights:  12%|█▏        | 73/617 [00:00<00:03, 156.47it/s]
+[1ALoading weights:  15%|█▌        | 95/617 [00:00<00:03, 160.45it/s]
+[1ALoading weights:  21%|██        | 129/617 [00:00<00:02, 199.88it/s]
+[1ALoading weights:  25%|██▍       | 152/617 [00:01<00:02, 199.65it/s]
+[1ALoading weights:  30%|██▉       | 183/617 [00:01<00:01, 229.08it/s]
+[1ALoading weights:  34%|███▎      | 208/617 [00:01<00:01, 224.21it/s]
+[1ALoading weights:  38%|███▊      | 235/617 [00:01<00:01, 230.93it/s]
+[1ALoading weights:  42%|████▏     | 259/617 [00:01<00:01, 219.20it/s]
+[1ALoading weights:  46%|████▋     | 286/617 [00:01<00:01, 229.11it/s]
+[1ALoading weights:  50%|█████     | 310/617 [00:01<00:01, 229.03it/s]
+[1ALoading weights:  58%|█████▊    | 359/617 [00:01<00:00, 300.59it/s]
+[1ALoading weights:  72%|███████▏  | 445/617 [00:01<00:00, 459.71it/s]
+[1ALoading weights:  89%|████████▉ | 550/617 [00:01<00:00, 630.23it/s]
+[1ALoading weights: 100%|██████████| 617/617 [00:02<00:00, 297.11it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+HF noise floor dev-prose-512 {'max_abs_diff': 0.2734375, 'top1_disagree': 1}
+HF noise floor dev-prose-2048 {'max_abs_diff': 0.3125, 'top1_disagree': 2}
+HF noise floor dev-code-512 {'max_abs_diff': 0.4375, 'top1_disagree': 3}
+HF noise floor dev-code-2048 {'max_abs_diff': 0.2734375, 'top1_disagree': 3}
+HF noise floor dev-structured-512 {'max_abs_diff': 2.0, 'top1_disagree': 1}
+HF noise floor dev-structured-2048 {'max_abs_diff': 1.1875, 'top1_disagree': 0}
+k0_compile {'correct': True, 'why': 'ok (max|diff| 1.406, tol 2.375)', 'geomean': 389.6625088061497, 'spread': (389.5180195895401, 389.8069165668699), 'accepted': True}
+k2_compile {'correct': True, 'why': 'ok (max|diff| 1.500, tol 2.375)', 'geomean': 565.4081371727689, 'spread': (565.3993507961471, 565.4168574309097), 'accepted': False}
+k3_compile {'correct': True, 'why': 'ok (max|diff| 2.344, tol 2.375)', 'geomean': 581.9765652947765, 'spread': (581.3570771384616, 582.5955314114942), 'accepted': False}
+k4_compile {'correct': True, 'why': 'ok (max|diff| 1.500, tol 2.375)', 'geomean': 563.4932416514099, 'spread': (563.4505302694665, 563.5358876530723), 'accepted': False}
+incumbent: k0_compile
+saved results/opt_ledger.json
+exit code 0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/islamborghini/main/ap-QHpCqNKv6I6zBRQ6BlAwrr
