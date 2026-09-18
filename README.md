@@ -1,6 +1,6 @@
 # Qwen3.5-2B, auto-optimized by Fable
 
-[![Watch the side-by-side demo of the original and Fable-optimized model](assets/demo-preview.png)](https://raw.githubusercontent.com/islamborghini/Qwen3.5-2B-auto-optimized/main/assets/qwen35-fable-demo.mp4)
+[![Watch the side-by-side demo of the original and Fable-optimized model](assets/demo-preview.gif)](https://raw.githubusercontent.com/islamborghini/Qwen3.5-2B-auto-optimized/main/assets/qwen35-fable-demo.mp4)
 
 [▶ Watch the 25-second side-by-side demo](https://raw.githubusercontent.com/islamborghini/Qwen3.5-2B-auto-optimized/main/assets/qwen35-fable-demo.mp4)
 
