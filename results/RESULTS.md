@@ -20,7 +20,7 @@
 ### Same-session comparison (custom vs vLLM+MTP k=3 measured back-to-back in the final session)
 
 | Workload | vllm_mtp3 TPS | custom_k2 TPS | ratio | custom_k2 TTFT ms | custom_k2 peak GB | vllm_mtp3 TTFT ms |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | dev-prose-128 | 528 (527-529) | 600 (600-601) | 1.14x | 35.7 | 4.94 | 30.1 |
 | dev-prose-512 | 538 (537-539) | 582 (581-582) | 1.08x | 36.4 | 4.95 | 30.1 |
 | dev-prose-2048 | 567 (566-568) | 618 (617-618) | 1.09x | 35.8 | 5.12 | 39.0 |
@@ -73,11 +73,11 @@ Held-out geomean ratio custom_k2 / vllm_mtp3: **1.01x**
 
 | candidate | kwargs | correct | geomean TPS (screen) | accepted |
 |---|---|---|---|---|
-| k0_compile | `{'spec_k': 0, 'compile_blocks': True}` | False (dev-structured-512: decode logits max|diff| 4.363 > tol 3.93) | nan | None |
-| k2_compile | `{'spec_k': 2, 'compile_blocks': True}` | True (ok (max|diff| 2.562, tol 2.875)) | 594 | True |
-| k2_compile_fused | `{'spec_k': 2, 'compile_blocks': True, 'fused_gdn': True}` | True (ok (max|diff| 2.406, tol 2.875)) | 665 | True |
+| k0_compile | `{'spec_k': 0, 'compile_blocks': True}` | False (dev-structured-512: decode logits max\|diff\| 4.363 > tol 3.93) | nan | None |
+| k2_compile | `{'spec_k': 2, 'compile_blocks': True}` | True (ok (max\|diff\| 2.562, tol 2.875)) | 594 | True |
+| k2_compile_fused | `{'spec_k': 2, 'compile_blocks': True, 'fused_gdn': True}` | True (ok (max\|diff\| 2.406, tol 2.875)) | 665 | True |
 
-Frozen incumbent: **k2_compile_fused** ``
+Frozen incumbent: **k2_compile_fused** `{'spec_k': 2, 'compile_blocks': True, 'fused_gdn': True}`
 
 
 ### IFEval 100-prompt subset (greedy, non-thinking, normal stopping, max 1280 new tokens)

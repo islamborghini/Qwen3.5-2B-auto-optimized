@@ -9,7 +9,7 @@ def fmt(runs, key="decode_tps"):
 
 base = load("eval_baselines_full_dev.json"); hfc = load("eval_hfcompile_full_dev.json")
 fin = load("eval_final_full_dev.json"); held = load("eval_final_heldout_heldout.json")
-led = load("opt_ledger.json"); frozen = load("frozen_config.json")
+led = load("opt_ledger.json"); frozen = load("frozen_config.json") or json.load(open("bench/frozen_config.json"))
 out = []
 if base and fin:
     custs = [n for n in fin["engines"] if n.startswith("custom")]; cust = custs[-1]
@@ -35,7 +35,7 @@ if base and fin:
     if "vllm_mtp3" in fin["engines"]:
         out.append("### Same-session comparison (custom vs vLLM+MTP k=3 measured back-to-back in the final session)\n")
         out.append("| Workload | vllm_mtp3 TPS | " + " | ".join(f"{c} TPS | ratio | {c} TTFT ms | {c} peak GB" for c in custs) + " | vllm_mtp3 TTFT ms |")
-        out.append("|---" * (2 + 4 * len(custs)) + "|")
+        out.append("|---" * (3 + 4 * len(custs)) + "|")
         for w in wids:
             a = fin["engines"]["vllm_mtp3"]["runs"][w]; cells = []
             for c in custs:
@@ -69,7 +69,8 @@ if led:
     out.append("\n### Optimization ledger (bench/optimize.py, dev screen 512+2048)\n")
     out.append("| candidate | kwargs | correct | geomean TPS (screen) | accepted |"); out.append("|---|---|---|---|---|")
     for n, c in led["candidates"].items():
-        out.append(f"| {n} | `{c['kwargs']}` | {c.get('correct')} ({c.get('why','')[:60]}) | {c.get('geomean', float('nan')):.0f} | {c.get('accepted')} |")
+        why = c.get('why','')[:60].replace('|', '\\|')
+        out.append(f"| {n} | `{c['kwargs']}` | {c.get('correct')} ({why}) | {c.get('geomean', float('nan')):.0f} | {c.get('accepted')} |")
     out.append(f"\nFrozen incumbent: **{led['incumbent']}** `{frozen['kwargs'] if frozen else ''}`\n")
 ia = load("ifeval_hf.json"); ibs = [load(n) for n in sorted(os.listdir(R)) if n.startswith("ifeval_custom")]
 if ia and ibs:
